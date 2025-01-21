@@ -6,3 +6,4 @@ val SmallArrange = 8.dp
 
 
 val AppBarHeight = 64.dp
+val NavigationBarHeight = 80.dp

@@ -2,8 +2,13 @@ package com.example.kanicard.ui.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -22,18 +27,19 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.kanicard.R
+import com.example.kanicard.ui.activities.LocalAwareWindowInset
 import com.example.kanicard.ui.component.image.CoilImage
 import com.example.kanicard.ui.screen.Screens
 
 @Composable
 fun AppDrawerSheet(
     modifier: Modifier = Modifier,
-    onNavigate: (String) -> Unit,
-
-    ) {
+    onNavigate: (String) -> Unit
+) {
     ModalDrawerSheet(
         modifier = modifier
             .fillMaxHeight()
+            .padding(WindowInsets.systemBars.asPaddingValues())
     ) {
         Gap(height = 12.dp)
         Image(

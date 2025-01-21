@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.example.kanicard.data.entities.DeckEntity
+import com.example.kanicard.data.entities.SearchHistory
 import com.example.kanicard.data.entities.UserEntity
 
 class KaniDatabase(
@@ -31,9 +32,9 @@ class KaniDatabase(
 
 @Database(
     entities = [
-        UserEntity::class, DeckEntity::class
+        UserEntity::class, DeckEntity::class, SearchHistory::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
     autoMigrations = [
 

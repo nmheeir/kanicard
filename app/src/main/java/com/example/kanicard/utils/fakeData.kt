@@ -29,7 +29,7 @@ val fakeListDecks = listOf(
         id = 2,
         userId = 102,
         title = "Advanced Android Development",
-        thumbnail = "https://picsum.photos/200",
+        thumbnail = "https://picsum.photos/300",
         description = "Dive deep into Android development with Kotlin, covering advanced topics.",
         isPublic = false,
         createdAt = LocalDateTime.of(2023, 12, 10, 10, 0, 0, 0)
@@ -60,5 +60,95 @@ val fakeListDecks = listOf(
         description = "Understand the fundamentals of machine learning and AI concepts.",
         isPublic = false,
         createdAt = LocalDateTime.of(2023, 12, 20, 18, 30, 0, 0)
+    ),
+    DeckEntity(
+        id = 6,
+        userId = 106,
+        title = "Python for Data Science",
+        thumbnail = "https://picsum.photos/201",
+        description = "Master Python programming for data analysis and machine learning.",
+        isPublic = true,
+        createdAt = LocalDateTime.of(2023, 12, 22, 15, 0, 0, 0)
+    ),
+    DeckEntity(
+        id = 7,
+        userId = 107,
+        title = "Introduction to Flutter",
+        thumbnail = "https://picsum.photos/202",
+        description = "Learn how to build beautiful mobile apps with Flutter.",
+        isPublic = false,
+        createdAt = LocalDateTime.of(2023, 12, 25, 10, 30, 0, 0)
+    ),
+    DeckEntity(
+        id = 8,
+        userId = 108,
+        title = "Django Web Development",
+        thumbnail = "https://picsum.photos/203",
+        description = "Develop dynamic websites with Python and Django framework.",
+        isPublic = true,
+        createdAt = LocalDateTime.of(2023, 11, 30, 14, 15, 0, 0)
+    ),
+    DeckEntity(
+        id = 9,
+        userId = 109,
+        title = "C++ for Competitive Programming",
+        thumbnail = "https://picsum.photos/204",
+        description = "Enhance your coding skills with C++ for competitive programming.",
+        isPublic = true,
+        createdAt = LocalDateTime.of(2023, 12, 1, 12, 0, 0, 0)
+    ),
+    DeckEntity(
+        id = 10,
+        userId = 110,
+        title = "Go Programming Essentials",
+        thumbnail = "https://picsum.photos/205",
+        description = "Learn Go programming to build efficient and scalable applications.",
+        isPublic = false,
+        createdAt = LocalDateTime.of(2023, 11, 28, 16, 30, 0, 0)
+    ),
+    DeckEntity(
+        id = 11,
+        userId = 111,
+        title = "UI/UX Design Principles",
+        thumbnail = "https://picsum.photos/206",
+        description = "Discover the core principles of UI/UX design for applications.",
+        isPublic = true,
+        createdAt = LocalDateTime.of(2023, 12, 3, 11, 0, 0, 0)
+    ),
+    DeckEntity(
+        id = 12,
+        userId = 112,
+        title = "Cloud Computing Basics",
+        thumbnail = "https://picsum.photos/207",
+        description = "Understand cloud computing and how to deploy scalable applications.",
+        isPublic = false,
+        createdAt = LocalDateTime.of(2023, 12, 12, 10, 0, 0, 0)
+    ),
+    DeckEntity(
+        id = 13,
+        userId = 113,
+        title = "Blockchain Technology",
+        thumbnail = "https://picsum.photos/208",
+        description = "Learn the fundamentals of blockchain and its applications.",
+        isPublic = true,
+        createdAt = LocalDateTime.of(2023, 11, 27, 13, 45, 0, 0)
+    ),
+    DeckEntity(
+        id = 14,
+        userId = 114,
+        title = "DevOps Foundations",
+        thumbnail = "https://picsum.photos/209",
+        description = "Explore DevOps practices and tools for modern software development.",
+        isPublic = true,
+        createdAt = LocalDateTime.of(2023, 12, 6, 17, 15, 0, 0)
+    ),
+    DeckEntity(
+        id = 15,
+        userId = 115,
+        title = "Rust Programming for Beginners",
+        thumbnail = "https://picsum.photos/210",
+        description = "Get started with Rust programming for high-performance software.",
+        isPublic = false,
+        createdAt = LocalDateTime.of(2023, 12, 18, 9, 30, 0, 0)
     )
 )

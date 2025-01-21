@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import com.example.kanicard.ui.screen.Screens
 import com.example.kanicard.ui.screen.home.HomeScreen
 import com.example.kanicard.ui.screen.setting.SettingScreen
+import com.example.kanicard.ui.screen.statistics.StatisticsScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 fun NavGraphBuilder.mainNavigationBuilder(
@@ -28,7 +29,7 @@ fun NavGraphBuilder.mainNavigationBuilder(
     }
 
     composable(Screens.Statistics.route) {
-        Text(text = "Statistics Screen")
+        StatisticsScreen()
     }
 
     composable(Screens.Profile.route) {

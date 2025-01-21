@@ -20,5 +20,4 @@ object Size {
     val navBarSize = 68.dp
 }
 
-val NavigationBarHeight = 64.dp
 val NavigationBarAnimationSpec = spring<Dp>(stiffness = Spring.StiffnessMedium)
