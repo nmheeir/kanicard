@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">KaniCard</string>
+
+    <string name="home">Home</string>
+    <string name="statistics">Statistics</string>
+    <string name="setting">Setting</string>
+    <string name="profile">Profile</string>
+    <string name="notification">Notification</string>
+    <string name="logout">Log Out</string>
+    <string name="support">Support</string>
+
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="forgot_password">Forgot password</string>
+    <string name="title_activity_auth">AuthActivity</string>
+    <string name="title_activity_authorization">AuthorizationActivity</string>
+    <string name="title_activity_main2">MainActivity2</string>
+</resources>
