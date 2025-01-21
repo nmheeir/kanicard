@@ -37,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -52,6 +53,7 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.kanicard.data.local.KaniDatabase
 import com.example.kanicard.ui.component.AppDrawerSheet
 import com.example.kanicard.ui.navigation.mainNavigationBuilder
 import com.example.kanicard.ui.screen.Screens
@@ -61,11 +63,15 @@ import com.example.kanicard.ui.theme.NavigationBarHeight
 import com.example.kanicard.utils.appBarScrollBehavior
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+    @Inject
+    lateinit var database: KaniDatabase
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -144,9 +150,10 @@ class MainActivity : ComponentActivity() {
                             }
                         )
 
-                        Log.d("mainactivity", "onCreate: " + navigationItems)
+                        Log.d("mainactivity", "onCreate: $navigationItems")
                         CompositionLocalProvider(
                             // TODO: Chỗ này provide sau (tùy vào nhu cầu)
+                            LocalDatabase provides database
                         ) {
                             NavHost(
                                 navController = navController,
@@ -219,3 +226,5 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+val LocalDatabase = staticCompositionLocalOf<KaniDatabase> { error("No database provided") }

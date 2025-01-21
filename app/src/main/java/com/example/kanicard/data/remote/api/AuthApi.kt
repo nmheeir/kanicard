@@ -1,4 +1,4 @@
 package com.example.kanicard.data.remote.api
 
-class AuthApi {
+interface AuthApi {
 }

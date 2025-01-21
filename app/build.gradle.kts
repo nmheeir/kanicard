@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.kanicard"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -42,6 +42,11 @@ android {
         compose = true
     }
 }
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 
 dependencies {
 
@@ -92,4 +97,9 @@ dependencies {
 
     //DataStore
     implementation(libs.datastore)
+
+    //Room
+    implementation(libs.room.runtime)
+    ksp(libs.room.compiler)
+    implementation(libs.room.ktx)
 }
