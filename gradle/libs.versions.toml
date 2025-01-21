@@ -22,10 +22,12 @@ moshi = "1.14.0"
 moshiConverter = "2.9.0"
 
 coil = "3.0.4"
+coil-network = "3.0.4"
 
 dataStore = "1.1.1"
 
 room = "2.6.1"
+timber = "5.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -58,6 +60,7 @@ moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "mosh
 moshi-converter = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "moshiConverter" }
 
 coil = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil-network = {module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil-network"}
 
 androidx-compose-materialWindow = { module = "androidx.compose.material3:material3-window-size-class" }
 
@@ -66,6 +69,7 @@ datastore = { group = "androidx.datastore", name = "datastore-preferences", vers
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

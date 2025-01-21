@@ -56,161 +56,178 @@ fun DeckItem(
         modifier = Modifier
             .animateContentSize()
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .padding(4.dp)
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = modifier
+                .padding(horizontal = 8.dp, vertical = 8.dp)
         ) {
-            CoilImage(
-                imageUrl = deck.thumbnail,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .size(56.dp)
-                    .clip(MaterialTheme.shapes.medium)
-            )
-            Gap(width = 8.dp)
-            Column(
-                modifier = Modifier
-                    .weight(1f)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
+                CoilImage(
+                    imageUrl = deck.thumbnail,
+                    modifier = Modifier
+                        .size(96.dp)
+                        .clip(MaterialTheme.shapes.medium)
+                )
+                Gap(width = 8.dp)
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
                 ) {
-                    Text(
-                        text = deck.title,
-                        style = MaterialTheme.typography.titleMedium
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = deck.title,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+
+                        IconButton(
+                            onClick = {
+                                expanded = !expanded
+                            }
+                        ) {
+                            Icon(
+                                painter = if (expanded) painterResource(R.drawable.ic_arrow_up) else painterResource(
+                                    R.drawable.ic_arrow_down
+                                ),
+                                contentDescription = null
+                            )
+                        }
+                    }
+                }
+            }
+
+            if (expanded) {
+                HorizontalDivider(
+                    thickness = 2.dp,
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "Due Today",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+
+                        Text(
+                            text = "220",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
+
+                        Text(
+                            text = "Cards"
+                        )
+                    }
+
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "Studied Today",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+
+                        Text(
+                            text = "73",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
+
+                        Text(
+                            text = "Cards"
+                        )
+                    }
+
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "New cards",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+
+                        Text(
+                            text = "123",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
+
+                        Text(
+                            text = "Cards"
+                        )
+                    }
+                }
+                HorizontalDivider(
+                    thickness = 2.dp,
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                )
+
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    DeckOption(
+                        onClick = {},
+                        option = "View",
+                        icon = R.drawable.ic_visibility
                     )
 
-                    IconButton(
+                    DeckOption(
+                        onClick = {},
+                        option = "Edit",
+                        icon = R.drawable.ic_edit
+                    )
+
+                    DeckOption(
                         onClick = {
-                            expanded = !expanded
-                        }
+
+                        },
+                        option = "Options",
+                        icon = R.drawable.ic_tune
+                    )
+
+                    TextButton(
+                        shape = MaterialTheme.shapes.medium,
+                        onClick = {
+
+                        },
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.inversePrimary,
+                            containerColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
                     ) {
-                        Icon(
-                            painter = if (expanded) painterResource(R.drawable.ic_arrow_up) else painterResource(
-                                R.drawable.ic_arrow_down
-                            ),
-                            contentDescription = null
+                        Text(
+                            text = stringResource(R.string.learn),
+                            style = MaterialTheme.typography.bodySmall
                         )
                     }
                 }
             }
         }
-
-        if (expanded) {
-            HorizontalDivider(
-                thickness = 2.dp,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-            )
-            Column {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Due Today",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-
-                    Text(
-                        text = "220",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.SemiBold
-                    )
-
-                    Text(
-                        text = "Cards"
-                    )
-                }
-
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Studied Today",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-
-                    Text(
-                        text = "73",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.SemiBold
-                    )
-
-                    Text(
-                        text = "Cards"
-                    )
-                }
-
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "New cards",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-
-                    Text(
-                        text = "123",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.SemiBold
-                    )
-
-                    Text(
-                        text = "Cards"
-                    )
-                }
-            }
-            HorizontalDivider(
-                thickness = 2.dp,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-            )
-
-            Row {
-                DeckOption(
-                    onClick = {},
-                    option = "View",
-                    icon = R.drawable.ic_visibility
-                )
-
-                DeckOption(
-                    onClick = {},
-                    option = "Edit",
-                    icon = R.drawable.ic_edit
-                )
-
-                DeckOption(
-                    onClick = {
-
-                    },
-                    option = "Options",
-                    icon = R.drawable.ic_tune
-                )
-
-                TextButton(
-                    shape = MaterialTheme.shapes.medium,
-                    onClick = {
-
-                    },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.inversePrimary,
-                        containerColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                ) {
-                    Text(
-                        text = stringResource(R.string.learn),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-        }
-
-
     }
 }
 
@@ -222,6 +239,7 @@ private fun DeckOption(
     option: String
 ) {
     Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .clickable {
                 onClick()
@@ -231,6 +249,7 @@ private fun DeckOption(
             painter = painterResource(icon),
             contentDescription = null
         )
+        Gap(width = 4.dp)
         Text(
             text = option,
             style = MaterialTheme.typography.bodySmall

@@ -94,6 +94,7 @@ dependencies {
 
     //Coil
     implementation(libs.coil)
+    implementation(libs.coil.network)
 
     //DataStore
     implementation(libs.datastore)
@@ -102,4 +103,7 @@ dependencies {
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
+
+    //Timber
+    implementation(libs.timber)
 }
