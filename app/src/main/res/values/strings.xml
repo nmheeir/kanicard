@@ -10,6 +10,10 @@
     <string name="support">Support</string>
     <string name="learn">Learn</string>
 
+    <string name="search">Search</string>
+    <string name="search_online">Search online…</string>
+    <string name="search_local">Search local…</string>
+
     <string name="login">Login</string>
     <string name="register">Register</string>
     <string name="forgot_password">Forgot password</string>

@@ -12,33 +12,43 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.SearchBarColors
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -122,7 +132,7 @@ class MainActivity : ComponentActivity() {
                         )
                     },
                     modifier = Modifier,
-                    gesturesEnabled = false
+                    gesturesEnabled = true
                 ) {
                     BoxWithConstraints(
                         modifier = Modifier
@@ -131,10 +141,6 @@ class MainActivity : ComponentActivity() {
                     ) {
                         val width = maxWidth
                         val navigationItems = remember { Screens.MainScreens }
-                        val topLevelScreens = listOf(
-                            Screens.Home.route,
-                            Screens.Statistics.route,
-                        )
 
                         val focusManager = LocalFocusManager.current
 
@@ -160,7 +166,7 @@ class MainActivity : ComponentActivity() {
                         }
 
 
-                        val searchSource by rememberEnumPreference(
+                        var searchSource by rememberEnumPreference(
                             SearchSourceKey,
                             SearchSource.ONLINE
                         )
@@ -191,7 +197,7 @@ class MainActivity : ComponentActivity() {
                         val shouldShowTopBar = remember(backStackEntry, active) {
                             backStackEntry?.destination?.route == null
                                     || backStackEntry?.destination?.route == Screens.Home.route
-//                                    && !active
+                                    && !active
                         }
                         val topBarHeight by animateDpAsState(
                             targetValue = if (shouldShowTopBar) AppBarHeight else 0.dp,
@@ -231,7 +237,7 @@ class MainActivity : ComponentActivity() {
                                 var bottom = bottomInset
                                 var top = AppBarHeight
                                 if (shouldShowNavigationBar) bottom += NavigationBarHeight
-                                if (shouldShowSearchBar) top += InputFieldHeight
+                                if (shouldShowSearchBar) top += (InputFieldHeight + 4.dp)
                                 windowInsets
                                     .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
                                     .add(WindowInsets(bottom = bottom, top = top))
@@ -324,63 +330,68 @@ class MainActivity : ComponentActivity() {
 
                             Column(
                                 modifier = Modifier
-                                    .fillMaxSize()
                                     .animateContentSize()
                             ) {
-                                TopAppBar(
-                                    title = {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier
-                                        ) {
-                                            Icon(
-                                                painter = painterResource(R.drawable.ic_fake_logo),
-                                                contentDescription = null
-                                            )
-                                            Gap(8.dp)
-                                            Text(
-                                                text = stringResource(R.string.app_name)
-                                            )
-                                        }
-                                    },
-                                    actions = {
-                                        IconButton(
-                                            onClick = {
-                                                // TODO: Sync function
+                                AnimatedVisibility(
+                                    visible = shouldShowTopBar
+                                ) {
+                                    TopAppBar(
+                                        title = {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(R.drawable.ic_fake_logo),
+                                                    contentDescription = null
+                                                )
+                                                Gap(8.dp)
+                                                Text(
+                                                    text = stringResource(R.string.app_name)
+                                                )
                                             }
-                                        ) {
-                                            Icon(
-                                                painter = painterResource(R.drawable.ic_sync),
-                                                contentDescription = null
-                                            )
-                                        }
+                                        },
+                                        actions = {
+                                            IconButton(
+                                                onClick = {
+                                                    // TODO: Sync function
+                                                }
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(R.drawable.ic_sync),
+                                                    contentDescription = null
+                                                )
+                                            }
 
-                                        IconButton(
-                                            onClick = {
-                                                coroutineScope.launch {
-                                                    drawerState.open()
+                                            IconButton(
+                                                onClick = {
+                                                    coroutineScope.launch {
+                                                        drawerState.open()
+                                                    }
+                                                }
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(R.drawable.ic_menu),
+                                                    contentDescription = null
+                                                )
+                                            }
+                                        },
+                                        colors = TopAppBarDefaults.topAppBarColors(
+                                            containerColor = MaterialTheme.colorScheme.surface,
+                                        ),
+                                        modifier = Modifier
+                                            .offset {
+                                                if (topBarHeight == 0.dp) {
+                                                    IntOffset(
+                                                        x = 0,
+                                                        y = -(AppBarHeight + topInset).roundToPx()
+                                                    )
+                                                } else {
+                                                    IntOffset(0, 0)
                                                 }
                                             }
-                                        ) {
-                                            Icon(
-                                                painter = painterResource(R.drawable.ic_menu),
-                                                contentDescription = null
-                                            )
-                                        }
-                                    },
-                                    modifier = Modifier
-                                        .offset {
-                                            if (topBarHeight == 0.dp) {
-                                                IntOffset(
-                                                    x = 0,
-                                                    y = -(AppBarHeight + topInset).roundToPx()
-                                                )
-                                            } else {
-                                                IntOffset(0, 0)
-                                            }
-                                        }
-//                                        .align(Alignment.TopCenter)
-                                )
+                                    )
+                                }
                                 AnimatedVisibility(
                                     visible = shouldShowSearchBar,
                                     enter = fadeIn(),
@@ -391,22 +402,91 @@ class MainActivity : ComponentActivity() {
                                     SearchBar(
                                         query = query,
                                         onQueryChange = onQueryChange,
-                                        onSearch = {
-
-                                        },
+                                        onSearch = onSearch,
                                         active = active,
                                         onActiveChange = onActiveChange,
                                         scrollBehavior = searchBarScrollBehavior,
+                                        placeholder = {
+                                            Text(
+                                                text = stringResource(
+                                                    if (!active) R.string.search
+                                                    else when (searchSource) {
+                                                        SearchSource.ONLINE -> R.string.search_online
+                                                        SearchSource.LOCAL -> R.string.search_local
+                                                    }
+                                                )
+                                            )
+                                        },
+                                        trailingIcon = {
+                                            if (active) {
+                                                if (query.text.isNotEmpty()) {
+                                                    IconButton(
+                                                        onClick = { onQueryChange(TextFieldValue("")) }
+                                                    ) {
+                                                        Icon(
+                                                            painter = painterResource(R.drawable.ic_close),
+                                                            contentDescription = null
+                                                        )
+                                                    }
+                                                }
+                                                IconButton(
+                                                    onClick = {
+                                                        searchSource = searchSource.toggle()
+                                                    }
+                                                ) {
+                                                    Icon(
+                                                        painter = painterResource(
+                                                            when (searchSource) {
+                                                                SearchSource.ONLINE -> R.drawable.ic_language
+                                                                SearchSource.LOCAL -> R.drawable.ic_local_library
+                                                            }
+                                                        ),
+                                                        contentDescription = null
+                                                    )
+                                                }
+                                            }
+                                        },
+                                        leadingIcon = {
+                                            IconButton(
+                                                onClick = {
+                                                    when {
+                                                        active -> onActiveChange(false)
+                                                        backStackEntry?.destination?.route != Screens.Home.route -> {
+                                                            navController.navigateUp()
+                                                        }
+
+                                                        else -> onActiveChange(true)
+                                                    }
+                                                }
+                                            ) {
+                                                Icon(
+                                                    painterResource(
+                                                        if (active || !navigationItems.fastAny { it.route == backStackEntry?.destination?.route }) {
+                                                            R.drawable.ic_arrow_back
+                                                        } else {
+                                                            R.drawable.ic_search
+                                                        }
+                                                    ),
+                                                    contentDescription = null
+                                                )
+                                            }
+                                        },
+                                        shape = MaterialTheme.shapes.small,
                                         modifier = Modifier
                                     ) {
-
+                                        if (query.text.isEmpty()) {
+                                            Text(
+                                                text = stringResource(R.string.app_name)
+                                            )
+                                        } else {
+                                            Text(
+                                                text = query.text
+                                            )
+                                        }
                                     }
                                 }
                             }
-
-                            val state = TopAppBarDefaults.enterAlwaysScrollBehavior()
                         }
-
                     }
                 }
             }

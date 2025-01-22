@@ -79,6 +79,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.util.lerp
 import com.example.kanicard.constants.AppBarHeight
+import timber.log.Timber
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -151,7 +152,7 @@ fun SearchBar(
         derivedStateOf {
             PaddingValues(
                 start = startInset * animationProgress,
-//                top = topPadding * animationProgress,
+                top = topPadding * animationProgress,
                 end = endInset * animationProgress,
                 bottom = SearchBarVerticalPadding * animationProgress,
             )
