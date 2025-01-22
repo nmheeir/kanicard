@@ -5,14 +5,16 @@ plugins {
 
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.ksp)
+
+    id("com.google.gms.google-services")
 }
 
 android {
-    namespace = "com.example.kanicard"
+    namespace = "com.nmheir.kanicard"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.kanicard"
+        applicationId = "com.nmheir.kanicard"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
@@ -106,4 +108,9 @@ dependencies {
 
     //Timber
     implementation(libs.timber)
+
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.analytics)
 }

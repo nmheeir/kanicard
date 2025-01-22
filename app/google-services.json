@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "793162644862",
+    "project_id": "kanicard",
+    "storage_bucket": "kanicard.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:793162644862:android:6f193f551dd7ea5094c72f",
+        "android_client_info": {
+          "package_name": "com.nmheir.kanicard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFcyB8114z2xVA5j6GXo0T2Y79CpsmFvY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
