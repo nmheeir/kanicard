@@ -1,26 +1,44 @@
 {
   "project_info": {
-    "project_number": "793162644862",
-    "project_id": "kanicard",
-    "storage_bucket": "kanicard.firebasestorage.app"
+    "project_number": "657716076673",
+    "project_id": "kanicard-e8c8e",
+    "storage_bucket": "kanicard-e8c8e.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:793162644862:android:6f193f551dd7ea5094c72f",
+        "mobilesdk_app_id": "1:657716076673:android:66bdb7d473f9b864252d80",
         "android_client_info": {
           "package_name": "com.nmheir.kanicard"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "657716076673-ja0jf6uvr8i99ttghdrt44vm8n4aqtrh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nmheir.kanicard",
+            "certificate_hash": "7cec656b69280a8b5ab3777fd9f8611185c05e0c"
+          }
+        },
+        {
+          "client_id": "657716076673-pttetbgl1j3nrqva31ha0prrl50n0t5a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyBFcyB8114z2xVA5j6GXo0T2Y79CpsmFvY"
+          "current_key": "AIzaSyCk_qO42akNa9VIm-TixQmrSXw5VSAd3j8"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "657716076673-pttetbgl1j3nrqva31ha0prrl50n0t5a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

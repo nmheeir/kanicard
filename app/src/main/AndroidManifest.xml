@@ -20,7 +20,7 @@
         <activity
             android:name=".ui.activities.AuthorizationActivity"
             android:exported="true"
-            android:theme="@style/Theme.App.Starting">
+            android:theme="@style/Theme.KaniCard">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -9,15 +9,35 @@
     <string name="logout">Log Out</string>
     <string name="support">Support</string>
     <string name="learn">Learn</string>
+    <string name="error">Error</string>
 
     <string name="search">Search</string>
     <string name="search_online">Search online…</string>
     <string name="search_local">Search local…</string>
 
-    <string name="login">Login</string>
-    <string name="register">Register</string>
+    <string name="sign_in">Sign in</string>
+    <string name="sign_up">Sign up</string>
     <string name="forgot_password">Forgot password</string>
     <string name="title_activity_auth">AuthActivity</string>
     <string name="title_activity_authorization">AuthorizationActivity</string>
     <string name="title_activity_main2">MainActivity2</string>
+    <string name="email_address">Email Address</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm password</string>
+
+    <string name="sign_in_title">Welcome Back!</string>
+    <string name="sign_in_description">Sign in to continue learning with Kani Card,\n your ultimate flashcard companion.</string>
+    <string name="already_have_account">Already have an account?</string>
+    <string name="sign_up_title">Join Kani Card</string>
+    <string name="sign_up_description">Create a free account and unlock the power of flashcards for smarter learning.</string>
+
+    <string name="err_pw_not_match">Password do not match!</string>
+    <string name="err_invalid_email">Invalid email</string>
+    <string name="err_invalid_email_des">Eg: test@gmail.com</string>
+    <string name="err_invalid_password">Password does not meet criteria</string>
+    <string name="err_invalid_password_des">Eg: Password must contain at least 6 character, 1 digit, 1 special character</string>
+    <string name="err_sign_in_incorrect">Sign in Incorrect</string>
+    <string name="err_sign_in_failed">Sign in failed</string>
+    <string name="err_network_error">Network error</string>
+    <string name="err_too_many_request">Too many request</string>
 </resources>
