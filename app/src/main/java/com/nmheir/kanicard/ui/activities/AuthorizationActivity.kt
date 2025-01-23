@@ -34,11 +34,11 @@ class AuthorizationActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-/*        installSplashScreen().apply {
+        installSplashScreen().apply {
             setKeepOnScreenCondition {
                 viewModel.authState.value is AuthorizationState.Loading
             }
-        }*/
+        }
 
         setContent {
             KaniCardTheme {

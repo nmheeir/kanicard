@@ -2,6 +2,7 @@ package com.nmheir.kanicard.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +14,8 @@ class AuthorizationViewModel @Inject constructor(
 
 ) : ViewModel() {
 
+    private val auth = FirebaseAuth.getInstance()
+
     val authState = MutableStateFlow<AuthorizationState>(AuthorizationState.Loading)
 
 
@@ -22,10 +25,11 @@ class AuthorizationViewModel @Inject constructor(
 
     private fun checkAuthorization() {
         viewModelScope.launch {
-
-            delay(2000)
-
-            authState.value = AuthorizationState.Unauthorized
+            if (auth.currentUser != null) {
+                authState.value = AuthorizationState.Authorized
+            } else {
+                authState.value = AuthorizationState.Unauthorized
+            }
         }
     }
 }

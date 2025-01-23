@@ -10,6 +10,8 @@
     <string name="support">Support</string>
     <string name="learn">Learn</string>
     <string name="error">Error</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
 
     <string name="search">Search</string>
     <string name="search_online">Search online…</string>
@@ -40,4 +42,6 @@
     <string name="err_sign_in_failed">Sign in failed</string>
     <string name="err_network_error">Network error</string>
     <string name="err_too_many_request">Too many request</string>
+
+    <string name="confirm_logout">Are you sure you want to logout?</string>
 </resources>
