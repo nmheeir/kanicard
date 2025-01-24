@@ -27,7 +27,7 @@ class AuthViewModel @Inject constructor(
     private val _channel = Channel<AuthEvent>()
     val channel = _channel.receiveAsFlow()
 
-    val signUpError = MutableStateFlow<SignUpError>(SignUpError.Nothing)
+    val authError = MutableStateFlow<AuthError>(AuthError.Nothing)
     val isLoading = MutableStateFlow(false)
 
     fun onAction(action: AuthAction) {
@@ -46,15 +46,15 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             when {
                 password != confirmPassword -> {
-                    emitError(SignUpError.PasswordNotMatch, R.string.err_pw_not_match)
+                    emitError(AuthError.PasswordNotMatch, R.string.err_pw_not_match)
                 }
 
                 !Validate.validateEmail(email) -> {
-                    emitError(SignUpError.InvalidEmail, R.string.err_invalid_email)
+                    emitError(AuthError.InvalidEmail, R.string.err_invalid_email)
                 }
 
                 !Validate.validatePassword(password) -> {
-                    emitError(SignUpError.InvalidPassword, R.string.err_invalid_password)
+                    emitError(AuthError.InvalidPassword, R.string.err_invalid_password)
                 }
 
                 else -> registerUser(email, password)
@@ -70,8 +70,7 @@ class AuthViewModel @Inject constructor(
                     if (task.isSuccessful) {
                         _channel.send(AuthEvent.Success)
                     } else {
-                        val exception = task.exception
-                        when (exception) {
+                        when (val exception = task.exception) {
                             is FirebaseNetworkException -> {
                                 _channel.send(AuthEvent.Failure(R.string.err_network_error))
                             }
@@ -90,8 +89,8 @@ class AuthViewModel @Inject constructor(
             }
     }
 
-    private suspend fun emitError(error: SignUpError, @StringRes message: Int) {
-        signUpError.value = error
+    private suspend fun emitError(error: AuthError, @StringRes message: Int) {
+        authError.value = error
         _channel.send(AuthEvent.Failure(message))
     }
 
@@ -136,13 +135,16 @@ sealed interface AuthEvent {
 @Immutable
 sealed interface AuthAction {
     data class SignIn(val email: String, val password: String) : AuthAction
-    data class SignUp(val email: String, val password: String, val confirmPassword: String) :
-        AuthAction
+    data class SignUp(
+        val email: String,
+        val password: String,
+        val confirmPassword: String
+    ) : AuthAction
 }
 
-sealed interface SignUpError {
-    data object PasswordNotMatch : SignUpError
-    data object Nothing : SignUpError
-    data object InvalidEmail : SignUpError
-    data object InvalidPassword : SignUpError
+sealed interface AuthError {
+    data object PasswordNotMatch : AuthError
+    data object Nothing : AuthError
+    data object InvalidEmail : AuthError
+    data object InvalidPassword : AuthError
 }

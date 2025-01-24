@@ -12,6 +12,11 @@
     <string name="error">Error</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
+    <string name="your_email">Your email</string>
+
+    <string name="change_password">Change password</string>
+    <string name="reset_password">Reset password</string>
+    <string name="forgot_password">Forgot password</string>
 
     <string name="search">Search</string>
     <string name="search_online">Search online…</string>
@@ -19,7 +24,6 @@
 
     <string name="sign_in">Sign in</string>
     <string name="sign_up">Sign up</string>
-    <string name="forgot_password">Forgot password</string>
     <string name="title_activity_auth">AuthActivity</string>
     <string name="title_activity_authorization">AuthorizationActivity</string>
     <string name="title_activity_main2">MainActivity2</string>
@@ -32,6 +36,7 @@
     <string name="already_have_account">Already have an account?</string>
     <string name="sign_up_title">Join Kani Card</string>
     <string name="sign_up_description">Create a free account and unlock the power of flashcards for smarter learning.</string>
+    <string name="forgot_password_description">Please enter your email to reset the password</string>
 
     <string name="err_pw_not_match">Password do not match!</string>
     <string name="err_invalid_email">Invalid email</string>
@@ -42,6 +47,11 @@
     <string name="err_sign_in_failed">Sign in failed</string>
     <string name="err_network_error">Network error</string>
     <string name="err_too_many_request">Too many request</string>
+    <string name="err_unknown">Unknown Error</string>
 
     <string name="confirm_logout">Are you sure you want to logout?</string>
+    <string name="we_have_send_code_to">We have sent a code to</string>
+    <string name="verify_now">Verify now</string>
+    <string name="send_email">Send email</string>
+    <string name="please_check_email">The email has been successfully sent.\nPlease check your inbox\nand don\'t forget to look in your spam folder.</string>
 </resources>

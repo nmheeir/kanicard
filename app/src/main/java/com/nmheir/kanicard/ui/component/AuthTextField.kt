@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 fun AuthTextField(
     modifier: Modifier = Modifier,
     label: String,
-    value: () -> TextFieldValue,
+    value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
     placeHolder: (@Composable () -> Unit)? = null,
     leadingIcon: (@Composable () -> Unit)? = null,
@@ -33,7 +33,7 @@ fun AuthTextField(
     Column {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.align(Alignment.Start)
         )
@@ -41,7 +41,7 @@ fun AuthTextField(
         Gap(8.dp)
 
         OutlinedTextField(
-            value = value(),
+            value = value,
             onValueChange = onValueChange,
             placeholder = placeHolder,
             leadingIcon = leadingIcon,

@@ -49,12 +49,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.nmheir.kanicard.R
-import com.nmheir.kanicard.ui.activities.LocalWindowInset
+import com.nmheir.kanicard.ui.activities.LocalAuthActivityWindowInset
 import com.nmheir.kanicard.ui.component.AuthTextField
 import com.nmheir.kanicard.ui.component.ErrorBox
 import com.nmheir.kanicard.ui.component.Gap
 import com.nmheir.kanicard.ui.viewmodels.AuthAction
-import com.nmheir.kanicard.ui.viewmodels.SignUpError
+import com.nmheir.kanicard.ui.viewmodels.AuthError
 import com.nmheir.kanicard.ui.viewmodels.AuthEvent
 import com.nmheir.kanicard.ui.viewmodels.AuthViewModel
 import com.nmheir.kanicard.utils.ObserveAsEvents
@@ -83,7 +83,7 @@ fun SignUpScreen(
     val coroutineScope = rememberCoroutineScope()
     val bringIntoView = remember { BringIntoViewRequester() }
 
-    val error by viewModel.signUpError.collectAsStateWithLifecycle()
+    val error by viewModel.authError.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
     val (email, onEmailChange) = remember {
@@ -114,7 +114,7 @@ fun SignUpScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(LocalWindowInset.current.asPaddingValues())
+            .padding(LocalAuthActivityWindowInset.current.asPaddingValues())
     ) {
         //Header Section
         Image(
@@ -147,7 +147,7 @@ fun SignUpScreen(
         ) {
             AuthTextField(
                 label = stringResource(R.string.email_address),
-                value = {email},
+                value = email,
                 onValueChange = onEmailChange,
                 leadingIcon = {
                     Icon(
@@ -160,7 +160,7 @@ fun SignUpScreen(
 
             AuthTextField(
                 label = stringResource(R.string.password),
-                value = { password },
+                value = password,
                 onValueChange = onPasswordChange,
                 leadingIcon = {
                     Icon(
@@ -188,7 +188,7 @@ fun SignUpScreen(
 
             AuthTextField(
                 label = stringResource(R.string.confirm_password),
-                value = { confirmPassword },
+                value = confirmPassword,
                 onValueChange = onConfirmPasswordChange,
                 leadingIcon = {
                     Icon(
@@ -220,40 +220,40 @@ fun SignUpScreen(
             }
 
             AnimatedVisibility(
-                visible = error != SignUpError.Nothing
+                visible = error != AuthError.Nothing
             ) {
                 ErrorBox(
                     message = when (error) {
-                        SignUpError.Nothing -> {
+                        AuthError.Nothing -> {
                             "Nothing"
                         }
 
-                        SignUpError.PasswordNotMatch -> {
+                        AuthError.PasswordNotMatch -> {
                             stringResource(R.string.err_pw_not_match)
                         }
 
-                        SignUpError.InvalidEmail -> {
+                        AuthError.InvalidEmail -> {
                             stringResource(R.string.err_invalid_email)
                         }
 
-                        SignUpError.InvalidPassword -> {
+                        AuthError.InvalidPassword -> {
                             stringResource(R.string.err_invalid_password)
                         }
                     },
                     description = when (error) {
-                        SignUpError.InvalidEmail -> {
+                        AuthError.InvalidEmail -> {
                             stringResource(R.string.err_invalid_email_des)
                         }
 
-                        SignUpError.InvalidPassword -> {
+                        AuthError.InvalidPassword -> {
                             stringResource(R.string.err_invalid_password_des)
                         }
 
-                        SignUpError.Nothing -> {
+                        AuthError.Nothing -> {
                             null
                         }
 
-                        SignUpError.PasswordNotMatch -> {
+                        AuthError.PasswordNotMatch -> {
                             null
                         }
                     }

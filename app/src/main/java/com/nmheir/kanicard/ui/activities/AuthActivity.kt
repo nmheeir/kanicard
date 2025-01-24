@@ -29,7 +29,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHost
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.nmheir.kanicard.ui.navigation.authNavigationBuilder
@@ -57,12 +56,12 @@ class AuthActivity : ComponentActivity() {
                     val windowInset = WindowInsets.systemBars
                     val density = LocalDensity.current
                     val topInset = with(density) { windowInset.getTop(density).toDp() }
-                    val localWindowInset = remember {
+                    val authActivityWindowInset = remember {
                         windowInset.only(WindowInsetsSides.Top)
                             .add(WindowInsets(left = 12.dp, right = 12.dp))
                     }
                     CompositionLocalProvider(
-                        LocalWindowInset provides localWindowInset
+                        LocalAuthActivityWindowInset provides authActivityWindowInset
                     ) {
                         NavHost(
                             navController = navController,
@@ -92,4 +91,4 @@ class AuthActivity : ComponentActivity() {
     }
 }
 
-val LocalWindowInset = compositionLocalOf<WindowInsets> { error("No WindowInsets provided") }
+val LocalAuthActivityWindowInset = compositionLocalOf<WindowInsets> { error("No WindowInsets provided") }

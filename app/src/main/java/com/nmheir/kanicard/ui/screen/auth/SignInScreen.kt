@@ -47,7 +47,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.nmheir.kanicard.R
-import com.nmheir.kanicard.ui.activities.LocalWindowInset
+import com.nmheir.kanicard.ui.activities.LocalAuthActivityWindowInset
 import com.nmheir.kanicard.ui.activities.MainActivity
 import com.nmheir.kanicard.ui.component.AuthTextField
 import com.nmheir.kanicard.ui.component.Gap
@@ -83,7 +83,7 @@ fun SignInScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .padding(LocalWindowInset.current.asPaddingValues())
+            .padding(LocalAuthActivityWindowInset.current.asPaddingValues())
             .verticalScroll(rememberScrollState())
     ) {
 
@@ -131,7 +131,7 @@ fun SignInScreen(
 
             AuthTextField(
                 label = stringResource(R.string.email_address),
-                value = { email },
+                value = email,
                 onValueChange = onEmailChange,
                 leadingIcon = {
                     Icon(
@@ -143,7 +143,7 @@ fun SignInScreen(
 
             AuthTextField(
                 label = stringResource(R.string.password),
-                value = { password },
+                value = password,
                 onValueChange = onPasswordChange,
                 leadingIcon = {
                     Icon(
@@ -206,12 +206,12 @@ fun SignInScreen(
         Row {
             Text(
                 text = stringResource(R.string.already_have_account),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyLarge
             )
             Gap(4.dp)
             Text(
                 text = stringResource(R.string.sign_up),
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyLarge,
                 textDecoration = TextDecoration.Underline,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.clickable {
@@ -221,7 +221,7 @@ fun SignInScreen(
         }
         Text(
             text = stringResource(R.string.forgot_password),
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.error,
             textDecoration = TextDecoration.Underline,
             modifier = Modifier.clickable {
