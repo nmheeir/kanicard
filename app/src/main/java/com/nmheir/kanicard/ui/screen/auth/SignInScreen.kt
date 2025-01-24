@@ -1,6 +1,7 @@
 package com.nmheir.kanicard.ui.screen.auth
 
 import android.app.Activity
+import android.widget.CheckBox
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -17,6 +18,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxColors
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -113,7 +117,7 @@ fun SignInScreen(
 
         //Input Section
         Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxWidth()
@@ -123,6 +127,10 @@ fun SignInScreen(
             }
             val (password, onPasswordChange) = remember {
                 mutableStateOf(TextFieldValue())
+            }
+
+            val (rememberAccount, onRememberAccountChange) = remember {
+                mutableStateOf(false)
             }
 
             var showPassword by remember {
@@ -169,11 +177,29 @@ fun SignInScreen(
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
             )
 
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.align(Alignment.Start)
+            ) {
+                Checkbox(
+                    checked = rememberAccount,
+                    onCheckedChange = onRememberAccountChange,
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = MaterialTheme.colorScheme.primaryContainer,
+                        checkmarkColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                )
+                Text(
+                    text = "Remember account",
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+
             Button(
                 enabled = email.text.isNotEmpty() && password.text.isNotEmpty()
                         && !isLoading,
                 onClick = {
-                    viewModel.onAction(AuthAction.SignIn(email.text, password.text))
+                    viewModel.onAction(AuthAction.SignIn(email.text, password.text, rememberAccount))
                 },
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(

@@ -9,6 +9,8 @@ import com.google.firebase.FirebaseTooManyRequestsException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.nmheir.kanicard.R
+import com.nmheir.kanicard.data.entities.AccountSession
+import com.nmheir.kanicard.data.local.KaniDatabase
 import com.nmheir.kanicard.utils.Validate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -20,7 +22,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-
+    private val database: KaniDatabase
 ) : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
 
@@ -33,7 +35,7 @@ class AuthViewModel @Inject constructor(
     fun onAction(action: AuthAction) {
         when (action) {
             is AuthAction.SignIn -> {
-                signIn(action.email, action.password)
+                signIn(action.email, action.password, action.rememberAccount)
             }
 
             is AuthAction.SignUp -> {
@@ -94,12 +96,15 @@ class AuthViewModel @Inject constructor(
         _channel.send(AuthEvent.Failure(message))
     }
 
-    private fun signIn(email: String, password: String) {
+    private fun signIn(email: String, password: String, rememberAccount: Boolean) {
         isLoading.value = true
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 viewModelScope.launch {
                     if (task.isSuccessful) {
+                        if (rememberAccount) {
+                            database.insert(AccountSession(email = email, password = password))
+                        }
                         _channel.send(AuthEvent.Success)
                     } else {
                         when (val exception = task.exception) {
@@ -134,7 +139,12 @@ sealed interface AuthEvent {
 
 @Immutable
 sealed interface AuthAction {
-    data class SignIn(val email: String, val password: String) : AuthAction
+    data class SignIn(
+        val email: String,
+        val password: String,
+        val rememberAccount: Boolean
+    ) : AuthAction
+
     data class SignUp(
         val email: String,
         val password: String,

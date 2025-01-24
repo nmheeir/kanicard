@@ -7,10 +7,10 @@ import java.time.LocalDateTime
 
 @Immutable
 @Entity(
-    tableName = "Decks"
+    tableName = "decks"
 )
 data class DeckEntity(
-    @PrimaryKey val id: Int,
+    @PrimaryKey val id: Long,
     val userId: Int,
     val title: String,
     val thumbnail: String,

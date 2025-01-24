@@ -48,7 +48,6 @@ class AuthActivity : ComponentActivity() {
                 val navController = rememberNavController()
 
                 val windowWidthSize = calculateWindowSizeClass(this).widthSizeClass
-                val isExpandedScreen = windowWidthSize == WindowWidthSizeClass.Expanded
 
                 Surface(
                     modifier = Modifier

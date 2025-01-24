@@ -6,10 +6,10 @@ import androidx.room.PrimaryKey
 
 @Immutable
 @Entity(
-    tableName = "DeckPreview"
+    tableName = "deck_previews"
 )
 data class DeckPreview(
-    @PrimaryKey val id: Int,
+    @PrimaryKey val id: Long,
     val deckId: Int,
     val userId: Int,
     val newWord: Int,

@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 
 @Immutable
 @Entity(
-    tableName = "SavedDecks",
+    tableName = "deck_saved",
     foreignKeys = [
         ForeignKey(
             entity = UserEntity::class,

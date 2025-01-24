@@ -6,10 +6,10 @@ import androidx.room.PrimaryKey
 
 @Immutable
 @Entity(
-    tableName = "Users"
+    tableName = "users"
 )
 data class UserEntity(
-    @PrimaryKey val id: Int,
+    @PrimaryKey val id: String,
     val firstName: String,
     val lastName: String,
     val username: String,
