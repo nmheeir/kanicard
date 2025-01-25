@@ -53,7 +53,7 @@ fun CoilImage(
             is AsyncImagePainter.State.Loading,
             is AsyncImagePainter.State.Error -> {
                 Image(
-                    painter = painterResource(id = R.drawable.img_empty),
+                    painter = painterResource(id = R.drawable.ic_error),
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxSize()

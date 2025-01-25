@@ -35,6 +35,9 @@ class MainViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+//            updateRefreshToken()
+            val currentSession = client.auth.currentSessionOrNull()
+            Timber.d("Current session: " + currentSession.toString())
             updateRefreshToken()
         }
     }
@@ -49,35 +52,16 @@ class MainViewModel @Inject constructor(
             }
             Timber.d("Refresh Token: " + currentSession?.refreshToken)
 
-            userInfo.value = client.auth.currentUserOrNull()
         } else {
-            refreshSession(context)
-            updateRefreshToken(context)
-            Timber.d(client.auth.currentSessionOrNull().toString())
 
-            userInfo.value = client.auth.currentUserOrNull()
+            Timber.d(
+                "Refresh token from current session: " + client.auth.currentSessionOrNull()
+                    .toString()
+            )
+            Timber.d("Refresh token from data store: " + context.dataStore[RefreshTokenKey])
         }
     }
 
-    private suspend fun refreshSession(context: Context) {
-        try {
-            Timber.d("Refreshing session")
-            client.auth.refreshCurrentSession()
-        } catch (e: Exception) {
-            Timber.d(e)
-        }
-    }
-
-    private suspend fun updateRefreshToken(context: Context) {
-        try {
-            val refreshToken = client.auth.currentSessionOrNull()?.refreshToken
-            context.dataStore.edit {
-                it[RefreshTokenKey] = refreshToken!!
-            }
-        } catch (e: Exception) {
-            Timber.d(e)
-        }
-    }
 
     fun signOut() {
         isLoading.value = true

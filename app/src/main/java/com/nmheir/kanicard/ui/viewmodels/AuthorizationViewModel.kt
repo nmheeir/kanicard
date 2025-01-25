@@ -3,6 +3,7 @@ package com.nmheir.kanicard.ui.viewmodels
 import android.content.Context
 import androidx.core.content.contentValuesOf
 import androidx.datastore.dataStore
+import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -37,13 +38,31 @@ class AuthorizationViewModel @Inject constructor(
         }
     }
 
-    private fun checkAuthorization() {
+    private suspend fun checkAuthorization() {
 
         if (context.dataStore[RefreshTokenKey].isNullOrEmpty()) {
-            Timber.d(context.dataStore[RefreshTokenKey])
+//            Timber.d(context.dataStore[RefreshTokenKey])
             authState.value = AuthorizationState.Unauthorized
         } else {
-            authState.value = AuthorizationState.Authorized
+            try {
+                client.auth.refreshSession(context.dataStore[RefreshTokenKey]!!)
+                updateRefreshToken(context)
+                authState.value = AuthorizationState.Authorized
+            } catch (e: Exception) {
+                Timber.d(e)
+                authState.value = AuthorizationState.Unauthorized
+            }
+        }
+    }
+
+    private suspend fun updateRefreshToken(context: Context) {
+        try {
+            val refreshToken = client.auth.currentSessionOrNull()?.refreshToken
+            context.dataStore.edit {
+                it[RefreshTokenKey] = refreshToken!!
+            }
+        } catch (e: Exception) {
+            Timber.d(e)
         }
     }
 }
