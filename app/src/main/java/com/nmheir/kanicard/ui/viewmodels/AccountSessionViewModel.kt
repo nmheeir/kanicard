@@ -10,13 +10,9 @@ class AccountSessionViewModel @Inject constructor(
 
 ) : ViewModel() {
 
-    private val auth = FirebaseAuth.getInstance()
-    private val user = auth.currentUser
-
 //    val accounts = MutableStateFlow<AccountSession>()
 
     init {
-        auth.currentUser?.displayName
     }
 
 }

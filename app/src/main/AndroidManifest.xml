@@ -38,9 +38,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
 
                 <data
-                    android:host="kanicard-e8c8e.firebaseapp.com"
-                    android:scheme="https"
-                    android:path="/__/auth/action" />
+                    android:host="kanicard.supabase.com"
+                    android:scheme="https" />
             </intent-filter>
         </activity>
         <activity

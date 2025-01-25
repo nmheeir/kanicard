@@ -4,15 +4,17 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.FirebaseNetworkException
-import com.google.firebase.FirebaseTooManyRequestsException
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.nmheir.kanicard.BuildConfig
 import com.nmheir.kanicard.R
-import com.nmheir.kanicard.data.entities.AccountSession
 import com.nmheir.kanicard.data.local.KaniDatabase
 import com.nmheir.kanicard.utils.Validate
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.Auth
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.exception.AuthRestException
+import io.github.jan.supabase.auth.providers.builtin.Email
+import io.github.jan.supabase.createSupabaseClient
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -22,12 +24,17 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val database: KaniDatabase
+    private val database: KaniDatabase,
+    private val client: SupabaseClient
 ) : ViewModel() {
-    private val auth = FirebaseAuth.getInstance()
+//    private val auth = FirebaseAuth.getInstance()
+
+    private val auth = client.auth
 
     private val _channel = Channel<AuthEvent>()
     val channel = _channel.receiveAsFlow()
+
+    val sessionStatus = auth.sessionStatus
 
     val authError = MutableStateFlow<AuthError>(AuthError.Nothing)
     val isLoading = MutableStateFlow(false)
@@ -35,7 +42,11 @@ class AuthViewModel @Inject constructor(
     fun onAction(action: AuthAction) {
         when (action) {
             is AuthAction.SignIn -> {
-                signIn(action.email, action.password, action.rememberAccount)
+                viewModelScope.launch {
+                    isLoading.value = true
+                    signIn(action.email, action.password, action.rememberAccount)
+                    isLoading.value = false
+                }
             }
 
             is AuthAction.SignUp -> {
@@ -46,6 +57,7 @@ class AuthViewModel @Inject constructor(
 
     private fun signUp(email: String, password: String, confirmPassword: String) {
         viewModelScope.launch {
+            isLoading.value = true
             when {
                 password != confirmPassword -> {
                     emitError(AuthError.PasswordNotMatch, R.string.err_pw_not_match)
@@ -59,36 +71,28 @@ class AuthViewModel @Inject constructor(
                     emitError(AuthError.InvalidPassword, R.string.err_invalid_password)
                 }
 
-                else -> registerUser(email, password)
+                else -> signUpUser(email, password)
             }
+            isLoading.value = false
         }
     }
 
-    private fun registerUser(email: String, password: String) {
-        isLoading.value = true
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                viewModelScope.launch {
-                    if (task.isSuccessful) {
-                        _channel.send(AuthEvent.Success)
-                    } else {
-                        when (val exception = task.exception) {
-                            is FirebaseNetworkException -> {
-                                _channel.send(AuthEvent.Failure(R.string.err_network_error))
-                            }
+    private suspend fun signUpUser(userEmail: String, userPassword: String) {
+        try {
+            auth.signUpWith(Email) {
+                email = userEmail
+                password = userPassword
+            }
 
-                            is FirebaseTooManyRequestsException -> {
-                                _channel.send(AuthEvent.Failure(R.string.err_too_many_request))
-                            }
-
-                            else -> {
-                                Timber.d(exception?.message)
-                            }
-                        }
-                    }
-                    isLoading.value = false
+        } catch (e: Exception) {
+            Timber.d(e)
+            Timber.d(e.message)
+            when (e.cause) {
+                is AuthRestException -> {
+                    Timber.d(e.message)
                 }
             }
+        }
     }
 
     private suspend fun emitError(error: AuthError, @StringRes message: Int) {
@@ -96,38 +100,17 @@ class AuthViewModel @Inject constructor(
         _channel.send(AuthEvent.Failure(message))
     }
 
-    private fun signIn(email: String, password: String, rememberAccount: Boolean) {
-        isLoading.value = true
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                viewModelScope.launch {
-                    if (task.isSuccessful) {
-                        if (rememberAccount) {
-                            database.insert(AccountSession(email = email, password = password))
-                        }
-                        _channel.send(AuthEvent.Success)
-                    } else {
-                        when (val exception = task.exception) {
-                            is FirebaseAuthInvalidCredentialsException -> {
-                                _channel.send(AuthEvent.Failure(R.string.err_sign_in_incorrect))
-                            }
-
-                            is FirebaseNetworkException -> {
-                                _channel.send(AuthEvent.Failure(R.string.err_network_error))
-                            }
-
-                            is FirebaseTooManyRequestsException -> {
-                                _channel.send(AuthEvent.Failure(R.string.err_too_many_request))
-                            }
-
-                            else -> {
-                                Timber.d(exception?.message)
-                            }
-                        }
-                    }
-                    isLoading.value = false
-                }
+    private suspend fun signIn(userEmail: String, userPassword: String, rememberAccount: Boolean) {
+        try {
+            auth.signInWith(Email) {
+                email = userEmail
+                password = userPassword
             }
+            _channel.send(AuthEvent.Success)
+            Timber.d(auth.sessionStatus.toString())
+        } catch (e: Exception) {
+            Timber.d(e.message)
+        }
     }
 }
 

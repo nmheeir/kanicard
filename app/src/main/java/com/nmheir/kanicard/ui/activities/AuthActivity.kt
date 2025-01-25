@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
@@ -34,15 +33,25 @@ import androidx.navigation.compose.rememberNavController
 import com.nmheir.kanicard.ui.navigation.authNavigationBuilder
 import com.nmheir.kanicard.ui.theme.KaniCardTheme
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.handleDeeplinks
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class AuthActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var client: SupabaseClient
+
     @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
-        this.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        this.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        client.handleDeeplinks(intent)
+
         setContent {
             KaniCardTheme {
                 val navController = rememberNavController()
@@ -90,4 +99,5 @@ class AuthActivity : ComponentActivity() {
     }
 }
 
-val LocalAuthActivityWindowInset = compositionLocalOf<WindowInsets> { error("No WindowInsets provided") }
+val LocalAuthActivityWindowInset =
+    compositionLocalOf<WindowInsets> { error("No WindowInsets provided") }

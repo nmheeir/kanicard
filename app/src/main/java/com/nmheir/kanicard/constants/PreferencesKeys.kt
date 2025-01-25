@@ -9,6 +9,7 @@ val PauseSearchHistoryKey = booleanPreferencesKey("pauseSearchHistory")
 val MaxImageCacheSizeKey = intPreferencesKey("maxImageCacheSize")
 
 val SearchSourceKey = stringPreferencesKey("searchSource")
+
 enum class SearchSource {
     LOCAL, ONLINE;
 
@@ -17,3 +18,5 @@ enum class SearchSource {
         ONLINE -> LOCAL
     }
 }
+
+val RefreshTokenKey = stringPreferencesKey("refreshToken")

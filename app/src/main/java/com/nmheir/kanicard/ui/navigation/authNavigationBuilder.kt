@@ -40,7 +40,7 @@ fun NavGraphBuilder.authNavigationBuilder(
         deepLinks = listOf(
             navDeepLink {
                 uriPattern =
-                    "https://kanicard-e8c8e.firebaseapp.com/__/auth/action?mode=resetPassword&oobCode={oobCode}&apiKey={apiKey}&lang={lang}"
+                    "https://kanicard.supabase.com"
             }
         )
     ) {

@@ -60,6 +60,8 @@ import com.nmheir.kanicard.ui.viewmodels.AuthEvent
 import com.nmheir.kanicard.ui.viewmodels.AuthViewModel
 import com.nmheir.kanicard.utils.ObserveAsEvents
 import com.nmheir.kanicard.utils.startNewActivity
+import io.github.jan.supabase.auth.status.SessionSource
+import io.github.jan.supabase.auth.status.SessionStatus
 
 @Composable
 fun SignInScreen(
@@ -199,7 +201,13 @@ fun SignInScreen(
                 enabled = email.text.isNotEmpty() && password.text.isNotEmpty()
                         && !isLoading,
                 onClick = {
-                    viewModel.onAction(AuthAction.SignIn(email.text, password.text, rememberAccount))
+                    viewModel.onAction(
+                        AuthAction.SignIn(
+                            email.text,
+                            password.text,
+                            rememberAccount
+                        )
+                    )
                 },
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(

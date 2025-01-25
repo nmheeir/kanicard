@@ -1,5 +1,6 @@
 package com.nmheir.kanicard.ui.activities
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -57,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.zIndex
+import androidx.datastore.preferences.core.edit
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -65,6 +67,7 @@ import com.nmheir.kanicard.R
 import com.nmheir.kanicard.constants.AppBarHeight
 import com.nmheir.kanicard.constants.NavigationBarHeight
 import com.nmheir.kanicard.constants.PauseSearchHistoryKey
+import com.nmheir.kanicard.constants.RefreshTokenKey
 import com.nmheir.kanicard.constants.SearchSource
 import com.nmheir.kanicard.constants.SearchSourceKey
 import com.nmheir.kanicard.data.entities.SearchHistory
@@ -83,6 +86,9 @@ import com.nmheir.kanicard.utils.get
 import com.nmheir.kanicard.utils.rememberEnumPreference
 import com.nmheir.kanicard.utils.resetHeightOffset
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -93,6 +99,8 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var database: KaniDatabase
 
+    @Inject
+    lateinit var client: SupabaseClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,6 +108,23 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             KaniCardTheme {
+
+                LaunchedEffect(Unit) {
+                    if (dataStore[RefreshTokenKey] == null) {
+                        val currentSession = client.auth.currentSessionOrNull()
+                        if (currentSession != null) {
+                            dataStore.edit {
+                                it[RefreshTokenKey] = currentSession.refreshToken
+                            }
+                        }
+                        Timber.d("Refresh Token: " + currentSession?.refreshToken)
+                    } else {
+                        refreshSession(applicationContext)
+                        updateRefreshToken(applicationContext)
+                        Timber.d(client.auth.currentSessionOrNull().toString())
+                    }
+                }
+
 
                 val navController = rememberNavController()
                 val coroutineScope = rememberCoroutineScope()
@@ -113,6 +138,7 @@ class MainActivity : ComponentActivity() {
                     drawerContent = {
                         AppDrawerSheet(
                             modifier = Modifier,
+                            client = client,
                             onNavigate = {
                                 coroutineScope.launch {
                                     drawerState.close()
@@ -480,6 +506,27 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    private suspend fun refreshSession(context: Context) {
+        try {
+            Timber.d("Refreshing session")
+//            client.auth.refreshSession(context.dataStore[RefreshTokenKey]!!)
+            client.auth.refreshCurrentSession()
+        } catch (e: Exception) {
+            Timber.d(e)
+        }
+    }
+
+    private suspend fun updateRefreshToken(context: Context) {
+        try {
+            val refreshToken = client.auth.currentSessionOrNull()?.refreshToken
+            context.dataStore.edit {
+                it[RefreshTokenKey] = refreshToken!!
+            }
+        } catch (e: Exception) {
+            Timber.d(e)
         }
     }
 }
