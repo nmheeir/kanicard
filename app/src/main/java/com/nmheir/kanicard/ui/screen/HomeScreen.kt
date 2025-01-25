@@ -1,4 +1,4 @@
-package com.nmheir.kanicard.ui.screen.home
+package com.nmheir.kanicard.ui.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints

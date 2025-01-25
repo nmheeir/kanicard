@@ -10,7 +10,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.nmheir.kanicard.ui.screen.Screens
-import com.nmheir.kanicard.ui.screen.home.HomeScreen
+import com.nmheir.kanicard.ui.screen.HomeScreen
 import com.nmheir.kanicard.ui.screen.settings.SettingScreen
 import com.nmheir.kanicard.ui.screen.statistics.StatisticsScreen
 

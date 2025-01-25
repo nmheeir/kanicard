@@ -2,9 +2,11 @@ package com.nmheir.kanicard.ui.activities
 
 import android.content.Context
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
@@ -59,6 +61,9 @@ import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.zIndex
 import androidx.datastore.preferences.core.edit
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ReportFragment.Companion.reportFragment
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -80,11 +85,15 @@ import com.nmheir.kanicard.ui.navigation.mainNavigationBuilder
 import com.nmheir.kanicard.ui.screen.Screens
 import com.nmheir.kanicard.ui.theme.KaniCardTheme
 import com.nmheir.kanicard.ui.theme.NavigationBarAnimationSpec
+import com.nmheir.kanicard.ui.viewmodels.MainState
+import com.nmheir.kanicard.ui.viewmodels.MainViewModel
+import com.nmheir.kanicard.utils.ObserveAsEvents
 import com.nmheir.kanicard.utils.appBarScrollBehavior
 import com.nmheir.kanicard.utils.dataStore
 import com.nmheir.kanicard.utils.get
 import com.nmheir.kanicard.utils.rememberEnumPreference
 import com.nmheir.kanicard.utils.resetHeightOffset
+import com.nmheir.kanicard.utils.startNewActivity
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -102,29 +111,14 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var client: SupabaseClient
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         setContent {
             KaniCardTheme {
-
-                LaunchedEffect(Unit) {
-                    if (dataStore[RefreshTokenKey] == null) {
-                        val currentSession = client.auth.currentSessionOrNull()
-                        if (currentSession != null) {
-                            dataStore.edit {
-                                it[RefreshTokenKey] = currentSession.refreshToken
-                            }
-                        }
-                        Timber.d("Refresh Token: " + currentSession?.refreshToken)
-                    } else {
-                        refreshSession(applicationContext)
-                        updateRefreshToken(applicationContext)
-                        Timber.d(client.auth.currentSessionOrNull().toString())
-                    }
-                }
-
+                val viewModel: MainViewModel = hiltViewModel()
 
                 val navController = rememberNavController()
                 val coroutineScope = rememberCoroutineScope()
@@ -133,12 +127,24 @@ class MainActivity : ComponentActivity() {
 
                 val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
+                ObserveAsEvents(viewModel.channel) {
+                    when (it) {
+                        is MainState.Error -> {
+                            Toast.makeText(this, it.message, Toast.LENGTH_SHORT).show()
+                        }
+
+                        MainState.Success -> {
+                            startNewActivity(AuthActivity::class.java)
+                        }
+                    }
+                }
+
                 ModalNavigationDrawer(
                     drawerState = drawerState,
                     drawerContent = {
                         AppDrawerSheet(
                             modifier = Modifier,
-                            client = client,
+                            viewModel = viewModel,
                             onNavigate = {
                                 coroutineScope.launch {
                                     drawerState.close()
@@ -506,27 +512,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-        }
-    }
-
-    private suspend fun refreshSession(context: Context) {
-        try {
-            Timber.d("Refreshing session")
-//            client.auth.refreshSession(context.dataStore[RefreshTokenKey]!!)
-            client.auth.refreshCurrentSession()
-        } catch (e: Exception) {
-            Timber.d(e)
-        }
-    }
-
-    private suspend fun updateRefreshToken(context: Context) {
-        try {
-            val refreshToken = client.auth.currentSessionOrNull()?.refreshToken
-            context.dataStore.edit {
-                it[RefreshTokenKey] = refreshToken!!
-            }
-        } catch (e: Exception) {
-            Timber.d(e)
         }
     }
 }

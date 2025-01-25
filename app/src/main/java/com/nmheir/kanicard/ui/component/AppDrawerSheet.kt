@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.datastore.dataStore
 import androidx.datastore.preferences.core.edit
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.installations.FirebaseInstallations
 import com.nmheir.kanicard.R
@@ -38,6 +39,7 @@ import com.nmheir.kanicard.constants.RefreshTokenKey
 import com.nmheir.kanicard.ui.activities.AuthActivity
 import com.nmheir.kanicard.ui.activities.MainActivity
 import com.nmheir.kanicard.ui.screen.Screens
+import com.nmheir.kanicard.ui.viewmodels.MainViewModel
 import com.nmheir.kanicard.utils.dataStore
 import com.nmheir.kanicard.utils.startNewActivity
 import io.github.jan.supabase.SupabaseClient
@@ -50,13 +52,16 @@ import timber.log.Timber
 fun AppDrawerSheet(
     modifier: Modifier = Modifier,
     onNavigate: (String) -> Unit,
-    client: SupabaseClient
+    viewModel: MainViewModel
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    var isLoading by remember { mutableStateOf(false) }
     var showLogoutDialog by remember { mutableStateOf(false) }
+
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val userInfo by viewModel.userInfo.collectAsStateWithLifecycle()
+    val error by viewModel.error.collectAsStateWithLifecycle()
     if (showLogoutDialog) {
         DefaultDialog(
             onDismiss = { showLogoutDialog = false },
@@ -70,6 +75,13 @@ fun AppDrawerSheet(
                 if (isLoading) {
                     CircularProgressIndicator()
                 }
+                if (error.isNotEmpty()) {
+                    Text(
+                        text = error,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
             },
             buttons = {
                 TextButton(
@@ -81,17 +93,7 @@ fun AppDrawerSheet(
 
                 TextButton(
                     enabled = !isLoading,
-                    onClick = {
-                        isLoading = true
-                        scope.launch {
-                            client.auth.signOut(SignOutScope.LOCAL)
-                            context.dataStore.edit {
-                                it.remove(RefreshTokenKey)
-                            }
-                            isLoading = false
-                            (context as? Activity)?.startNewActivity(AuthActivity::class.java)
-                        }
-                    }
+                    onClick = viewModel::signOut
                 ) {
                     Text(text = stringResource(R.string.ok))
                 }
@@ -116,6 +118,10 @@ fun AppDrawerSheet(
         Gap(height = 12.dp)
 
         HorizontalDivider()
+
+        Text(
+            text = userInfo?.email ?: "No email"
+        )
 
         Gap(height = 12.dp)
 
