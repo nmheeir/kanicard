@@ -12,7 +12,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.SignOutScope
 import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.user.UserInfo
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -54,14 +53,34 @@ class MainViewModel @Inject constructor(
 
         } else {
 
-            Timber.d(
-                "Refresh token from current session: " + client.auth.currentSessionOrNull()
-                    .toString()
-            )
-            Timber.d("Refresh token from data store: " + context.dataStore[RefreshTokenKey])
+            try {
+                client.auth.refreshCurrentSession()
+
+                updateRefreshTokenDataStore(context)
+
+                Timber.d(
+                    "Refresh token from current session: " + client.auth.currentSessionOrNull()?.refreshToken
+                        .toString()
+                )
+                Timber.d("Refresh token from data store: " + context.dataStore[RefreshTokenKey])
+            } catch (e: Exception) {
+                Timber.d(e)
+            }
         }
     }
 
+    private suspend fun updateRefreshTokenDataStore(context: Context) {
+        try {
+            val refreshToken = client.auth.currentSessionOrNull()?.refreshToken
+
+            Timber.d("AuthorizationViewModel updateRefreshToken: $refreshToken")
+            context.dataStore.edit {
+                it[RefreshTokenKey] = refreshToken!!
+            }
+        } catch (e: Exception) {
+            Timber.d(e)
+        }
+    }
 
     fun signOut() {
         isLoading.value = true

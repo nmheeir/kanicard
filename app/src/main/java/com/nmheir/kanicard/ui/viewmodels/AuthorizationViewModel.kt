@@ -45,26 +45,17 @@ class AuthorizationViewModel @Inject constructor(
             authState.value = AuthorizationState.Unauthorized
         } else {
             try {
+                //Restore old session
                 client.auth.refreshSession(context.dataStore[RefreshTokenKey]!!)
-                updateRefreshToken(context)
                 authState.value = AuthorizationState.Authorized
             } catch (e: Exception) {
                 Timber.d(e)
-                authState.value = AuthorizationState.Unauthorized
+                authState.value = AuthorizationState.Error(e.message ?: "Unknown error")
             }
         }
     }
 
-    private suspend fun updateRefreshToken(context: Context) {
-        try {
-            val refreshToken = client.auth.currentSessionOrNull()?.refreshToken
-            context.dataStore.edit {
-                it[RefreshTokenKey] = refreshToken!!
-            }
-        } catch (e: Exception) {
-            Timber.d(e)
-        }
-    }
+
 }
 
 sealed interface AuthorizationState {

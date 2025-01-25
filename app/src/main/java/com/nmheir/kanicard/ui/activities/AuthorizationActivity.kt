@@ -5,13 +5,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -51,17 +55,32 @@ class AuthorizationActivity : ComponentActivity() {
                             startNewActivity(MainActivity::class.java)
                         }
 
-                        AuthorizationState.Loading -> {
+                        AuthorizationState.Unauthorized -> {
+                            startNewActivity(AuthActivity::class.java)
+                        }
 
+                        else -> Unit
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Red),
+                    contentAlignment = Alignment.Center
+                ) {
+                    when (state) {
+                        AuthorizationState.Loading -> {
+                            CircularProgressIndicator()
                         }
 
                         is AuthorizationState.Error -> {
-
+                            // Hiển thị lỗi nếu cần
+                            Text(text = "Something went wrong")
                         }
 
-
-                        AuthorizationState.Unauthorized -> {
-                            startNewActivity(AuthActivity::class.java)
+                        else -> {
+                            // Nội dung mặc định, nếu cần
                         }
                     }
                 }
