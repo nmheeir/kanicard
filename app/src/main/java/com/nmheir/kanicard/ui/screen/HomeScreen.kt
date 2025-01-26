@@ -1,6 +1,7 @@
 package com.nmheir.kanicard.ui.screen
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -28,7 +30,6 @@ import com.nmheir.kanicard.utils.fakeListDecks
 @Composable
 fun HomeScreen(
     navController: NavController,
-    appBarScrollBehavior: TopAppBarScrollBehavior,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
 
@@ -37,7 +38,7 @@ fun HomeScreen(
 
     val refreshState = rememberPullToRefreshState()
 
-    BoxWithConstraints(
+    Box(
         contentAlignment = Alignment.TopStart,
         modifier = Modifier
             .fillMaxSize()
@@ -48,8 +49,6 @@ fun HomeScreen(
                 onRefresh = viewModel::refresh
             )
     ) {
-        val width = maxWidth
-
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = LocalAwareWindowInset.current.asPaddingValues(),
@@ -66,6 +65,13 @@ fun HomeScreen(
                 )
             }
         }
-    }
 
+        Indicator(
+            isRefreshing = isRefreshing,
+            state = refreshState,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(LocalAwareWindowInset.current.asPaddingValues()),
+        )
+    }
 }

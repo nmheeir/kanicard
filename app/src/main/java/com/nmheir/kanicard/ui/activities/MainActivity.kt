@@ -1,19 +1,18 @@
 package com.nmheir.kanicard.ui.activities
 
-import android.content.Context
+import android.annotation.SuppressLint
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -48,6 +47,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -60,10 +61,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.zIndex
-import androidx.datastore.preferences.core.edit
+import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ReportFragment.Companion.reportFragment
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -72,7 +71,6 @@ import com.nmheir.kanicard.R
 import com.nmheir.kanicard.constants.AppBarHeight
 import com.nmheir.kanicard.constants.NavigationBarHeight
 import com.nmheir.kanicard.constants.PauseSearchHistoryKey
-import com.nmheir.kanicard.constants.RefreshTokenKey
 import com.nmheir.kanicard.constants.SearchSource
 import com.nmheir.kanicard.constants.SearchSourceKey
 import com.nmheir.kanicard.data.entities.SearchHistory
@@ -96,8 +94,6 @@ import com.nmheir.kanicard.utils.resetHeightOffset
 import com.nmheir.kanicard.utils.startNewActivity
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -114,7 +110,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        if (!isTaskRoot) {
+            finish()
+            return
+        }
 
         setContent {
             KaniCardTheme {
@@ -139,6 +140,10 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
+                LaunchedEffect(Unit) {
+                    setSystemBarAppearance(false)
+                }
+
                 ModalNavigationDrawer(
                     drawerState = drawerState,
                     drawerContent = {
@@ -156,12 +161,11 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier,
                     gesturesEnabled = true
                 ) {
-                    BoxWithConstraints(
+                    Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(MaterialTheme.colorScheme.surface)
                     ) {
-                        val width = maxWidth
                         val navigationItems = remember { Screens.MainScreens }
 
                         val focusManager = LocalFocusManager.current
@@ -292,7 +296,6 @@ class MainActivity : ComponentActivity() {
                             ) {
                                 mainNavigationBuilder(
                                     navController = navController,
-                                    appBarScrollBehavior = appBarScrollBehavior,
                                     topAppBarScrollBehavior = topAppBarScrollBehavior
                                 )
                             }
@@ -307,7 +310,9 @@ class MainActivity : ComponentActivity() {
                                                 y = (bottomInset + NavigationBarHeight).roundToPx()
                                             )
                                         } else {
-                                            IntOffset(x = 0, y = 0)
+                                            val hideOffset =
+                                                (bottomInset + NavigationBarHeight) * (1 - navigationBarHeight / NavigationBarHeight)
+                                            IntOffset(x = 0, y = hideOffset.roundToPx())
                                         }
                                     }
                             ) {
@@ -512,6 +517,22 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    @SuppressLint("ObsoleteSdkInt")
+    private fun setSystemBarAppearance(isDark: Boolean) {
+        WindowCompat.getInsetsController(window, window.decorView.rootView).apply {
+            isAppearanceLightStatusBars = !isDark
+            isAppearanceLightNavigationBars = !isDark
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            window.statusBarColor =
+                (if (isDark) Color.Transparent else Color.Black.copy(alpha = 0.2f)).toArgb()
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            window.navigationBarColor =
+                (if (isDark) Color.Transparent else Color.Black.copy(alpha = 0.2f)).toArgb()
         }
     }
 }

@@ -15,9 +15,11 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.status.SessionSource
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -27,10 +29,7 @@ class AuthorizationViewModel @Inject constructor(
     private val client: SupabaseClient
 ) : ViewModel() {
 
-    private val auth = FirebaseAuth.getInstance()
-
     val authState = MutableStateFlow<AuthorizationState>(AuthorizationState.Loading)
-
 
     init {
         viewModelScope.launch {
@@ -39,9 +38,8 @@ class AuthorizationViewModel @Inject constructor(
     }
 
     private suspend fun checkAuthorization() {
-
         if (context.dataStore[RefreshTokenKey].isNullOrEmpty()) {
-//            Timber.d(context.dataStore[RefreshTokenKey])
+            //User already sign out before
             authState.value = AuthorizationState.Unauthorized
         } else {
             try {

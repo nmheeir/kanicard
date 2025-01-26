@@ -125,4 +125,7 @@ dependencies {
     implementation(libs.ktor.client.cio)
     implementation(libs.supabase.serializer.moshi)
 
+    //Kotlin Collection Immutable
+    implementation(libs.kotlinx.collections.immutable)
+
 }

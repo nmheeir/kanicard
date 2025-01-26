@@ -35,6 +35,7 @@ class AuthorizationActivity : ComponentActivity() {
     private val viewModel by viewModels<AuthorizationViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Timber.d("AuthorizationActivity onCreate")
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
@@ -46,6 +47,7 @@ class AuthorizationActivity : ComponentActivity() {
 
         setContent {
             KaniCardTheme {
+
                 val state by viewModel.authState.collectAsStateWithLifecycle()
 
                 Timber.d(state.toString())

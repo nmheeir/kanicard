@@ -11,20 +11,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.nmheir.kanicard.ui.screen.Screens
 import com.nmheir.kanicard.ui.screen.HomeScreen
+import com.nmheir.kanicard.ui.screen.ProfileScreen
 import com.nmheir.kanicard.ui.screen.settings.SettingScreen
 import com.nmheir.kanicard.ui.screen.statistics.StatisticsScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 fun NavGraphBuilder.mainNavigationBuilder(
     navController: NavHostController,
-    appBarScrollBehavior: TopAppBarScrollBehavior,
     topAppBarScrollBehavior: TopAppBarScrollBehavior
 ) {
     composable(Screens.Home.route) {
-        HomeScreen(
-            navController = navController,
-            appBarScrollBehavior = appBarScrollBehavior
-        )
+        HomeScreen(navController = navController)
     }
 
     composable(Screens.Setting.route) {
@@ -36,7 +33,7 @@ fun NavGraphBuilder.mainNavigationBuilder(
     }
 
     composable(Screens.Profile.route) {
-        Text(text = "Profile Screen")
+        ProfileScreen(navController = navController, scrollBehavior = topAppBarScrollBehavior)
     }
 
     composable(

@@ -1,12 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="Theme.KaniCard" parent="Theme.Material3.DayNight.NoActionBar" />
+    <style name="Theme.KaniCard" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowMinWidthMinor">100%</item>
+        <item name="android:windowMinWidthMajor">100%</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">#ffffff</item>
+        <item name="android:enforceNavigationBarContrast" tools:ignore="NewApi">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
 
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/material_dynamic_primary100</item>
         <item name="postSplashScreenTheme">@style/Theme.KaniCard</item>
         <item name="windowSplashScreenAnimationDuration">500</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_background</item>
+    </style>
+
+    <style name="Theme.Authorization" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="windowSplashScreenBackground">@color/material_dynamic_primary100</item>
+        <item name="postSplashScreenTheme">@style/Theme.KaniCard</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
     </style>
 </resources>
