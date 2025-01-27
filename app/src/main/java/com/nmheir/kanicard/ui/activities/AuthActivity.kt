@@ -31,10 +31,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.nmheir.kanicard.ui.navigation.authNavigationBuilder
-import com.nmheir.kanicard.ui.theme.KaniCardTheme
+import com.nmheir.kanicard.ui.theme.KaniTheme
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.handleDeeplinks
 import javax.inject.Inject
 
@@ -53,7 +52,7 @@ class AuthActivity : ComponentActivity() {
         client.handleDeeplinks(intent)
 
         setContent {
-            KaniCardTheme {
+            KaniTheme {
                 val navController = rememberNavController()
 
                 val windowWidthSize = calculateWindowSizeClass(this).widthSizeClass

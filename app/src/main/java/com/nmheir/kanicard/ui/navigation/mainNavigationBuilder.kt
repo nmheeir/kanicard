@@ -12,7 +12,8 @@ import androidx.navigation.navArgument
 import com.nmheir.kanicard.ui.screen.Screens
 import com.nmheir.kanicard.ui.screen.HomeScreen
 import com.nmheir.kanicard.ui.screen.ProfileScreen
-import com.nmheir.kanicard.ui.screen.settings.SettingScreen
+import com.nmheir.kanicard.ui.screen.onboarding.OnboardingScreen
+import com.nmheir.kanicard.ui.screen.settings.screen.SettingScreen
 import com.nmheir.kanicard.ui.screen.statistics.StatisticsScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,6 +51,13 @@ fun NavGraphBuilder.mainNavigationBuilder(
             text = query ?: "Không có query", // Xử lý trường hợp query null
             style = MaterialTheme.typography.bodyLarge
         )
+    }
+
+    //After sign in
+    composable(
+        route = "onboarding"
+    ) {
+        OnboardingScreen(navController)
     }
 
 }

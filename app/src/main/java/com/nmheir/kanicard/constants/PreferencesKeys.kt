@@ -20,3 +20,6 @@ enum class SearchSource {
 }
 
 val RefreshTokenKey = stringPreferencesKey("refreshToken")
+val ShowOnboardingKey = booleanPreferencesKey("showOnboarding")
+val ThemeModeKey = stringPreferencesKey("themeMode")
+val AppThemeKey = stringPreferencesKey("appTheme")

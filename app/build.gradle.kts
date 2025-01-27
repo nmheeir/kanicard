@@ -128,4 +128,6 @@ dependencies {
     //Kotlin Collection Immutable
     implementation(libs.kotlinx.collections.immutable)
 
+    //Material Motion Compose
+    implementation (libs.motion.compose.core)
 }

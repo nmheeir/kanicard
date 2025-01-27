@@ -18,9 +18,6 @@ sealed class Screens(
     data object Notification :
         Screens(R.string.notification, R.drawable.ic_notification, "Notification")
 
-    data object Logout : Screens(R.string.logout, R.drawable.ic_logout, "Logout")
-    data object Support : Screens(R.string.support, R.drawable.ic_support, "Support")
-
     companion object {
         val MainScreens = listOf(Home, Statistics)
     }

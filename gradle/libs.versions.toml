@@ -38,6 +38,8 @@ mapsplatform-secrets = "2.0.1"
 supabase-bom = "3.0.3"
 supabaseSerializerMoshi = "3.0.3"
 
+motionComposeCore = "1.2.1"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashScreen" }
@@ -94,6 +96,8 @@ supabase-realtime = { module = "io.github.jan-tennert.supabase:realtime-kt" }
 supabase-auth = { module = "io.github.jan-tennert.supabase:auth-kt" }
 supabase-storage = { module = "io.github.jan-tennert.supabase:storage-kt" }
 supabase-serializer-moshi = { module = "io.github.jan-tennert.supabase:serializer-moshi", version.ref = "supabaseSerializerMoshi"}
+
+motion-compose-core = { module = "io.github.fornewid:material-motion-compose-core", version.ref = "motionComposeCore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

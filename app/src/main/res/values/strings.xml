@@ -13,6 +13,7 @@
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
     <string name="your_email">Your email</string>
+    <string name="selected">Selected</string>
 
     <string name="change_password">Change password</string>
     <string name="reset_password">Reset password</string>
@@ -54,4 +55,26 @@
     <string name="verify_now">Verify now</string>
     <string name="send_email">Send email</string>
     <string name="please_check_email">The email has been successfully sent.\nPlease check your inbox\nand don\'t forget to look in your spam folder.</string>
+
+    <string name="onboarding">Onboarding</string>
+    <string name="onboarding_heading">Welcome!</string>
+    <string name="onboarding_action_skip">Skip!</string>
+    <string name="onboarding_action_finish">Get started!</string>
+    <string name="onboarding_action_next">Next</string>
+    <string name="onboarding_description">Let\&apos;s set some things up first. You can always change these in the settings later too.</string>
+    <string name="label_default">Default</string>
+    <string name="theme_monet">Dynamic</string>
+    <string name="theme_greenapple">Green Apple</string>
+    <string name="theme_lavender">Lavender</string>
+    <string name="theme_midnightdusk">Midnight Dusk</string>
+    <string name="theme_nord">Nord</string>
+    <string name="theme_strawberrydaiquiri">Strawberry Daiquiri</string>
+    <string name="theme_tako">Tako</string>
+    <string name="theme_tealturquoise">Teal Turquoise</string>
+    <string name="theme_tidalwave">Tidal wave</string>
+    <string name="theme_yinyang">Yinyang</string>
+    <string name="theme_yotsuba">Yotsuba</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
 </resources>

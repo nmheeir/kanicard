@@ -1,5 +1,6 @@
 package com.nmheir.kanicard.core.presentation.screens
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -31,7 +33,7 @@ import com.nmheir.kanicard.core.presentation.utils.secondaryItemAlpha
 
 @Composable
 fun InfoScreen(
-    icon: ImageVector,
+    @DrawableRes icon: Int,
     headingText: String,
     subtitleText: String,
     acceptText: String,
@@ -99,7 +101,7 @@ fun InfoScreen(
                 .padding(horizontal = MaterialTheme.padding.medium),
         ) {
             Icon(
-                imageVector = icon,
+                painter = painterResource(icon),
                 contentDescription = null,
                 modifier = Modifier
                     .padding(bottom = MaterialTheme.padding.small)

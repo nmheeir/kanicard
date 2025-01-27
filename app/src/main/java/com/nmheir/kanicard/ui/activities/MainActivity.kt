@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -34,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -81,7 +83,7 @@ import com.nmheir.kanicard.ui.component.InputFieldHeight
 import com.nmheir.kanicard.ui.component.SearchBar
 import com.nmheir.kanicard.ui.navigation.mainNavigationBuilder
 import com.nmheir.kanicard.ui.screen.Screens
-import com.nmheir.kanicard.ui.theme.KaniCardTheme
+import com.nmheir.kanicard.ui.theme.KaniTheme
 import com.nmheir.kanicard.ui.theme.NavigationBarAnimationSpec
 import com.nmheir.kanicard.ui.viewmodels.MainState
 import com.nmheir.kanicard.ui.viewmodels.MainViewModel
@@ -98,6 +100,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
+@Suppress("DEPRECATION")
 @OptIn(ExperimentalMaterial3Api::class)
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -118,7 +121,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            KaniCardTheme {
+            KaniTheme {
                 val viewModel: MainViewModel = hiltViewModel()
 
                 val navController = rememberNavController()
@@ -518,6 +521,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    @Composable
+    private fun ShowOnboarding() {
+        // TODO: show onboarding
     }
 
     @SuppressLint("ObsoleteSdkInt")

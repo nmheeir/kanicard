@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="kani_primary">#0058CA</color>
+    <color name="kani_onPrimary">#FFFFFF</color>
+    <color name="kani_primaryContainer">#D9E2FF</color>
+    <color name="kani_onPrimaryContainer">#001945</color>
+    <color name="kani_inversePrimary">#B0C6FF</color>
+    <color name="kani_secondary">#0058CA</color>
+    <color name="kani_onSecondary">#FFFFFF</color>
+    <color name="kani_secondaryContainer">#D9E2FF</color>
+    <color name="kani_onSecondaryContainer">#001945</color>
+    <color name="kani_tertiary">#006E1B</color>
+    <color name="kani_onTertiary">#FFFFFF</color>
+    <color name="kani_tertiaryContainer">#95F990</color>
+    <color name="kani_onTertiaryContainer">#002203</color>
+    <color name="kani_background">#FEFBFF</color>
+    <color name="kani_onBackground">#1B1B1F</color>
+    <color name="kani_surface">#FEFBFF</color>
+    <color name="kani_onSurface">#1B1B1F</color>
+    <color name="kani_surfaceVariant">#F3EDF7</color>
+    <color name="kani_onSurfaceVariant">#44464F</color>
+    <color name="kani_surfaceTint">#0058CA</color>
+    <color name="kani_inverseSurface">#303034</color>
+    <color name="kani_inverseOnSurface">#F2F0F4</color>
+    <color name="kani_error">#BA1A1A</color>
+    <color name="kani_onError">#FFFFFF</color>
+    <color name="kani_errorContainer">#FFDAD6</color>
+    <color name="kani_onErrorContainer">#410002</color>
+    <color name="kani_outline">#757780</color>
+    <color name="kani_outlineVariant">#C5C6D0</color>
+    <color name="kani_surfaceContainerLowest">#F5F1F8</color>
+    <color name="kani_surfaceContainerLow">#F7F2FA</color>
+    <color name="kani_surfaceContainer">#F3EDF7</color>
+    <color name="kani_surfaceContainerHigh">#FCF7FF</color>
+    <color name="kani_surfaceContainerHighest">#FCF7FF</color>
+</resources>

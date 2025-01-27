@@ -9,11 +9,17 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -100,6 +106,60 @@ fun SwitchPreference(
             )
         },
         onClick = { onCheckedChange(!checked) },
+        isEnabled = isEnabled
+    )
+}
+
+@Composable
+fun <T> ListPreference(
+    modifier: Modifier = Modifier,
+    title: @Composable () -> Unit,
+    icon: (@Composable () -> Unit)? = null,
+    selectedValue: T,
+    values: List<T>,
+    valueText: @Composable (T) -> String,
+    onValueSelected: (T) -> Unit,
+    isEnabled: Boolean = true,
+) {
+    var showDialog by remember {
+        mutableStateOf(false)
+    }
+    if (showDialog) {
+        ListDialog(
+            onDismiss = { showDialog = false }
+        ) {
+            items(values) { value ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            showDialog = false
+                            onValueSelected(value)
+                        }
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                ) {
+                    RadioButton(
+                        selected = value == selectedValue,
+                        onClick = null
+                    )
+
+                    Text(
+                        text = valueText(value),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
+                }
+            }
+        }
+    }
+
+    PreferenceEntry(
+        modifier = modifier,
+        title = title,
+        description = valueText(selectedValue),
+        icon = icon,
+        onClick = { showDialog = true },
         isEnabled = isEnabled
     )
 }
