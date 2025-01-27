@@ -13,16 +13,14 @@
         <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
-    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/material_dynamic_primary100</item>
-        <item name="postSplashScreenTheme">@style/Theme.KaniCard</item>
-        <item name="windowSplashScreenAnimationDuration">500</item>
+    <!--== Splash Theme ==-->
+    <style name="Theme.KaniCard.SplashScreen" parent="Theme.SplashScreen">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_background</item>
-    </style>
-
-    <style name="Theme.Authorization" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="windowSplashScreenBackground">@color/material_dynamic_primary100</item>
+        <item name="windowSplashScreenBackground">@color/splash</item>
         <item name="postSplashScreenTheme">@style/Theme.KaniCard</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
     </style>
 </resources>

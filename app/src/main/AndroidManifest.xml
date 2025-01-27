@@ -16,13 +16,14 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.App.Starting"
+        android:theme="@style/Theme.KaniCard"
         android:usesCleartextTraffic="true"
         tools:targetApi="tiramisu">
         <activity
             android:name=".ui.activities.AuthorizationActivity"
             android:exported="true"
-            android:theme="@style/Theme.Authorization">
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.KaniCard.SplashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

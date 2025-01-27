@@ -1,6 +1,7 @@
 package com.nmheir.kanicard.ui.activities
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -47,43 +48,22 @@ class AuthorizationActivity : ComponentActivity() {
 
         setContent {
             KaniCardTheme {
-
                 val state by viewModel.authState.collectAsStateWithLifecycle()
 
-                Timber.d(state.toString())
-                LaunchedEffect(state) {
-                    when (state) {
-                        AuthorizationState.Authorized -> {
-                            startNewActivity(MainActivity::class.java)
-                        }
-
-                        AuthorizationState.Unauthorized -> {
-                            startNewActivity(AuthActivity::class.java)
-                        }
-
-                        else -> Unit
+                when (state) {
+                    AuthorizationState.Authorized -> {
+                        startNewActivity(MainActivity::class.java)
+                        finish() // Kết thúc Activity
                     }
-                }
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Red),
-                    contentAlignment = Alignment.Center
-                ) {
-                    when (state) {
-                        AuthorizationState.Loading -> {
-                            CircularProgressIndicator()
-                        }
+                    AuthorizationState.Unauthorized -> {
+                        startNewActivity(AuthActivity::class.java)
+                        finish() // Kết thúc Activity
+                    }
 
-                        is AuthorizationState.Error -> {
-                            // Hiển thị lỗi nếu cần
-                            Text(text = "Something went wrong")
-                        }
-
-                        else -> {
-                            // Nội dung mặc định, nếu cần
-                        }
+                    else -> {
+                        Timber.d("Loading")
+                        Toast.makeText(this, "Loading", Toast.LENGTH_SHORT).show()
                     }
                 }
             }

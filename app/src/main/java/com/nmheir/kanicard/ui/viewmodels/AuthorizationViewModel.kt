@@ -29,9 +29,10 @@ class AuthorizationViewModel @Inject constructor(
     private val client: SupabaseClient
 ) : ViewModel() {
 
-    val authState = MutableStateFlow<AuthorizationState>(AuthorizationState.Loading)
+    val authState = MutableStateFlow<AuthorizationState?>(null)
 
     init {
+        authState.value = AuthorizationState.Loading
         viewModelScope.launch {
             checkAuthorization()
         }
@@ -48,7 +49,10 @@ class AuthorizationViewModel @Inject constructor(
                 authState.value = AuthorizationState.Authorized
             } catch (e: Exception) {
                 Timber.d(e)
-                authState.value = AuthorizationState.Error(e.message ?: "Unknown error")
+                context.dataStore.edit {
+                    it.remove(RefreshTokenKey)
+                }
+                authState.value = AuthorizationState.Unauthorized
             }
         }
     }
@@ -60,5 +64,4 @@ sealed interface AuthorizationState {
     data object Authorized : AuthorizationState
     data object Unauthorized : AuthorizationState
     data object Loading : AuthorizationState
-    data class Error(val message: String) : AuthorizationState
 }
