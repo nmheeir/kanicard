@@ -1,4 +1,4 @@
-package com.nmheir.kanicard.ui.screen.settings.widget
+package com.nmheir.kanicard.ui.component.widget
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.RepeatMode
@@ -36,13 +36,13 @@ import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-internal fun BasePreferenceWidget(
+fun BasePreferenceWidget(
     modifier: Modifier = Modifier,
     title: String? = null,
     subcomponent: @Composable (ColumnScope.() -> Unit)? = null,
     icon: @Composable (() -> Unit)? = null,
     onClick: (() -> Unit)? = null,
-    widget: @Composable (() -> Unit)? = null,
+    widget: @Composable (() -> Unit)? = null
 ) {
     val highlighted = LocalPreferenceHighlighted.current
     val minHeight = LocalPreferenceMinHeight.current

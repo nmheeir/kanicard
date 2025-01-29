@@ -14,6 +14,7 @@
     <string name="ok">OK</string>
     <string name="your_email">Your email</string>
     <string name="selected">Selected</string>
+    <string name="more">More</string>
 
     <string name="change_password">Change password</string>
     <string name="reset_password">Reset password</string>
@@ -77,4 +78,15 @@
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
+
+    <!--Category-->
+    <string name="pref_category_appearance">Appearance</string>
+    <string name="pref_category_theme">Theme</string>
+    <string name="pref_category_security">Security and Privacy</string>
+    <string name="pref_category_advanced">Advanced</string>
+    <string name="pref_category_about">About</string>
+    <!--Summary-->
+    <string name="pref_appearance_summary">Theme, date &amp; time format</string>
+    <string name="pref_security_summary">App lock, secure screen</string>
+    <string name="pref_advanced_summary">Dump crash logs, battery optimizations</string>
 </resources>

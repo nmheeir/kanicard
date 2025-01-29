@@ -1,4 +1,4 @@
-package com.nmheir.kanicard.ui.screen.settings.widget
+package com.nmheir.kanicard.ui.component.widget
 
 import android.app.Activity
 import androidx.compose.foundation.background

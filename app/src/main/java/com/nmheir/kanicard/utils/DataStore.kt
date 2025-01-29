@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlin.properties.ReadOnlyProperty
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
@@ -95,3 +96,9 @@ inline fun <reified T : Enum<T>> rememberEnumPreference(
         }
     }
 }
+
+inline fun <reified T : Enum<T>> enumPreference(
+    context: Context,
+    key: Preferences.Key<String>,
+    defaultValue: T,
+) = ReadOnlyProperty<Any?, T> { _, _ -> context.dataStore[key].toEnum(defaultValue) }

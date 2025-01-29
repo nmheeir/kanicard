@@ -11,8 +11,8 @@ import com.nmheir.kanicard.constants.ThemeModeKey
 import com.nmheir.kanicard.core.domain.ui.model.AppTheme
 import com.nmheir.kanicard.core.domain.ui.model.ThemeMode
 import com.nmheir.kanicard.core.domain.ui.model.setAppCompatDelegateThemeMode
-import com.nmheir.kanicard.ui.screen.settings.widget.AppThemeModePreferenceWidget
-import com.nmheir.kanicard.ui.screen.settings.widget.AppThemePreferenceWidget
+import com.nmheir.kanicard.ui.component.widget.AppThemeModePreferenceWidget
+import com.nmheir.kanicard.ui.component.widget.AppThemePreferenceWidget
 import com.nmheir.kanicard.utils.dataStore
 import com.nmheir.kanicard.utils.rememberEnumPreference
 
@@ -22,14 +22,15 @@ class ThemeStep : OnboardingStep {
     @Composable
     override fun Content() {
 
-        var themeMode by rememberEnumPreference(ThemeModeKey, ThemeMode.SYSTEM)
-        var appTheme by rememberEnumPreference(AppThemeKey, AppTheme.DEFAULT)
+        val (themeMode, onThemeModeChange) = rememberEnumPreference(ThemeModeKey, ThemeMode.SYSTEM)
+        val (appTheme, onAppThemeChange) = rememberEnumPreference(AppThemeKey, AppTheme.DEFAULT)
+
 
         Column {
             AppThemeModePreferenceWidget(
                 value = themeMode,
                 onItemClick = {
-                    themeMode = it
+                    onThemeModeChange(it)
                     setAppCompatDelegateThemeMode(it)
                 },
             )
@@ -37,7 +38,7 @@ class ThemeStep : OnboardingStep {
             AppThemePreferenceWidget(
                 value = appTheme,
                 onItemClick = {
-                    appTheme = it
+                    onAppThemeChange(it)
                 },
             )
         }

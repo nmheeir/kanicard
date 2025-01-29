@@ -4,6 +4,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -12,7 +13,9 @@ import androidx.navigation.navArgument
 import com.nmheir.kanicard.ui.screen.Screens
 import com.nmheir.kanicard.ui.screen.HomeScreen
 import com.nmheir.kanicard.ui.screen.ProfileScreen
+import com.nmheir.kanicard.ui.screen.more.MoreScreen
 import com.nmheir.kanicard.ui.screen.onboarding.OnboardingScreen
+import com.nmheir.kanicard.ui.screen.settings.screen.SettingAppearanceScreen
 import com.nmheir.kanicard.ui.screen.settings.screen.SettingScreen
 import com.nmheir.kanicard.ui.screen.statistics.StatisticsScreen
 
@@ -23,10 +26,6 @@ fun NavGraphBuilder.mainNavigationBuilder(
 ) {
     composable(Screens.Home.route) {
         HomeScreen(navController = navController)
-    }
-
-    composable(Screens.Setting.route) {
-        SettingScreen(topAppBarScrollBehavior, navController)
     }
 
     composable(Screens.Statistics.route) {
@@ -53,6 +52,12 @@ fun NavGraphBuilder.mainNavigationBuilder(
         )
     }
 
+    composable(
+        route = Screens.More.route
+    ) {
+        MoreScreen(navController)
+    }
+
     //After sign in
     composable(
         route = "onboarding"
@@ -60,4 +65,38 @@ fun NavGraphBuilder.mainNavigationBuilder(
         OnboardingScreen(navController)
     }
 
+    /*Setting*/
+    composable(Screens.Setting.route) {
+        SettingScreen(topAppBarScrollBehavior, navController)
+    }
+
+    composable(
+        route = "settings/appearance"
+    ) {
+        SettingAppearanceScreen(topAppBarScrollBehavior, navController)
+    }
+
+    composable(
+        route = "settings/security"
+    ) {
+        Text("Security")
+    }
+
+    composable(
+        route = "settings/advanced"
+    ) {
+        Text("Advanced")
+    }
+
+    composable(
+        route = "settings/about"
+    ) {
+        Text("About")
+    }
+
+    composable(
+        route = "help"
+    ) {
+        Text("Help")
+    }
 }

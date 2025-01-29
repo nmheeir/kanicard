@@ -1,4 +1,4 @@
-package com.nmheir.kanicard.ui.screen.settings.widget
+package com.nmheir.kanicard.ui.component.widget
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,7 +19,7 @@ private val options = mapOf(
 )
 
 @Composable
-internal fun AppThemeModePreferenceWidget(
+fun AppThemeModePreferenceWidget(
     value: ThemeMode,
     onItemClick: (ThemeMode) -> Unit,
 ) {

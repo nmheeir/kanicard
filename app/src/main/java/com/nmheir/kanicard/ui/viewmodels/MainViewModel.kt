@@ -10,11 +10,7 @@ import com.nmheir.kanicard.utils.get
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.auth.SignOutScope
 import io.github.jan.supabase.auth.auth
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -24,13 +20,6 @@ class MainViewModel @Inject constructor(
     private val client: SupabaseClient,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
-
-    private val _channel = Channel<MainState>()
-    val channel = _channel.receiveAsFlow()
-
-    val userInfo = MutableStateFlow(client.auth.currentUserOrNull())
-    val isLoading = MutableStateFlow(false)
-    val error = MutableStateFlow("")
 
     init {
         viewModelScope.launch {
@@ -82,27 +71,5 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun signOut() {
-        isLoading.value = true
-        viewModelScope.launch {
-            try {
-                client.auth.signOut(SignOutScope.LOCAL)
-                context.dataStore.edit {
-                    it.remove(RefreshTokenKey)
-                }
-                _channel.send(MainState.Success)
-                isLoading.value = false
-            } catch (e: Exception) {
-                error.value = e.message ?: "Something went wrong, please check log"
-                Timber.d(e)
-                _channel.send(MainState.Error(e.message!!))
-                isLoading.value = false
-            }
-        }
-    }
 }
 
-sealed interface MainState {
-    data object Success : MainState
-    data class Error(val message: String) : MainState
-}

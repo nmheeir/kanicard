@@ -1,21 +1,138 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="Theme.KaniCard" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:windowMinWidthMinor">100%</item>
-        <item name="android:windowMinWidthMajor">100%</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowBackground">#ffffff</item>
-        <item name="android:enforceNavigationBarContrast" tools:ignore="NewApi">false</item>
+    <!--============-->
+    <!-- Base Theme -->
+    <!--============-->
+
+    <!--== Theme Base ==-->
+    <style name="Base.Theme.KaniCard" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Disallow "Force dark theme" -->
+        <item name="android:forceDarkAllowed" tools:targetApi="Q">false</item>
+
+        <!-- Theme Colors -->
+        <item name="colorPrimary">@color/kani_primary</item>
+        <item name="colorOnPrimary">@color/kani_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/kani_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/kani_onPrimaryContainer</item>
+        <item name="colorPrimaryInverse">@color/kani_inversePrimary</item>
+        <item name="colorSecondary">@color/kani_secondary</item>
+        <item name="colorOnSecondary">@color/kani_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/kani_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/kani_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/kani_tertiary</item>
+        <item name="colorOnTertiary">@color/kani_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/kani_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/kani_onTertiaryContainer</item>
+        <item name="android:colorBackground">@color/kani_background</item>
+        <item name="colorOnBackground">@color/kani_onBackground</item>
+        <item name="colorSurface">@color/kani_surface</item>
+        <item name="colorOnSurface">@color/kani_onSurface</item>
+        <item name="colorSurfaceVariant">@color/kani_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/kani_onSurfaceVariant</item>
+        <item name="elevationOverlayColor">@color/kani_surfaceTint</item>
+        <item name="colorSurfaceInverse">@color/kani_inverseSurface</item>
+        <item name="colorOnSurfaceInverse">@color/kani_inverseOnSurface</item>
+        <item name="colorError">@color/kani_error</item>
+        <item name="colorOnError">@color/kani_onError</item>
+        <item name="colorErrorContainer">@color/kani_errorContainer</item>
+        <item name="colorOnErrorContainer">@color/kani_onErrorContainer</item>
+        <item name="colorOutline">@color/kani_outline</item>
+        <item name="colorOutlineVariant">@color/kani_outlineVariant</item>
+        <item name="colorSurfaceContainer">@color/kani_surfaceContainer</item>
+        <item name="colorSurfaceContainerHigh">@color/kani_surfaceContainerHigh</item>
+        <item name="colorSurfaceContainerHighest">@color/kani_surfaceContainerHighest</item>
+        <item name="colorSurfaceContainerLow">@color/kani_surfaceContainerLow</item>
+        <item name="colorSurfaceContainerLowest">@color/kani_surfaceContainerLowest</item>
+
+        <item name="android:divider">@color/divider_default</item>
+        <item name="android:listDivider">@drawable/line_divider</item>
+        <item name="materialDividerStyle">@style/Widget.KaniCard.MaterialDivider</item>
+
+        <!-- Ripples -->
+        <item name="colorControlHighlight">?attr/colorSurfaceVariant</item>
+
+        <!-- Handles RTL Text -->
+        <item name="android:textAlignment">gravity</item>
+        <item name="android:textDirection">locale</item>
+
+        <!-- Themes -->
+        <item name="android:windowLightStatusBar">@bool/lightStatusBar</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/amoled_surface</item>
+        <item name="android:navigationBarDividerColor" tools:targetApi="o_mr1">@null</item>
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="Q">false</item>
+        <item name="android:enforceStatusBarContrast" tools:targetApi="Q">false</item>
+        <item name="android:itemTextAppearance">@style/TextAppearance.Widget.Menu</item>
+
+        <item name="textAppearanceButton">@style/TextAppearance.Widget.Button</item>
+        <item name="android:buttonStyle">?attr/borderlessButtonStyle</item>
+        <item name="android:backgroundDimAmount">0.32</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="textInputStyle">@style/Widget.Material3.TextInputLayout.OutlinedBox</item>
+        <item name="appBarLayoutStyle">@style/Widget.Material3.AppBarLayout</item>
+        <item name="toolbarStyle">@style/Widget.Material3.Toolbar.Surface</item>
+        <item name="switchStyle">@style/Widget.KaniCard.Switch</item>
+        <item name="materialSwitchStyle">@style/Widget.Material3.CompoundButton.MaterialSwitch
+        </item>
+        <item name="materialCardViewStyle">@style/Widget.Material3.CardView.Elevated</item>
+
+        <!-- Preference text appearance -->
+        <item name="android:textAppearanceListItem">?attr/textAppearanceBodyLarge</item>
+        <item name="android:textAppearanceListItemSecondary">
+            @style/TextAppearance.KaniCard.Preference.Secondary
+        </item>
     </style>
+
+    <!--== Default Theme ==-->
+    <style name="Theme.KaniCard" parent="Base.Theme.KaniCard" />
+
+    <!-- Monet theme only support S+ -->
+    <style name="Theme.KaniCard.Monet" />
+
+    <style name="Theme.KaniCard.GreenApple">
+        <!-- Theme Colors -->
+        <item name="colorPrimary">@color/greenapple_primary</item>
+        <item name="colorOnPrimary">@color/greenapple_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/greenapple_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/greenapple_onPrimaryContainer</item>
+        <item name="colorPrimaryInverse">@color/greenapple_inversePrimary</item>
+        <item name="colorSecondary">@color/greenapple_secondary</item>
+        <item name="colorOnSecondary">@color/greenapple_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/greenapple_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/greenapple_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/greenapple_tertiary</item>
+        <item name="colorOnTertiary">@color/greenapple_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/greenapple_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/greenapple_onTertiaryContainer</item>
+        <item name="android:colorBackground">@color/greenapple_background</item>
+        <item name="colorOnBackground">@color/greenapple_onBackground</item>
+        <item name="colorSurface">@color/greenapple_surface</item>
+        <item name="colorOnSurface">@color/greenapple_onSurface</item>
+        <item name="colorSurfaceVariant">@color/greenapple_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/greenapple_onSurfaceVariant</item>
+        <item name="colorSurfaceInverse">@color/greenapple_inverseSurface</item>
+        <item name="colorOnSurfaceInverse">@color/greenapple_inverseOnSurface</item>
+        <item name="colorError">@color/greenapple_error</item>
+        <item name="colorOnError">@color/greenapple_onError</item>
+        <item name="colorErrorContainer">@color/greenapple_errorContainer</item>
+        <item name="colorOnErrorContainer">@color/greenapple_onErrorContainer</item>
+        <item name="colorOutline">@color/greenapple_outline</item>
+        <item name="colorOutlineVariant">@color/greenapple_outlineVariant</item>
+        <item name="scrimBackground">@color/greenapple_scrim</item>
+        <item name="colorSurfaceBright">@color/greenapple_surfaceBright</item>
+        <item name="colorSurfaceDim">@color/greenapple_surfaceDim</item>
+        <item name="colorSurfaceContainer">@color/greenapple_surfaceContainer</item>
+        <item name="colorSurfaceContainerHigh">@color/greenapple_surfaceContainerHigh</item>
+        <item name="colorSurfaceContainerHighest">@color/greenapple_surfaceContainerHighest</item>
+        <item name="colorSurfaceContainerLow">@color/greenapple_surfaceContainerLow</item>
+        <item name="colorSurfaceContainerLowest">@color/greenapple_surfaceContainerLowest</item>
+    </style>
+
 
     <!--== Splash Theme ==-->
     <style name="Theme.KaniCard.SplashScreen" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_kotlin</item>
         <item name="windowSplashScreenBackground">@color/splash</item>
         <item name="postSplashScreenTheme">@style/Theme.KaniCard</item>
         <item name="android:statusBarColor">@android:color/transparent</item>

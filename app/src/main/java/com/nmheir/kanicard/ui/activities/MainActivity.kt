@@ -3,15 +3,15 @@ package com.nmheir.kanicard.ui.activities
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,18 +23,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -42,7 +39,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -64,8 +60,8 @@ import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.zIndex
 import androidx.core.view.WindowCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -75,9 +71,10 @@ import com.nmheir.kanicard.constants.NavigationBarHeight
 import com.nmheir.kanicard.constants.PauseSearchHistoryKey
 import com.nmheir.kanicard.constants.SearchSource
 import com.nmheir.kanicard.constants.SearchSourceKey
+import com.nmheir.kanicard.constants.ShowOnboardingKey
 import com.nmheir.kanicard.data.entities.SearchHistory
 import com.nmheir.kanicard.data.local.KaniDatabase
-import com.nmheir.kanicard.ui.component.AppDrawerSheet
+import com.nmheir.kanicard.ui.base.BaseActivity
 import com.nmheir.kanicard.ui.component.Gap
 import com.nmheir.kanicard.ui.component.InputFieldHeight
 import com.nmheir.kanicard.ui.component.SearchBar
@@ -85,31 +82,27 @@ import com.nmheir.kanicard.ui.navigation.mainNavigationBuilder
 import com.nmheir.kanicard.ui.screen.Screens
 import com.nmheir.kanicard.ui.theme.KaniTheme
 import com.nmheir.kanicard.ui.theme.NavigationBarAnimationSpec
-import com.nmheir.kanicard.ui.viewmodels.MainState
-import com.nmheir.kanicard.ui.viewmodels.MainViewModel
-import com.nmheir.kanicard.utils.ObserveAsEvents
 import com.nmheir.kanicard.utils.appBarScrollBehavior
 import com.nmheir.kanicard.utils.dataStore
 import com.nmheir.kanicard.utils.get
 import com.nmheir.kanicard.utils.rememberEnumPreference
 import com.nmheir.kanicard.utils.resetHeightOffset
-import com.nmheir.kanicard.utils.startNewActivity
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.jan.supabase.SupabaseClient
-import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
 @Suppress("DEPRECATION")
 @OptIn(ExperimentalMaterial3Api::class)
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : BaseActivity() {
     @Inject
     lateinit var database: KaniDatabase
 
     @Inject
     lateinit var client: SupabaseClient
 
+    private val showOnboarding = dataStore[ShowOnboardingKey] ?: true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -122,397 +115,405 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             KaniTheme {
-                val viewModel: MainViewModel = hiltViewModel()
-
                 val navController = rememberNavController()
-                val coroutineScope = rememberCoroutineScope()
 
                 val backStackEntry by navController.currentBackStackEntryAsState()
-
-                val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-
-                ObserveAsEvents(viewModel.channel) {
-                    when (it) {
-                        is MainState.Error -> {
-                            Toast.makeText(this, it.message, Toast.LENGTH_SHORT).show()
-                        }
-
-                        MainState.Success -> {
-                            startNewActivity(AuthActivity::class.java)
-                        }
-                    }
-                }
 
                 LaunchedEffect(Unit) {
                     setSystemBarAppearance(false)
                 }
 
-                ModalNavigationDrawer(
-                    drawerState = drawerState,
-                    drawerContent = {
-                        AppDrawerSheet(
-                            modifier = Modifier,
-                            viewModel = viewModel,
-                            onNavigate = {
-                                coroutineScope.launch {
-                                    drawerState.close()
-                                }
-                                navController.navigate(it)
-                            }
-                        )
-                    },
-                    modifier = Modifier,
-                    gesturesEnabled = true
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surface)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.surface)
-                    ) {
-                        val navigationItems = remember { Screens.MainScreens }
+                    val navigationItems = remember { Screens.MainScreens }
+                    val topLevelScreens = listOf(
+                        Screens.Home.route,
+                        Screens.Statistics.route,
+                        Screens.More.route
+                    )
 
-                        val focusManager = LocalFocusManager.current
+                    val focusManager = LocalFocusManager.current
 
-                        val windowInsets = WindowInsets.systemBars
-                        val density = LocalDensity.current
-                        val bottomInset = with(density) { windowInsets.getBottom(density).toDp() }
-                        val topInset = with(density) { windowInsets.getTop(density).toDp() }
+                    val windowInsets = WindowInsets.systemBars
+                    val density = LocalDensity.current
+                    val bottomInset = with(density) { windowInsets.getBottom(density).toDp() }
+                    val topInset = with(density) { windowInsets.getTop(density).toDp() }
 
-                        var active by rememberSaveable {
-                            mutableStateOf(false)
+                    var active by rememberSaveable {
+                        mutableStateOf(false)
+                    }
+                    val (query, onQueryChange) = rememberSaveable(stateSaver = TextFieldValue.Saver) {
+                        mutableStateOf(TextFieldValue())
+                    }
+                    val onActiveChange: (Boolean) -> Unit = { newActive ->
+                        active = newActive
+                        if (!newActive) {
+                            focusManager.clearFocus()
+                            if (backStackEntry?.destination?.route == Screens.Home.route) {
+                                onQueryChange(TextFieldValue())
+                            }
                         }
-                        val (query, onQueryChange) = rememberSaveable(stateSaver = TextFieldValue.Saver) {
-                            mutableStateOf(TextFieldValue())
-                        }
-                        val onActiveChange: (Boolean) -> Unit = { newActive ->
-                            active = newActive
-                            if (!newActive) {
-                                focusManager.clearFocus()
-                                if (backStackEntry?.destination?.route == Screens.Home.route) {
-                                    onQueryChange(TextFieldValue())
+                    }
+
+
+                    var searchSource by rememberEnumPreference(
+                        SearchSourceKey,
+                        SearchSource.ONLINE
+                    )
+                    val searchBarFocusRequester = remember { FocusRequester() }
+                    val onSearch: (String) -> Unit = {
+                        if (it.isNotEmpty()) {
+                            onActiveChange(false)
+                            navController.navigate("search/$it")
+                            if (dataStore[PauseSearchHistoryKey] != true) {
+                                database.query {
+                                    insert(SearchHistory(query = it))
                                 }
                             }
                         }
+                    }
+
+                    val shouldShowNavigationBar = remember(backStackEntry, active) {
+                        backStackEntry?.destination?.route == null
+                                || navigationItems.fastAny { it.route == backStackEntry?.destination?.route }
+                                && !active
+                    }
+                    val navigationBarHeight by animateDpAsState(
+                        targetValue = if (shouldShowNavigationBar) NavigationBarHeight else 0.dp,
+                        label = "",
+                        animationSpec = NavigationBarAnimationSpec
+                    )
+
+                    val shouldShowTopBar = remember(backStackEntry, active) {
+                        backStackEntry?.destination?.route == null
+                                || backStackEntry?.destination?.route == Screens.Home.route
+                                && !active
+                    }
+                    val topBarHeight by animateDpAsState(
+                        targetValue = if (shouldShowTopBar) AppBarHeight else 0.dp,
+                        label = "",
+                        animationSpec = NavigationBarAnimationSpec
+                    )
+
+                    val shouldShowSearchBar = remember(backStackEntry, active) {
+                        (active
+                                || backStackEntry?.destination?.route == Screens.Home.route
+                                || backStackEntry?.destination?.route?.startsWith("/search") == true)
+                    }
+
+                    /*Scroll Behaviour*/
+                    val appBarScrollBehavior = appBarScrollBehavior(
+                        canScroll = {
+                            backStackEntry?.destination?.route == Screens.Home.route
+                                    || backStackEntry?.destination?.route == Screens.Statistics.route
+                        }
+                    )
+                    val topAppBarScrollBehavior = appBarScrollBehavior(
+                        canScroll = {
+                            !(backStackEntry?.destination?.route == Screens.Home.route
+                                    || backStackEntry?.destination?.route == Screens.Statistics.route)
+                        }
+                    )
+                    val searchBarScrollBehavior = appBarScrollBehavior(
+                        canScroll = {
+                            backStackEntry?.destination?.route?.startsWith("search/") == false
+                        }
+                    )
+
+                    Timber.d(shouldShowSearchBar.toString())
+
+                    val localAwareWindowInset =
+                        remember(bottomInset, shouldShowNavigationBar, shouldShowSearchBar) {
+                            var bottom = bottomInset
+                            var top = AppBarHeight
+                            if (shouldShowNavigationBar) bottom += NavigationBarHeight
+                            if (shouldShowSearchBar) top += (InputFieldHeight + 4.dp)
+                            windowInsets
+                                .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
+                                .add(WindowInsets(bottom = bottom, top = top))
+                        }
 
 
-                        var searchSource by rememberEnumPreference(
-                            SearchSourceKey,
-                            SearchSource.ONLINE
-                        )
-                        val searchBarFocusRequester = remember { FocusRequester() }
-                        val onSearch: (String) -> Unit = {
-                            if (it.isNotEmpty()) {
-                                onActiveChange(false)
-                                navController.navigate("search/$it")
-                                if (dataStore[PauseSearchHistoryKey] != true) {
-                                    database.query {
-                                        insert(SearchHistory(query = it))
+
+                    LaunchedEffect(active) {
+                        if (active) {
+                            searchBarScrollBehavior.state.resetHeightOffset()
+                        }
+                    }
+
+                    CompositionLocalProvider(
+                        LocalDatabase provides database,
+                        LocalAwareWindowInset provides localAwareWindowInset
+                    ) {
+                        NavHost(
+                            navController = navController,
+                            startDestination = Screens.Home.route,
+                            enterTransition = {
+                                if (initialState.destination.route in topLevelScreens
+                                    && targetState.destination.route in topLevelScreens
+                                ) {
+                                    fadeIn(tween(250))
+                                } else {
+                                    fadeIn(tween(250)) + slideInHorizontally { it / 2 }
+                                }
+                            },
+                            exitTransition = {
+                                if (initialState.destination.route in topLevelScreens
+                                    && targetState.destination.route in topLevelScreens
+                                ) {
+                                    fadeOut(tween(200))
+                                } else {
+                                    fadeOut(tween(200)) + slideOutHorizontally { -it / 2 }
+                                }
+                            },
+                            popEnterTransition = {
+                                if ((initialState.destination.route in topLevelScreens
+                                            || initialState.destination.route?.startsWith("search/") == true)
+                                    && targetState.destination.route in topLevelScreens
+                                ) {
+                                    fadeIn(tween(250))
+                                } else {
+                                    fadeIn(tween(250)) + slideInHorizontally { -it / 2 }
+                                }
+                            },
+                            popExitTransition = {
+                                if ((initialState.destination.route in topLevelScreens
+                                            || initialState.destination.route?.startsWith("search/") == true)
+                                    && targetState.destination.route in topLevelScreens
+                                ) {
+                                    fadeOut(tween(200))
+                                } else {
+                                    fadeOut(tween(200)) + slideOutHorizontally { it / 2 }
+                                }
+                            },
+                            modifier = Modifier
+                                .nestedScroll(
+                                    if (navigationItems.fastAny { it.route == backStackEntry?.destination?.route } ||
+                                        backStackEntry?.destination?.route?.startsWith("search/") == true) {
+                                        searchBarScrollBehavior.nestedScrollConnection
+                                    } else {
+                                        topAppBarScrollBehavior.nestedScrollConnection
+                                    }
+                                )
+                        ) {
+                            mainNavigationBuilder(
+                                navController = navController,
+                                topAppBarScrollBehavior = topAppBarScrollBehavior
+                            )
+                        }
+
+//                            ShowOnboarding(navController)
+
+                        NavigationBar(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .offset {
+                                    if (navigationBarHeight == 0.dp) {
+                                        IntOffset(
+                                            x = 0,
+                                            y = (bottomInset + NavigationBarHeight).roundToPx()
+                                        )
+                                    } else {
+                                        val hideOffset =
+                                            (bottomInset + NavigationBarHeight) * (1 - navigationBarHeight / NavigationBarHeight)
+                                        IntOffset(x = 0, y = hideOffset.roundToPx())
                                     }
                                 }
-                            }
-                        }
-
-                        val shouldShowNavigationBar = remember(backStackEntry, active) {
-                            backStackEntry?.destination?.route == null
-                                    || navigationItems.fastAny { it.route == backStackEntry?.destination?.route }
-                                    && !active
-                        }
-                        val navigationBarHeight by animateDpAsState(
-                            targetValue = if (shouldShowNavigationBar) NavigationBarHeight else 0.dp,
-                            label = "",
-                            animationSpec = NavigationBarAnimationSpec
-                        )
-
-                        val shouldShowTopBar = remember(backStackEntry, active) {
-                            backStackEntry?.destination?.route == null
-                                    || backStackEntry?.destination?.route == Screens.Home.route
-                                    && !active
-                        }
-                        val topBarHeight by animateDpAsState(
-                            targetValue = if (shouldShowTopBar) AppBarHeight else 0.dp,
-                            label = "",
-                            animationSpec = NavigationBarAnimationSpec
-                        )
-
-                        val shouldShowSearchBar = remember(backStackEntry, active) {
-                            (active
-                                    || backStackEntry?.destination?.route == Screens.Home.route
-                                    || backStackEntry?.destination?.route?.startsWith("/search") == true)
-                        }
-
-                        /*Scroll Behaviour*/
-                        val appBarScrollBehavior = appBarScrollBehavior(
-                            canScroll = {
-                                backStackEntry?.destination?.route == Screens.Home.route
-                                        || backStackEntry?.destination?.route == Screens.Statistics.route
-                            }
-                        )
-                        val topAppBarScrollBehavior = appBarScrollBehavior(
-                            canScroll = {
-                                !(backStackEntry?.destination?.route == Screens.Home.route
-                                        || backStackEntry?.destination?.route == Screens.Statistics.route)
-                            }
-                        )
-                        val searchBarScrollBehavior = appBarScrollBehavior(
-                            canScroll = {
-                                backStackEntry?.destination?.route?.startsWith("search/") == false
-                            }
-                        )
-
-                        Timber.d(shouldShowSearchBar.toString())
-
-                        val localAwareWindowInset =
-                            remember(bottomInset, shouldShowNavigationBar, shouldShowSearchBar) {
-                                var bottom = bottomInset
-                                var top = AppBarHeight
-                                if (shouldShowNavigationBar) bottom += NavigationBarHeight
-                                if (shouldShowSearchBar) top += (InputFieldHeight + 4.dp)
-                                windowInsets
-                                    .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
-                                    .add(WindowInsets(bottom = bottom, top = top))
-                            }
-
-
-
-                        LaunchedEffect(active) {
-                            if (active) {
-                                searchBarScrollBehavior.state.resetHeightOffset()
-                            }
-                        }
-
-                        CompositionLocalProvider(
-                            LocalDatabase provides database,
-                            LocalAwareWindowInset provides localAwareWindowInset
                         ) {
-                            NavHost(
-                                navController = navController,
-                                startDestination = Screens.Home.route,
-                                modifier = Modifier
-                                    .nestedScroll(
-                                        if (navigationItems.fastAny { it.route == backStackEntry?.destination?.route } ||
-                                            backStackEntry?.destination?.route?.startsWith("search/") == true) {
-                                            searchBarScrollBehavior.nestedScrollConnection
-                                        } else {
-                                            topAppBarScrollBehavior.nestedScrollConnection
+                            navigationItems.fastForEach { screens ->
+                                key(screens.route) {
+                                    NavigationBarItem(
+                                        selected = backStackEntry?.destination?.hierarchy?.any { it.route == screens.route } == true,
+                                        icon = {
+                                            Icon(
+                                                painter = painterResource(screens.iconId),
+                                                contentDescription = null
+                                            )
+                                        },
+                                        label = {
+                                            Text(
+                                                text = stringResource(screens.titleId),
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        },
+                                        onClick = {
+                                            if (backStackEntry?.destination?.hierarchy?.any { it.route == screens.route } == true) {
+                                                backStackEntry?.savedStateHandle?.set(
+                                                    "scrollToTop",
+                                                    true
+                                                )
+                                            } else {
+                                                navController.navigate(screens.route) {
+                                                    popUpTo(navController.graph.startDestinationId) {
+                                                        saveState = true
+                                                    }
+                                                    launchSingleTop = true
+                                                    restoreState = true
+                                                }
+                                            }
                                         }
                                     )
+                                }
+                            }
+                        }
+
+                        Column(
+                            modifier = Modifier
+                                .animateContentSize()
+                        ) {
+                            AnimatedVisibility(
+                                visible = shouldShowTopBar
                             ) {
-                                mainNavigationBuilder(
-                                    navController = navController,
-                                    topAppBarScrollBehavior = topAppBarScrollBehavior
+                                TopAppBar(
+                                    title = {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_fake_logo),
+                                                contentDescription = null
+                                            )
+                                            Gap(8.dp)
+                                            Text(
+                                                text = stringResource(R.string.app_name)
+                                            )
+                                        }
+                                    },
+                                    actions = {
+                                        IconButton(
+                                            onClick = {
+                                                // TODO: Sync function
+                                            }
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_sync),
+                                                contentDescription = null
+                                            )
+                                        }
+
+                                        IconButton(
+                                            onClick = {
+                                                navController.navigate(Screens.Setting.route)
+                                            }
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_setting),
+                                                contentDescription = null
+                                            )
+                                        }
+                                    },
+                                    colors = TopAppBarDefaults.topAppBarColors(
+                                        containerColor = MaterialTheme.colorScheme.surface,
+                                    ),
+                                    modifier = Modifier
+                                        .offset {
+                                            if (topBarHeight == 0.dp) {
+                                                IntOffset(
+                                                    x = 0,
+                                                    y = -(AppBarHeight + topInset).roundToPx()
+                                                )
+                                            } else {
+                                                IntOffset(0, 0)
+                                            }
+                                        }
                                 )
                             }
-
-                            NavigationBar(
+                            AnimatedVisibility(
+                                visible = shouldShowSearchBar,
+                                enter = fadeIn(),
+                                exit = fadeOut(),
                                 modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .offset {
-                                        if (navigationBarHeight == 0.dp) {
-                                            IntOffset(
-                                                x = 0,
-                                                y = (bottomInset + NavigationBarHeight).roundToPx()
-                                            )
-                                        } else {
-                                            val hideOffset =
-                                                (bottomInset + NavigationBarHeight) * (1 - navigationBarHeight / NavigationBarHeight)
-                                            IntOffset(x = 0, y = hideOffset.roundToPx())
-                                        }
-                                    }
+                                    .zIndex(-1f)
                             ) {
-                                navigationItems.fastForEach { screens ->
-                                    key(screens.route) {
-                                        NavigationBarItem(
-                                            selected = backStackEntry?.destination?.hierarchy?.any { it.route == screens.route } == true,
-                                            icon = {
-                                                Icon(
-                                                    painter = painterResource(screens.iconId),
-                                                    contentDescription = null
-                                                )
-                                            },
-                                            label = {
-                                                Text(
-                                                    text = stringResource(screens.titleId),
-                                                    style = MaterialTheme.typography.bodyMedium,
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis
-                                                )
-                                            },
-                                            onClick = {
-                                                if (backStackEntry?.destination?.hierarchy?.any { it.route == screens.route } == true) {
-                                                    backStackEntry?.savedStateHandle?.set(
-                                                        "scrollToTop",
-                                                        true
-                                                    )
-                                                } else {
-                                                    navController.navigate(screens.route) {
-                                                        popUpTo(navController.graph.startDestinationId) {
-                                                            saveState = true
-                                                        }
-                                                        launchSingleTop = true
-                                                        restoreState = true
-                                                    }
+                                SearchBar(
+                                    query = query,
+                                    onQueryChange = onQueryChange,
+                                    onSearch = onSearch,
+                                    active = active,
+                                    onActiveChange = onActiveChange,
+                                    scrollBehavior = searchBarScrollBehavior,
+                                    placeholder = {
+                                        Text(
+                                            text = stringResource(
+                                                if (!active) R.string.search
+                                                else when (searchSource) {
+                                                    SearchSource.ONLINE -> R.string.search_online
+                                                    SearchSource.LOCAL -> R.string.search_local
                                                 }
-                                            }
+                                            )
                                         )
-                                    }
-                                }
-                            }
-
-                            Column(
-                                modifier = Modifier
-                                    .animateContentSize()
-                            ) {
-                                AnimatedVisibility(
-                                    visible = shouldShowTopBar
-                                ) {
-                                    TopAppBar(
-                                        title = {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                modifier = Modifier
-                                            ) {
-                                                Icon(
-                                                    painter = painterResource(R.drawable.ic_fake_logo),
-                                                    contentDescription = null
-                                                )
-                                                Gap(8.dp)
-                                                Text(
-                                                    text = stringResource(R.string.app_name)
-                                                )
-                                            }
-                                        },
-                                        actions = {
-                                            IconButton(
-                                                onClick = {
-                                                    // TODO: Sync function
-                                                }
-                                            ) {
-                                                Icon(
-                                                    painter = painterResource(R.drawable.ic_sync),
-                                                    contentDescription = null
-                                                )
-                                            }
-
-                                            IconButton(
-                                                onClick = {
-                                                    coroutineScope.launch {
-                                                        drawerState.open()
-                                                    }
-                                                }
-                                            ) {
-                                                Icon(
-                                                    painter = painterResource(R.drawable.ic_menu),
-                                                    contentDescription = null
-                                                )
-                                            }
-                                        },
-                                        colors = TopAppBarDefaults.topAppBarColors(
-                                            containerColor = MaterialTheme.colorScheme.surface,
-                                        ),
-                                        modifier = Modifier
-                                            .offset {
-                                                if (topBarHeight == 0.dp) {
-                                                    IntOffset(
-                                                        x = 0,
-                                                        y = -(AppBarHeight + topInset).roundToPx()
-                                                    )
-                                                } else {
-                                                    IntOffset(0, 0)
-                                                }
-                                            }
-                                    )
-                                }
-                                AnimatedVisibility(
-                                    visible = shouldShowSearchBar,
-                                    enter = fadeIn(),
-                                    exit = fadeOut(),
-                                    modifier = Modifier
-                                        .zIndex(-1f)
-                                ) {
-                                    SearchBar(
-                                        query = query,
-                                        onQueryChange = onQueryChange,
-                                        onSearch = onSearch,
-                                        active = active,
-                                        onActiveChange = onActiveChange,
-                                        scrollBehavior = searchBarScrollBehavior,
-                                        placeholder = {
-                                            Text(
-                                                text = stringResource(
-                                                    if (!active) R.string.search
-                                                    else when (searchSource) {
-                                                        SearchSource.ONLINE -> R.string.search_online
-                                                        SearchSource.LOCAL -> R.string.search_local
-                                                    }
-                                                )
-                                            )
-                                        },
-                                        trailingIcon = {
-                                            if (active) {
-                                                if (query.text.isNotEmpty()) {
-                                                    IconButton(
-                                                        onClick = { onQueryChange(TextFieldValue("")) }
-                                                    ) {
-                                                        Icon(
-                                                            painter = painterResource(R.drawable.ic_close),
-                                                            contentDescription = null
-                                                        )
-                                                    }
-                                                }
+                                    },
+                                    trailingIcon = {
+                                        if (active) {
+                                            if (query.text.isNotEmpty()) {
                                                 IconButton(
-                                                    onClick = {
-                                                        searchSource = searchSource.toggle()
-                                                    }
+                                                    onClick = { onQueryChange(TextFieldValue("")) }
                                                 ) {
                                                     Icon(
-                                                        painter = painterResource(
-                                                            when (searchSource) {
-                                                                SearchSource.ONLINE -> R.drawable.ic_language
-                                                                SearchSource.LOCAL -> R.drawable.ic_local_library
-                                                            }
-                                                        ),
+                                                        painter = painterResource(R.drawable.ic_close),
                                                         contentDescription = null
                                                     )
                                                 }
                                             }
-                                        },
-                                        leadingIcon = {
                                             IconButton(
                                                 onClick = {
-                                                    when {
-                                                        active -> onActiveChange(false)
-                                                        backStackEntry?.destination?.route != Screens.Home.route -> {
-                                                            navController.navigateUp()
-                                                        }
-
-                                                        else -> onActiveChange(true)
-                                                    }
+                                                    searchSource = searchSource.toggle()
                                                 }
                                             ) {
                                                 Icon(
-                                                    painterResource(
-                                                        if (active || !navigationItems.fastAny { it.route == backStackEntry?.destination?.route }) {
-                                                            R.drawable.ic_arrow_back
-                                                        } else {
-                                                            R.drawable.ic_search
+                                                    painter = painterResource(
+                                                        when (searchSource) {
+                                                            SearchSource.ONLINE -> R.drawable.ic_language
+                                                            SearchSource.LOCAL -> R.drawable.ic_local_library
                                                         }
                                                     ),
                                                     contentDescription = null
                                                 )
                                             }
-                                        },
-                                        shape = MaterialTheme.shapes.small,
-                                        modifier = Modifier
-                                    ) {
-                                        if (query.text.isEmpty()) {
-                                            Text(
-                                                text = stringResource(R.string.app_name)
-                                            )
-                                        } else {
-                                            Text(
-                                                text = query.text
+                                        }
+                                    },
+                                    leadingIcon = {
+                                        IconButton(
+                                            onClick = {
+                                                when {
+                                                    active -> onActiveChange(false)
+                                                    backStackEntry?.destination?.route != Screens.Home.route -> {
+                                                        navController.navigateUp()
+                                                    }
+
+                                                    else -> onActiveChange(true)
+                                                }
+                                            }
+                                        ) {
+                                            Icon(
+                                                painterResource(
+                                                    if (active || !navigationItems.fastAny { it.route == backStackEntry?.destination?.route }) {
+                                                        R.drawable.ic_arrow_back
+                                                    } else {
+                                                        R.drawable.ic_search
+                                                    }
+                                                ),
+                                                contentDescription = null
                                             )
                                         }
+                                    },
+                                    shape = MaterialTheme.shapes.small,
+                                    modifier = Modifier
+                                ) {
+                                    if (query.text.isEmpty()) {
+                                        Text(
+                                            text = stringResource(R.string.app_name)
+                                        )
+                                    } else {
+                                        Text(
+                                            text = query.text
+                                        )
                                     }
                                 }
                             }
@@ -521,11 +522,17 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
     }
 
     @Composable
-    private fun ShowOnboarding() {
-        // TODO: show onboarding
+    private fun ShowOnboarding(navController: NavHostController) {
+        Timber.d("showonboarding")
+        LaunchedEffect(Unit) {
+            if (showOnboarding) {
+                navController.navigate("onboarding")
+            }
+        }
     }
 
     @SuppressLint("ObsoleteSdkInt")

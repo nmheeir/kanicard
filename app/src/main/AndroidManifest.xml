@@ -22,7 +22,8 @@
         <activity
             android:name=".ui.activities.AuthorizationActivity"
             android:exported="true"
-            android:launchMode="singleTask"
+            android:launchMode="singleTop"
+            android:noHistory="true"
             android:theme="@style/Theme.KaniCard.SplashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -32,6 +33,7 @@
         </activity>
         <activity
             android:name=".ui.activities.AuthActivity"
+            android:launchMode="singleTop"
             android:exported="true"
             android:theme="@style/Theme.KaniCard"
             android:windowSoftInputMode="adjustResize">
@@ -48,6 +50,7 @@
         </activity>
         <activity
             android:name=".ui.activities.MainActivity"
+            android:launchMode="singleTop"
             android:exported="true"
             android:theme="@style/Theme.KaniCard" />
     </application>

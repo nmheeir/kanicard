@@ -42,24 +42,24 @@ class AuthorizationActivity : ComponentActivity() {
 
         setContent {
             KaniTheme {
-                val state by viewModel.authState.collectAsStateWithLifecycle()
+                /*val state by viewModel.authState.collectAsStateWithLifecycle()
 
                 when (state) {
                     AuthorizationState.Authorized -> {
                         startNewActivity(MainActivity::class.java)
-                        finish() // Kết thúc Activity
                     }
 
                     AuthorizationState.Unauthorized -> {
                         startNewActivity(AuthActivity::class.java)
-                        finish() // Kết thúc Activity
                     }
 
                     else -> {
                         Timber.d("Loading")
                         Toast.makeText(this, "Loading", Toast.LENGTH_SHORT).show()
                     }
-                }
+                }*/
+
+                startNewActivity(MainActivity::class.java)
             }
         }
 
