@@ -1,26 +1,41 @@
 package com.nmheir.kanicard.ui.screen.settings.screen
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.nmheir.kanicard.R
 import com.nmheir.kanicard.constants.AppThemeKey
 import com.nmheir.kanicard.constants.ThemeModeKey
 import com.nmheir.kanicard.core.domain.ui.model.AppTheme
 import com.nmheir.kanicard.core.domain.ui.model.ThemeMode
+import com.nmheir.kanicard.core.domain.ui.model.setAppCompatDelegateThemeMode
 import com.nmheir.kanicard.ui.component.widget.AppThemeModePreferenceWidget
 import com.nmheir.kanicard.ui.component.widget.AppThemePreferenceWidget
 import com.nmheir.kanicard.ui.component.widget.PreferenceGroupHeader
@@ -71,10 +86,16 @@ private fun GetThemeGroup(modifier: Modifier = Modifier) {
         AppThemeModePreferenceWidget(
             value = themeMode,
             onItemClick = {
+                setAppCompatDelegateThemeMode(it)
                 onThemeModeChange(it)
             }
         )
 
-        AppThemePreferenceWidget(value = appTheme, onItemClick = { onAppThemeChange(it) })
+        AppThemePreferenceWidget(
+            value = appTheme,
+            onItemClick = { appTheme ->
+                onAppThemeChange(appTheme)
+            }
+        )
     }
 }

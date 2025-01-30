@@ -3,6 +3,7 @@ package com.nmheir.kanicard.ui.activities
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -13,6 +14,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -67,14 +69,17 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.nmheir.kanicard.R
 import com.nmheir.kanicard.constants.AppBarHeight
+import com.nmheir.kanicard.constants.AppThemeKey
 import com.nmheir.kanicard.constants.NavigationBarHeight
 import com.nmheir.kanicard.constants.PauseSearchHistoryKey
 import com.nmheir.kanicard.constants.SearchSource
 import com.nmheir.kanicard.constants.SearchSourceKey
 import com.nmheir.kanicard.constants.ShowOnboardingKey
+import com.nmheir.kanicard.constants.ThemeModeKey
+import com.nmheir.kanicard.core.domain.ui.model.AppTheme
+import com.nmheir.kanicard.core.domain.ui.model.ThemeMode
 import com.nmheir.kanicard.data.entities.SearchHistory
 import com.nmheir.kanicard.data.local.KaniDatabase
-import com.nmheir.kanicard.ui.base.BaseActivity
 import com.nmheir.kanicard.ui.component.Gap
 import com.nmheir.kanicard.ui.component.InputFieldHeight
 import com.nmheir.kanicard.ui.component.SearchBar
@@ -95,33 +100,44 @@ import javax.inject.Inject
 @Suppress("DEPRECATION")
 @OptIn(ExperimentalMaterial3Api::class)
 @AndroidEntryPoint
-class MainActivity : BaseActivity() {
+class MainActivity : ComponentActivity() {
     @Inject
     lateinit var database: KaniDatabase
 
     @Inject
     lateinit var client: SupabaseClient
 
-    private val showOnboarding = dataStore[ShowOnboardingKey] ?: true
+    private val showOnboarding by lazy {
+        dataStore[ShowOnboardingKey] ?: true
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        if (!isTaskRoot) {
-            finish()
-            return
-        }
+        /*        if (!isTaskRoot) {
+                    finish()
+                    return
+                }*/
 
         setContent {
-            KaniTheme {
+            val appTheme by rememberEnumPreference(AppThemeKey, AppTheme.DEFAULT)
+            val darkTheme by rememberEnumPreference(ThemeModeKey, ThemeMode.SYSTEM)
+            val isSystemInDarkTheme = isSystemInDarkTheme()
+            val useDarkTheme = remember(darkTheme, isSystemInDarkTheme) {
+                if (darkTheme == ThemeMode.SYSTEM) isSystemInDarkTheme else darkTheme == ThemeMode.DARK
+            }
+
+            LaunchedEffect(useDarkTheme) {
+                setSystemBarAppearance(useDarkTheme)
+            }
+
+            KaniTheme(
+                darkTheme = useDarkTheme,
+                appTheme = appTheme
+            ) {
                 val navController = rememberNavController()
-
                 val backStackEntry by navController.currentBackStackEntryAsState()
-
-                LaunchedEffect(Unit) {
-                    setSystemBarAppearance(false)
-                }
 
                 Box(
                     modifier = Modifier
@@ -205,12 +221,6 @@ class MainActivity : BaseActivity() {
                     }
 
                     /*Scroll Behaviour*/
-                    val appBarScrollBehavior = appBarScrollBehavior(
-                        canScroll = {
-                            backStackEntry?.destination?.route == Screens.Home.route
-                                    || backStackEntry?.destination?.route == Screens.Statistics.route
-                        }
-                    )
                     val topAppBarScrollBehavior = appBarScrollBehavior(
                         canScroll = {
                             !(backStackEntry?.destination?.route == Screens.Home.route
@@ -223,8 +233,6 @@ class MainActivity : BaseActivity() {
                         }
                     )
 
-                    Timber.d(shouldShowSearchBar.toString())
-
                     val localAwareWindowInset =
                         remember(bottomInset, shouldShowNavigationBar, shouldShowSearchBar) {
                             var bottom = bottomInset
@@ -235,8 +243,6 @@ class MainActivity : BaseActivity() {
                                 .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
                                 .add(WindowInsets(bottom = bottom, top = top))
                         }
-
-
 
                     LaunchedEffect(active) {
                         if (active) {
@@ -376,7 +382,7 @@ class MainActivity : BaseActivity() {
                                             modifier = Modifier
                                         ) {
                                             Icon(
-                                                painter = painterResource(R.drawable.ic_fake_logo),
+                                                painter = painterResource(R.drawable.ic_kotlin),
                                                 contentDescription = null
                                             )
                                             Gap(8.dp)
