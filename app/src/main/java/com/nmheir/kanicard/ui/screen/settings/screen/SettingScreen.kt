@@ -1,39 +1,28 @@
 package com.nmheir.kanicard.ui.screen.settings.screen
 
-import android.annotation.SuppressLint
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.nmheir.kanicard.R
-import com.nmheir.kanicard.ui.activities.LocalAwareWindowInset
+import com.nmheir.kanicard.ui.component.TopAppBar
 import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
-import com.nmheir.kanicard.ui.screen.Screens
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingScreen(
@@ -43,22 +32,12 @@ fun SettingScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(text = stringResource(R.string.setting))
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = navController::navigateUp
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = null
-                        )
-                    }
-                },
-                scrollBehavior = topAppBarScrollBehavior
+                title = stringResource(R.string.setting),
+                scrollBehavior = topAppBarScrollBehavior,
+                onBack = navController::navigateUp
             )
-        }
+        },
+        modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
     ) { contentPadding ->
         LazyColumn(
             contentPadding = contentPadding
@@ -66,7 +45,7 @@ fun SettingScreen(
             itemsIndexed(
                 items = items,
                 key = { _, item -> item.hashCode() }
-            ) { index, item ->
+            ) { _, item ->
                 val contentColor = LocalContentColor.current
                 CompositionLocalProvider(LocalContentColor provides contentColor) {
                     TextPreferenceWidget(

@@ -1,45 +1,30 @@
 package com.nmheir.kanicard.ui.screen.settings.screen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.nmheir.kanicard.R
 import com.nmheir.kanicard.constants.AppThemeKey
+import com.nmheir.kanicard.constants.DateFormatKey
 import com.nmheir.kanicard.constants.ThemeModeKey
 import com.nmheir.kanicard.core.domain.ui.model.AppTheme
 import com.nmheir.kanicard.core.domain.ui.model.ThemeMode
 import com.nmheir.kanicard.core.domain.ui.model.setAppCompatDelegateThemeMode
+import com.nmheir.kanicard.core.presentation.components.ScrollbarLazyColumn
+import com.nmheir.kanicard.ui.component.TopAppBar
 import com.nmheir.kanicard.ui.component.widget.AppThemeModePreferenceWidget
 import com.nmheir.kanicard.ui.component.widget.AppThemePreferenceWidget
 import com.nmheir.kanicard.ui.component.widget.PreferenceGroupHeader
+import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
 import com.nmheir.kanicard.utils.rememberEnumPreference
+import com.nmheir.kanicard.utils.rememberPreference
+import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,29 +35,22 @@ fun SettingAppearanceScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(text = stringResource(R.string.pref_category_appearance))
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = navController::navigateUp
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = null
-                        )
-                    }
-                },
-                scrollBehavior = scrollBehavior
+                title = stringResource(R.string.pref_category_appearance),
+                scrollBehavior = scrollBehavior,
+                onBack = navController::navigateUp
             )
         }
     ) { contentPadding ->
-        LazyColumn(
+        ScrollbarLazyColumn(
             contentPadding = contentPadding
         ) {
             item { PreferenceGroupHeader(stringResource(R.string.pref_category_theme)) }
 
             item { GetThemeGroup() }
+
+            item { PreferenceGroupHeader(stringResource(R.string.pref_category_display)) }
+
+//            item { GetDisplayGroup() }
         }
     }
 }
@@ -99,3 +77,27 @@ private fun GetThemeGroup(modifier: Modifier = Modifier) {
         )
     }
 }
+
+@Composable
+private fun GetDisplayGroup() {
+    val now = remember { LocalDate.now() }
+
+    val dateFormat = rememberPreference(DateFormatKey, DateFormats.first())
+
+    Column {
+        TextPreferenceWidget(title = stringResource(R.string.pref_app_language))
+        /*        ListPreferenceWidget(
+                    title = stringResource(R.string.pref_date_format),
+                    subtitle =
+                ) { }*/
+    }
+}
+
+private val DateFormats = listOf(
+    "", // Default
+    "MM/dd/yy",
+    "dd/MM/yy",
+    "yyyy-MM-dd",
+    "dd MMM yyyy",
+    "MMM dd, yyyy",
+)

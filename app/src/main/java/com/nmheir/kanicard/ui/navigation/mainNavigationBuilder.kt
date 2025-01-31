@@ -17,6 +17,7 @@ import com.nmheir.kanicard.ui.screen.more.MoreScreen
 import com.nmheir.kanicard.ui.screen.onboarding.OnboardingScreen
 import com.nmheir.kanicard.ui.screen.settings.screen.SettingAppearanceScreen
 import com.nmheir.kanicard.ui.screen.settings.screen.SettingScreen
+import com.nmheir.kanicard.ui.screen.settings.screen.SettingsAdvancedScreen
 import com.nmheir.kanicard.ui.screen.statistics.StatisticsScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,13 +86,13 @@ fun NavGraphBuilder.mainNavigationBuilder(
     composable(
         route = "settings/advanced"
     ) {
-        Text("Advanced")
+        SettingsAdvancedScreen(navController, topAppBarScrollBehavior)
     }
 
     composable(
         route = "settings/about"
     ) {
-        Text("About")
+        Text("about")
     }
 
     composable(

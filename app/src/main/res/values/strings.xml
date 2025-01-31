@@ -58,12 +58,17 @@
     <string name="please_check_email">The email has been successfully sent.\nPlease check your inbox\nand don\'t forget to look in your spam folder.</string>
 
     <string name="onboarding">Onboarding</string>
+    <string name="onboarding_guide">Onboarding guide</string>
     <string name="onboarding_heading">Welcome!</string>
     <string name="onboarding_action_skip">Skip!</string>
     <string name="onboarding_action_finish">Get started!</string>
     <string name="onboarding_action_next">Next</string>
     <string name="onboarding_description">Let\&apos;s set some things up first. You can always change these in the settings later too.</string>
-    <string name="label_default">Default</string>
+    <string name="onboarding_permission_action_grant">Grant</string>
+    <string name="onboarding_permission_notifications">Notification permission</string>
+    <string name="onboarding_permission_notifications_description">Get notified for library updates and more.</string>
+
+    <!--Theme-->
     <string name="theme_monet">Dynamic</string>
     <string name="theme_greenapple">Green Apple</string>
     <string name="theme_lavender">Lavender</string>
@@ -79,9 +84,13 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
 
+    <!--Label-->
+    <string name="label_default">Default</string>
+
     <!--Category-->
     <string name="pref_category_appearance">Appearance</string>
     <string name="pref_category_theme">Theme</string>
+    <string name="pref_category_display">Display</string>
     <string name="pref_category_security">Security and Privacy</string>
     <string name="pref_category_advanced">Advanced</string>
     <string name="pref_category_about">About</string>
@@ -89,4 +98,6 @@
     <string name="pref_appearance_summary">Theme, date &amp; time format</string>
     <string name="pref_security_summary">App lock, secure screen</string>
     <string name="pref_advanced_summary">Dump crash logs, battery optimizations</string>
+    <string name="pref_app_language">App language</string>
+    <string name="pref_date_format">Date format</string>
 </resources>

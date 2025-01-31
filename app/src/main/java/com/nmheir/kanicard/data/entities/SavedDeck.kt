@@ -11,7 +11,7 @@ import java.time.LocalDateTime
     tableName = "deck_saved",
     foreignKeys = [
         ForeignKey(
-            entity = UserEntity::class,
+            entity = User::class,
             parentColumns = ["id"],
             childColumns = ["userId"],
         ),

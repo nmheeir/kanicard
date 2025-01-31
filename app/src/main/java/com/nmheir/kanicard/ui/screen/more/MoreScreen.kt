@@ -1,5 +1,13 @@
 package com.nmheir.kanicard.ui.screen.more
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
@@ -10,14 +18,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.nmheir.kanicard.R
 import com.nmheir.kanicard.core.presentation.components.ScrollbarLazyColumn
+import com.nmheir.kanicard.data.entities.User
 import com.nmheir.kanicard.ui.component.DefaultDialog
 import com.nmheir.kanicard.ui.component.LogoHeader
+import com.nmheir.kanicard.ui.component.image.CoilImage
 import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
 import com.nmheir.kanicard.ui.screen.Screens
 import com.nmheir.kanicard.ui.viewmodels.MainState
@@ -36,7 +48,9 @@ fun MoreScreen(
 
             }
 
-            MainState.Success -> TODO()
+            MainState.Success -> {
+
+            }
         }
     }
 
@@ -61,13 +75,21 @@ fun MoreScreen(
         }
     }
 
-    Scaffold { contentPadding ->
+    Scaffold(
+        modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
+    ) { contentPadding ->
         ScrollbarLazyColumn(
             contentPadding = contentPadding
         ) {
             item {
                 LogoHeader()
             }
+
+            item {
+//                UserProfile()
+            }
+
+            item { HorizontalDivider() }
 
             item {
                 TextPreferenceWidget(
@@ -104,5 +126,21 @@ fun MoreScreen(
             }
         }
     }
+}
 
+@Composable
+private fun UserProfile(
+    onProfileClick: () -> Unit = {},
+    user: User
+) {
+    Row(
+        modifier = Modifier
+            .clickable { onProfileClick() }
+    ) {
+        CoilImage(
+            imageUrl = "",
+            modifier = Modifier
+                .size(96.dp)
+        )
+    }
 }

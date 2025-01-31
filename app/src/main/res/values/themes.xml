@@ -127,6 +127,7 @@
         <item name="colorSurfaceContainerHighest">@color/greenapple_surfaceContainerHighest</item>
         <item name="colorSurfaceContainerLow">@color/greenapple_surfaceContainerLow</item>
         <item name="colorSurfaceContainerLowest">@color/greenapple_surfaceContainerLowest</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
 

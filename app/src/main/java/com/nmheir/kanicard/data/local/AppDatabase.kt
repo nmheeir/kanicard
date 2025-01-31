@@ -7,8 +7,9 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.nmheir.kanicard.data.entities.AccountSession
 import com.nmheir.kanicard.data.entities.DeckEntity
+import com.nmheir.kanicard.data.entities.Profile
 import com.nmheir.kanicard.data.entities.SearchHistory
-import com.nmheir.kanicard.data.entities.UserEntity
+import com.nmheir.kanicard.data.entities.User
 
 class KaniDatabase(
     private val delegate: InternalDatabase
@@ -33,9 +34,9 @@ class KaniDatabase(
 
 @Database(
     entities = [
-        UserEntity::class, DeckEntity::class, SearchHistory::class, AccountSession::class
+        User::class, DeckEntity::class, SearchHistory::class, AccountSession::class, Profile::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
     autoMigrations = [
 

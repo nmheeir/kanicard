@@ -34,7 +34,6 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -63,7 +62,6 @@ import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.zIndex
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -74,7 +72,7 @@ import com.nmheir.kanicard.constants.NavigationBarHeight
 import com.nmheir.kanicard.constants.PauseSearchHistoryKey
 import com.nmheir.kanicard.constants.SearchSource
 import com.nmheir.kanicard.constants.SearchSourceKey
-import com.nmheir.kanicard.constants.ShowOnboardingKey
+import com.nmheir.kanicard.constants.OnboardingCompleteKey
 import com.nmheir.kanicard.constants.ThemeModeKey
 import com.nmheir.kanicard.core.domain.ui.model.AppTheme
 import com.nmheir.kanicard.core.domain.ui.model.ThemeMode
@@ -94,7 +92,6 @@ import com.nmheir.kanicard.utils.rememberEnumPreference
 import com.nmheir.kanicard.utils.resetHeightOffset
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.jan.supabase.SupabaseClient
-import timber.log.Timber
 import javax.inject.Inject
 
 @Suppress("DEPRECATION")
@@ -107,8 +104,8 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var client: SupabaseClient
 
-    private val showOnboarding by lazy {
-        dataStore[ShowOnboardingKey] ?: true
+    private val onboardingComplete by lazy {
+        dataStore[OnboardingCompleteKey] ?: false
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -256,7 +253,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         NavHost(
                             navController = navController,
-                            startDestination = Screens.Home.route,
+                            startDestination = if (!onboardingComplete) "onboarding" else Screens.Home.route,
                             enterTransition = {
                                 if (initialState.destination.route in topLevelScreens
                                     && targetState.destination.route in topLevelScreens
@@ -310,8 +307,6 @@ class MainActivity : ComponentActivity() {
                                 topAppBarScrollBehavior = topAppBarScrollBehavior
                             )
                         }
-
-//                            ShowOnboarding(navController)
 
                         NavigationBar(
                             modifier = Modifier
@@ -529,16 +524,6 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-    }
-
-    @Composable
-    private fun ShowOnboarding(navController: NavHostController) {
-        Timber.d("showonboarding")
-        LaunchedEffect(Unit) {
-            if (showOnboarding) {
-                navController.navigate("onboarding")
-            }
-        }
     }
 
     @SuppressLint("ObsoleteSdkInt")
