@@ -5,6 +5,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nmheir.kanicard.constants.RefreshTokenKey
+import com.nmheir.kanicard.data.entities.Profile
+import com.nmheir.kanicard.domain.usecase.UserUseCase
 import com.nmheir.kanicard.utils.dataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -21,14 +23,35 @@ import javax.inject.Inject
 @HiltViewModel
 class MoreViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val client: SupabaseClient
+    private val client: SupabaseClient,
+    private val userUseCase: UserUseCase
 ) : ViewModel() {
 
     val isLoading = MutableStateFlow(false)
 
+    val profile = MutableStateFlow<Profile?>(null)
+
     private val _channel = Channel<MainState>()
     val channel = _channel.receiveAsFlow()
     val error = MutableStateFlow("")
+
+    init {
+        isLoading.value = true
+        viewModelScope.launch {
+            fetchProfile()
+            isLoading.value = false
+        }
+    }
+
+    private suspend fun fetchProfile() {
+        try {
+            profile.value = userUseCase.fetchProfile()
+            Timber.e(profile.toString())
+        } catch (e: Exception) {
+            _channel.send(MainState.Error("Something went wrong, please check log"))
+            Timber.d(e)
+        }
+    }
 
     fun signOut() {
         isLoading.value = true

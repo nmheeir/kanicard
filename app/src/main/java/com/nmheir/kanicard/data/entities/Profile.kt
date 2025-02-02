@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import com.squareup.moshi.Json
 
 @Entity(
     tableName = "profiles",
@@ -17,13 +18,15 @@ import androidx.room.PrimaryKey
     ]
 )
 data class Profile(
-    @PrimaryKey val id: String,
-    val uid: String,
-    @ColumnInfo(name = "first_name")
-    val firstName: String,
-    @ColumnInfo(name = "last_name")
-    val lastName: String,
-    val bio: String,
-    @ColumnInfo(name = "profile_picture_url")
-    val profilePictureUrl: String
+    @PrimaryKey @Json(name = "uid") val uid: String,
+    @ColumnInfo(name = "user_name")
+    @Json(name = "user_name") val userName: String? = null,
+    @ColumnInfo(name = "email")
+    @Json(name = "email") val email: String? = null,
+    @ColumnInfo(name = "bio")
+    @Json(name = "bio") val bio: String? = null,
+    @ColumnInfo(name = "avatar_url")
+    @Json(name = "avatar_url") val avatarUrl: String? = null,
+    @ColumnInfo(name = "updated_at")
+    @Json(name = "updated_at") val updatedAt: String? = null
 )

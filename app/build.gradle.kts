@@ -130,4 +130,7 @@ dependencies {
 
     //Material Motion Compose
     implementation (libs.motion.compose.core)
+
+//    Shimmer
+    implementation(libs.shimmer)
 }

@@ -10,8 +10,11 @@ import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.FlowType
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.logging.LogLevel
+import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.serializer.MoshiSerializer
 import io.github.jan.supabase.storage.Storage
+import io.github.jan.supabase.storage.storage
 import javax.inject.Singleton
 
 @Module
@@ -31,7 +34,20 @@ object SupabaseModule {
                 host = "kanicard.supabase.com"
             }
             install(Storage)
+            install(Postgrest)
             defaultSerializer = MoshiSerializer()
         }
+    }
+
+    @Provides
+    @Singleton
+    fun provideSupabaseDatabase(): Postgrest {
+        return provideSupabaseClient().postgrest
+    }
+
+    @Provides
+    @Singleton
+    fun provideSupabaseStorage(): Storage {
+        return provideSupabaseClient().storage
     }
 }

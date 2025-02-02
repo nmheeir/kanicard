@@ -1,31 +1,28 @@
 package com.nmheir.kanicard.ui.screen
 
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.nmheir.kanicard.R
-import com.nmheir.kanicard.ui.activities.LocalAwareWindowInset
+import com.nmheir.kanicard.core.presentation.components.ScrollbarLazyColumn
+import com.nmheir.kanicard.data.entities.Profile
+import com.nmheir.kanicard.ui.component.TopAppBar
+import com.nmheir.kanicard.ui.component.image.CoilImage
 import com.nmheir.kanicard.ui.viewmodels.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,42 +32,58 @@ fun ProfileScreen(
     scrollBehavior: TopAppBarScrollBehavior,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
-    Column(
-        modifier = Modifier
-            .padding(LocalAwareWindowInset.current.asPaddingValues())
-            .verticalScroll(rememberScrollState())
-            .nestedScroll(scrollBehavior.nestedScrollConnection)
-    ) {
+    val profile by viewModel.profile.collectAsStateWithLifecycle()
 
-        for (i in 1..50) {
-            Text(
-                text = "Profile $i",
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+    val currentBackStack by navController.currentBackStackEntryAsState()
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = stringResource(R.string.profile),
+                scrollBehavior = scrollBehavior,
+                onBack = {
+                    navController.navigateUp()
+                }
             )
         }
+    ) { contentPadding ->
+        ScrollbarLazyColumn(
+            contentPadding = contentPadding
+        ) {
+            profile?.let {
+                item { UserProfile(profile = it) }
+            }
+        }
     }
+}
 
-    TopAppBar(
-        title = { Text(text = stringResource(R.string.profile)) },
-        scrollBehavior = scrollBehavior,
-        navigationIcon = {
+@Composable
+private fun UserProfile(
+    modifier: Modifier = Modifier,
+    profile: Profile
+) {
+    Box(modifier = modifier) {
+        Row {
+            CoilImage(
+                imageUrl = profile.avatarUrl ?: "",
+                modifier = Modifier
+            )
+
+            Column {
+                Text(text = profile.userName ?: "")
+                Text(text = profile.email ?: "")
+            }
+
             IconButton(
-                onClick = navController::navigateUp
+                onClick = {
+
+                }
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_arrow_back),
+                    painter = painterResource(R.drawable.ic_edit),
                     contentDescription = null
                 )
             }
         }
-    )
-}
-
-@Composable
-private fun UserSection(modifier: Modifier = Modifier) {
-
-    Row {
-
     }
-
 }

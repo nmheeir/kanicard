@@ -24,14 +24,18 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import com.nmheir.kanicard.constants.AppThemeKey
+import com.nmheir.kanicard.core.domain.ui.model.AppTheme
 import com.nmheir.kanicard.ui.navigation.authNavigationBuilder
 import com.nmheir.kanicard.ui.theme.KaniTheme
+import com.nmheir.kanicard.utils.rememberEnumPreference
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.handleDeeplinks
@@ -52,7 +56,11 @@ class AuthActivity : ComponentActivity() {
         client.handleDeeplinks(intent)
 
         setContent {
-            KaniTheme {
+            val appTheme by rememberEnumPreference(AppThemeKey, AppTheme.DEFAULT)
+
+            KaniTheme(
+                appTheme = appTheme
+            ) {
                 val navController = rememberNavController()
 
                 val windowWidthSize = calculateWindowSizeClass(this).widthSizeClass

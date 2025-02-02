@@ -99,6 +99,8 @@ supabase-serializer-moshi = { module = "io.github.jan-tennert.supabase:serialize
 
 motion-compose-core = { module = "io.github.fornewid:material-motion-compose-core", version.ref = "motionComposeCore" }
 
+shimmer = { group = "com.valentinilk.shimmer", name = "compose-shimmer", version = "1.3.1" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

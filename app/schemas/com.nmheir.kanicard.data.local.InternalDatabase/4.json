@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "729414f17fcfd5b25303c40b4ecd53f4",
+    "identityHash": "4902d3d16b2aac387b3fa30135162bfd",
     "entities": [
       {
         "tableName": "users",
@@ -156,14 +156,8 @@
       },
       {
         "tableName": "profiles",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `uid` TEXT NOT NULL, `first_name` TEXT NOT NULL, `last_name` TEXT NOT NULL, `bio` TEXT NOT NULL, `profile_picture_url` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`uid`) REFERENCES `users`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uid` TEXT NOT NULL, `user_name` TEXT, `email` TEXT, `bio` TEXT, `avatar_url` TEXT, `updated_at` TEXT, PRIMARY KEY(`uid`), FOREIGN KEY(`uid`) REFERENCES `users`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
-          {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "TEXT",
-            "notNull": true
-          },
           {
             "fieldPath": "uid",
             "columnName": "uid",
@@ -171,34 +165,40 @@
             "notNull": true
           },
           {
-            "fieldPath": "firstName",
-            "columnName": "first_name",
+            "fieldPath": "userName",
+            "columnName": "user_name",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
-            "fieldPath": "lastName",
-            "columnName": "last_name",
+            "fieldPath": "email",
+            "columnName": "email",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "bio",
             "columnName": "bio",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
-            "fieldPath": "profilePictureUrl",
-            "columnName": "profile_picture_url",
+            "fieldPath": "avatarUrl",
+            "columnName": "avatar_url",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "TEXT",
+            "notNull": false
           }
         ],
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "id"
+            "uid"
           ]
         },
         "indices": [],
@@ -220,7 +220,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '729414f17fcfd5b25303c40b4ecd53f4')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4902d3d16b2aac387b3fa30135162bfd')"
     ]
   }
 }

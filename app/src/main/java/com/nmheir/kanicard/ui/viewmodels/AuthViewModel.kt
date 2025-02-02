@@ -83,6 +83,7 @@ class AuthViewModel @Inject constructor(
                 email = userEmail
                 password = userPassword
             }
+            _channel.send(AuthEvent.Success)
 
         } catch (e: Exception) {
             Timber.d(e)

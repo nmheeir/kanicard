@@ -42,7 +42,7 @@ class AuthorizationActivity : ComponentActivity() {
 
         setContent {
             KaniTheme {
-                /*val state by viewModel.authState.collectAsStateWithLifecycle()
+                val state by viewModel.authState.collectAsStateWithLifecycle()
 
                 when (state) {
                     AuthorizationState.Authorized -> {
@@ -57,9 +57,9 @@ class AuthorizationActivity : ComponentActivity() {
                         Timber.d("Loading")
                         Toast.makeText(this, "Loading", Toast.LENGTH_SHORT).show()
                     }
-                }*/
+                }
 
-                startNewActivity(MainActivity::class.java)
+//                startNewActivity(MainActivity::class.java)
             }
         }
 
