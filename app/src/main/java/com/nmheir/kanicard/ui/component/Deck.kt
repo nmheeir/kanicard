@@ -29,12 +29,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nmheir.kanicard.R
 import com.nmheir.kanicard.data.entities.DeckEntity
 import com.nmheir.kanicard.ui.component.image.CoilImage
-import com.nmheir.kanicard.utils.fakeDeck
 
 
 @Composable
@@ -63,6 +61,7 @@ fun DeckItem(
                 .padding(horizontal = 8.dp, vertical = 8.dp)
         ) {
             Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
             ) {
@@ -72,36 +71,29 @@ fun DeckItem(
                         .size(96.dp)
                         .clip(MaterialTheme.shapes.medium)
                 )
-                Gap(width = 8.dp)
                 Column(
                     modifier = Modifier
                         .weight(1f)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = deck.title,
-                            overflow = TextOverflow.Ellipsis,
-                            maxLines = 2,
-                            style = MaterialTheme.typography.titleMedium
-                        )
+                    Text(
+                        text = deck.title,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 2,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
 
-                        IconButton(
-                            onClick = {
-                                expanded = !expanded
-                            }
-                        ) {
-                            Icon(
-                                painter = if (expanded) painterResource(R.drawable.ic_arrow_up) else painterResource(
-                                    R.drawable.ic_arrow_down
-                                ),
-                                contentDescription = null
-                            )
-                        }
+                IconButton(
+                    onClick = {
+                        expanded = !expanded
                     }
+                ) {
+                    Icon(
+                        painter = if (expanded) painterResource(R.drawable.ic_arrow_up) else painterResource(
+                            R.drawable.ic_arrow_down
+                        ),
+                        contentDescription = null
+                    )
                 }
             }
 
@@ -264,13 +256,4 @@ enum class DeckOption {
     VIEW,
     EDIT,
     OPTIONS
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun TestCardItem() {
-    DeckItem(
-        onClick = {},
-        deck = fakeDeck
-    )
 }

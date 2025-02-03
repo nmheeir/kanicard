@@ -4,7 +4,9 @@ import android.content.Context
 import androidx.compose.runtime.clearCompositionErrors
 import com.nmheir.kanicard.data.local.InternalDatabase
 import com.nmheir.kanicard.data.local.KaniDatabase
+import com.nmheir.kanicard.data.remote.repository.DeckRepo
 import com.nmheir.kanicard.data.remote.repository.UserRepo
+import com.nmheir.kanicard.data.remote.repository.irepo.IDeckRepo
 import com.nmheir.kanicard.data.remote.repository.irepo.IUserRepo
 import dagger.Module
 import dagger.Provides
@@ -29,5 +31,11 @@ class AppModule {
     @Singleton
     fun provideUserRepo(postgrest: Postgrest, client: SupabaseClient): IUserRepo {
         return UserRepo(postgrest, client)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDeckRepo(postgrest: Postgrest, client: SupabaseClient): IDeckRepo {
+        return DeckRepo(postgrest, client)
     }
 }

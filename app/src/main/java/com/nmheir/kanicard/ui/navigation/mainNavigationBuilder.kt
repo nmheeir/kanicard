@@ -10,6 +10,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.nmheir.kanicard.ui.screen.AddNewCardScreen
 import com.nmheir.kanicard.ui.screen.Screens
 import com.nmheir.kanicard.ui.screen.HomeScreen
 import com.nmheir.kanicard.ui.screen.ProfileScreen
@@ -65,6 +66,14 @@ fun NavGraphBuilder.mainNavigationBuilder(
     ) {
         OnboardingScreen(navController)
     }
+
+    /*Card*/
+    composable(
+        route = "add_new_card"
+    ) {
+        AddNewCardScreen(navController, topAppBarScrollBehavior)
+    }
+
 
     /*Setting*/
     composable(Screens.Setting.route) {

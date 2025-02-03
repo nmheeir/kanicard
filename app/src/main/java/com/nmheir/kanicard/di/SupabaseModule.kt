@@ -35,7 +35,12 @@ object SupabaseModule {
             }
             install(Storage)
             install(Postgrest)
-            defaultSerializer = MoshiSerializer()
+            defaultSerializer = MoshiSerializer(
+//                moshi = Moshi.Builder()
+//                    .add(MoshiLocalDateAdapter())
+//                    .add(KotlinJsonAdapterFactory())
+//                    .build()
+            )
         }
     }
 

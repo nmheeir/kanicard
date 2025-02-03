@@ -3,7 +3,7 @@ package com.nmheir.kanicard.utils
 import com.nmheir.kanicard.data.entities.DeckEntity
 import java.time.LocalDateTime
 
-val fakeDeck = DeckEntity(
+/*val fakeDeck = DeckEntity(
     id = 1,
     userId = 101,
     title = "Kotlin Basics",
@@ -149,4 +149,4 @@ val fakeListDecks = listOf(
         isPublic = false,
         createdAt = LocalDateTime.of(2023, 12, 18, 9, 30, 0, 0)
     )
-)
+)*/

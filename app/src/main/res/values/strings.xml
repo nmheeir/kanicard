@@ -100,4 +100,12 @@
     <string name="pref_advanced_summary">Dump crash logs, battery optimizations</string>
     <string name="pref_app_language">App language</string>
     <string name="pref_date_format">Date format</string>
+
+    <!--Information-->
+    <string name="information_empty_deck">You have no decks</string>
+
+    <!--Action-->
+    <string name="action_add_cards">Add Cards</string>
+    <string name="action_add_deck">Add Deck</string>
+    <string name="action_get_shared_deck">Get Shared Decks</string>
 </resources>
