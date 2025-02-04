@@ -2,7 +2,9 @@ package com.nmheir.kanicard.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nmheir.kanicard.data.entities.DeckEntity
+import com.nmheir.kanicard.data.dto.DeckDto
+import com.nmheir.kanicard.data.entities.DownloadedDeckEntity
+import com.nmheir.kanicard.data.entities.toDeckDtoList
 import com.nmheir.kanicard.data.local.KaniDatabase
 import com.nmheir.kanicard.domain.usecase.DeckUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,9 +26,9 @@ class HomeViewModel @Inject constructor(
     val isLoading = MutableStateFlow(false)
     val isRefreshing = MutableStateFlow(false)
 
-    val myDecks = MutableStateFlow<List<DeckEntity>?>(null)
-    val importedDeck = MutableStateFlow<List<DeckEntity>?>(null)
-    val allDecks = MutableStateFlow<List<DeckEntity>?>(null)
+    val myDecks = MutableStateFlow<List<DeckDto>?>(null)
+    val downloadedDeck = MutableStateFlow<List<DownloadedDeckEntity>?>(null)
+    val allDecks = MutableStateFlow<List<DeckDto>?>(null)
 
     val selectedHomeCategory = MutableStateFlow(HomeCategory.MY_DECK)
 
@@ -49,10 +51,10 @@ class HomeViewModel @Inject constructor(
             myDecks.value = deckUseCase.fetchMyDeck()
 
             val uid = client.auth.currentUserOrNull()?.id
-            importedDeck.value = database.getImportedDecks(uid!!)
+            downloadedDeck.value = database.getDownloadedDecks(uid!!)
                 .first().take(20)
 
-            allDecks.value = myDecks.value.orEmpty() + importedDeck.value.orEmpty()
+            allDecks.value = myDecks.value.orEmpty() + downloadedDeck.value.toDeckDtoList()
         } catch (e: Exception) {
             Timber.d(e)
         }
@@ -79,7 +81,7 @@ sealed interface HomeAction {
 enum class HomeCategory {
     ALL,
     MY_DECK,
-    IMPORTED_DECK
+    DOWNLOADED
 }
 
 data class HomeUiState(

@@ -87,6 +87,8 @@
     <!--Label-->
     <string name="label_default">Default</string>
     <string name="label_see_more">See more</string>
+    <string name="label_already_downloaded">Already downloaded</string>
+    <string name="label_description">Description</string>
 
     <!--Category-->
     <string name="pref_category_appearance">Appearance</string>
@@ -117,4 +119,5 @@
     <string name="action_retry">Retry</string>
     <string name="action_import">Import</string>
     <string name="action_imported">Imported</string>
+    <string name="action_download">Download</string>
 </resources>

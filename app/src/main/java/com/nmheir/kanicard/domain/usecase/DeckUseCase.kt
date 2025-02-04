@@ -2,7 +2,6 @@ package com.nmheir.kanicard.domain.usecase
 
 import com.nmheir.kanicard.data.dto.DeckDetailDto
 import com.nmheir.kanicard.data.dto.DeckDto
-import com.nmheir.kanicard.data.entities.DeckEntity
 import com.nmheir.kanicard.data.remote.repository.irepo.IDeckRepo
 
 data class DeckUseCase(
@@ -22,7 +21,7 @@ class GetDeckDetail(
 class CreateDeck(
     private val iDeckRepo: IDeckRepo
 ) {
-    suspend operator fun invoke(deck: DeckEntity) {
+    suspend operator fun invoke(deck: DeckDto) {
         iDeckRepo.create(deck)
     }
 }
@@ -30,7 +29,7 @@ class CreateDeck(
 class FetchMyDeck(
     private val iDeckRepo: IDeckRepo
 ) {
-    suspend operator fun invoke(): List<DeckEntity> {
+    suspend operator fun invoke(): List<DeckDto> {
         return iDeckRepo.fetchMyDecks()
     }
 }

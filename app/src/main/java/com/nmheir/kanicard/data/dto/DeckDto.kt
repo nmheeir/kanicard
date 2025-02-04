@@ -10,9 +10,11 @@ data class DeckDto(
     @Json(name = "title")
     val title: String,
     @Json(name = "description")
-    val description: String,
+    val description: String? = null,
     @Json(name = "thumbnail")
-    val thumbnail: String,
+    val thumbnail: String ?= null,
     @Json(name = "created_at")
-    val createdAt: String
+    val createdAt: String,
+    @Json(name = "last_updated")
+    val lastUpdated: String
 )

@@ -15,18 +15,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
@@ -57,14 +51,13 @@ import androidx.navigation.NavHostController
 import com.nmheir.kanicard.R
 import com.nmheir.kanicard.core.presentation.components.padding
 import com.nmheir.kanicard.core.presentation.screens.EmptyScreen
-import com.nmheir.kanicard.core.presentation.utils.fullWidthItem
-import com.nmheir.kanicard.data.entities.DeckEntity
+import com.nmheir.kanicard.data.dto.DeckDto
+import com.nmheir.kanicard.data.entities.DownloadedDeckEntity
 import com.nmheir.kanicard.ui.activities.LocalAwareWindowInset
 import com.nmheir.kanicard.ui.component.DeckItem
 import com.nmheir.kanicard.ui.component.Gap
 import com.nmheir.kanicard.ui.component.HideOnScrollFAB
 import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
-import com.nmheir.kanicard.ui.theme.colorsScheme.GreenAppleColorScheme
 import com.nmheir.kanicard.ui.viewmodels.HomeAction
 import com.nmheir.kanicard.ui.viewmodels.HomeCategory
 import com.nmheir.kanicard.ui.viewmodels.HomeViewModel
@@ -77,7 +70,7 @@ fun HomeScreen(
 ) {
 
     val myDecks by viewModel.myDecks.collectAsStateWithLifecycle()
-    val importedDecks by viewModel.importedDeck.collectAsStateWithLifecycle()
+    val importedDecks by viewModel.downloadedDeck.collectAsStateWithLifecycle()
     val allDecks by viewModel.allDecks.collectAsStateWithLifecycle()
 
     val selectedHomeCategory by viewModel.selectedHomeCategory.collectAsStateWithLifecycle()
@@ -104,7 +97,6 @@ fun HomeScreen(
                 onRefresh = viewModel::refresh
             )
     ) {
-
         HomeContent(
             navController = navController,
             lazyListState = lazyListState,
@@ -155,15 +147,16 @@ private fun HomeContent(
     lazyListState: LazyListState,
     homeCategories: List<HomeCategory>,
     selectedCategory: HomeCategory,
-    myDecks: List<DeckEntity>,
-    allDecks: List<DeckEntity>,
-    importedDecks: List<DeckEntity>,
+    myDecks: List<DeckDto>,
+    allDecks: List<DeckDto>,
+    importedDecks: List<DownloadedDeckEntity>,
     action: (HomeAction) -> Unit
 ) {
     LazyColumn(
         state = lazyListState,
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall),
-        contentPadding = LocalAwareWindowInset.current.asPaddingValues()
+        contentPadding = LocalAwareWindowInset.current.asPaddingValues(),
+        modifier = modifier
     ) {
 //        My latest review section
         item {
@@ -199,7 +192,7 @@ private fun HomeContent(
                 }
             }
 
-            HomeCategory.IMPORTED_DECK -> {
+            HomeCategory.DOWNLOADED -> {
                 if (importedDecks.isEmpty()) {
                     item {
                         EmptyScreen(R.string.information_empty_deck)
@@ -209,7 +202,7 @@ private fun HomeContent(
                         items = importedDecks,
                         key = { it.id }
                     ) {
-                        DeckItem(onClick = {}, deck = it)
+                        DeckItem(onClick = {}, deck = it.toDeckDto())
                         Spacer(Modifier.height(MaterialTheme.padding.extraSmall))
                     }
                 }
@@ -230,7 +223,7 @@ private fun HomeContent(
 
 @Composable
 private fun MyLatestReview(modifier: Modifier = Modifier) {
-
+    // TODO: Need to do
 }
 
 @Composable
@@ -262,7 +255,7 @@ private fun HomeCategoryTabs(
                     Text(
                         text = when (category) {
                             HomeCategory.MY_DECK -> stringResource(R.string.pref_category_my_deck)
-                            HomeCategory.IMPORTED_DECK -> stringResource(R.string.pref_category_import_deck)
+                            HomeCategory.DOWNLOADED -> stringResource(R.string.pref_category_import_deck)
                             HomeCategory.ALL -> stringResource(R.string.pref_category_all_deck)
                         },
                         style = MaterialTheme.typography.labelMedium,

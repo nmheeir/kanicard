@@ -4,9 +4,9 @@ import com.nmheir.kanicard.data.entities.ProfileEntity
 
 data class DeckDetailDto(
     val deckDto: DeckDto,
-    val profileEntity: ProfileEntity,
+    val profileDto: ProfileDto,
 ) {
-    fun toDeckDetail(): DeckDto = deckDto
+    fun toDeck(): DeckDto = deckDto
 
-    fun toProfile(): ProfileEntity = profileEntity
+    fun toProfile(): ProfileDto = profileDto
 }

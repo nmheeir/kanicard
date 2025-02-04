@@ -31,7 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.nmheir.kanicard.R
-import com.nmheir.kanicard.data.entities.DeckEntity
+import com.nmheir.kanicard.data.dto.DeckDto
 import com.nmheir.kanicard.ui.component.image.CoilImage
 
 
@@ -44,7 +44,7 @@ fun DeckList(modifier: Modifier = Modifier) {
 fun DeckItem(
     modifier: Modifier = Modifier,
     onClick: (Long) -> Unit,
-    deck: DeckEntity
+    deck: DeckDto
 ) {
     var expanded by rememberSaveable {
         mutableStateOf(false)
@@ -66,7 +66,7 @@ fun DeckItem(
                 modifier = Modifier
             ) {
                 CoilImage(
-                    imageUrl = deck.thumbnail,
+                    imageUrl = deck.thumbnail ?: "",
                     modifier = Modifier
                         .size(96.dp)
                         .clip(MaterialTheme.shapes.medium)

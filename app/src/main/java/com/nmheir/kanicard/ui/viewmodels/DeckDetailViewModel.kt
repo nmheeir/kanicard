@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.nmheir.kanicard.data.dto.CardDto
 import com.nmheir.kanicard.data.dto.DeckDetailDto
 import com.nmheir.kanicard.data.dto.DeckDto
-import com.nmheir.kanicard.data.entities.ImportedDeckEntity
+import com.nmheir.kanicard.data.entities.DownloadedDeckEntity
 import com.nmheir.kanicard.data.local.KaniDatabase
 import com.nmheir.kanicard.domain.usecase.CardUseCase
 import com.nmheir.kanicard.domain.usecase.DeckUseCase
@@ -55,7 +55,7 @@ class DeckDetailViewModel @Inject constructor(
 
     fun onAction(action: DeckDetailAction) {
         when (action) {
-            is DeckDetailAction.ImportDeck -> importDeck(action.deckDto)
+            is DeckDetailAction.ImportDeck -> downloadDeck(action.deckDto)
         }
     }
 
@@ -75,17 +75,22 @@ class DeckDetailViewModel @Inject constructor(
         }
     }
 
-    private fun importDeck(deck: DeckDto) {
-        val importDeck = ImportedDeckEntity(
-            id = deck.id,
-            creator = deck.creator,
-            title = deck.title,
-            thumbnail = deck.thumbnail,
-            description = deck.description,
-            createdAt = deck.createdAt,
-            userId = uid!!,
-        )
-        database.insert(importDeck)
+    private fun downloadDeck(deck: DeckDto) {
+        try {
+            val downloadDeck = DownloadedDeckEntity(
+                id = deck.id,
+                creator = deck.creator,
+                title = deck.title,
+                thumbnail = deck.thumbnail,
+                description = deck.description,
+                createdAt = deck.createdAt,
+                userId = uid!!,
+                lastUpdated = deck.lastUpdated
+            )
+            database.insert(downloadDeck)
+        } catch (e: Exception) {
+            Timber.d(e)
+        }
     }
 
     private fun isDeckImported(): Boolean {

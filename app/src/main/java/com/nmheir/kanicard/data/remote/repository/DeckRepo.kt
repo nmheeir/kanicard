@@ -4,7 +4,6 @@ import com.nmheir.kanicard.constants.SupabaseTable.DECKS
 import com.nmheir.kanicard.constants.SupabaseTable.PROFILE
 import com.nmheir.kanicard.data.dto.DeckDetailDto
 import com.nmheir.kanicard.data.dto.DeckDto
-import com.nmheir.kanicard.data.entities.DeckEntity
 import com.nmheir.kanicard.data.remote.repository.irepo.IDeckRepo
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -16,11 +15,11 @@ class DeckRepo(
     private val postgrest: Postgrest,
     private val client: SupabaseClient
 ) : IDeckRepo {
-    override suspend fun create(deck: DeckEntity) {
+    override suspend fun create(deck: DeckDto) {
         postgrest.from(DECKS).insert(deck)
     }
 
-    override suspend fun delete(deck: DeckEntity) {
+    override suspend fun delete(deck: DeckDto) {
         postgrest.from(DECKS).delete {
             filter {
                 eq("id", deck.id)
@@ -28,7 +27,7 @@ class DeckRepo(
         }
     }
 
-    override suspend fun update(deck: DeckEntity) {
+    override suspend fun update(deck: DeckDto) {
         postgrest.from(DECKS).update(deck) {
             filter {
                 eq("id", deck.id)
@@ -51,15 +50,15 @@ class DeckRepo(
         return test
     }
 
-    override suspend fun fetchMyDecks(): List<DeckEntity> {
+    override suspend fun fetchMyDecks(): List<DeckDto> {
         val uid = client.auth.currentUserOrNull()?.id
         Timber.d(uid)
         return postgrest[DECKS]
             .select() {
                 filter {
-                    DeckEntity::creator eq uid
+                    DeckDto::creator eq uid
                 }
             }
-            .decodeList<DeckEntity>()
+            .decodeList<DeckDto>()
     }
 }

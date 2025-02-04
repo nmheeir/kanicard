@@ -15,7 +15,11 @@ class Padding {
 
     val large = 24.dp
 
+    val mediumLarge = 28.dp
+
     val medium = 16.dp
+
+    val mediumSmall = 12.dp
 
     val small = 8.dp
 

@@ -6,8 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.nmheir.kanicard.data.entities.AccountSessionEntity
-import com.nmheir.kanicard.data.entities.DeckEntity
-import com.nmheir.kanicard.data.entities.ImportedDeckEntity
+import com.nmheir.kanicard.data.entities.DownloadedDeckEntity
 import com.nmheir.kanicard.data.entities.ProfileEntity
 import com.nmheir.kanicard.data.entities.SearchHistoryEntity
 
@@ -34,8 +33,10 @@ class KaniDatabase(
 
 @Database(
     entities = [
-        DeckEntity::class, SearchHistoryEntity::class, AccountSessionEntity::class, ProfileEntity::class,
-        ImportedDeckEntity::class
+        SearchHistoryEntity::class,
+        AccountSessionEntity::class,
+        ProfileEntity::class,
+        DownloadedDeckEntity::class
     ],
     version = 4,
     exportSchema = true,

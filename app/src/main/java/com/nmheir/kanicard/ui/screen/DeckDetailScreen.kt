@@ -3,8 +3,10 @@ package com.nmheir.kanicard.ui.screen
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.EaseOutExpo
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -12,7 +14,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -53,6 +57,7 @@ import com.nmheir.kanicard.core.presentation.screens.EmptyScreen
 import com.nmheir.kanicard.core.presentation.screens.EmptyScreenAction
 import com.nmheir.kanicard.data.dto.CardDto
 import com.nmheir.kanicard.data.dto.DeckDetailDto
+import com.nmheir.kanicard.data.dto.ProfileDto
 import com.nmheir.kanicard.ui.component.Gap
 import com.nmheir.kanicard.ui.component.image.CoilImage
 import com.nmheir.kanicard.ui.viewmodels.DeckDetailViewModel
@@ -69,10 +74,9 @@ fun DeckDetailScreen(
 ) {
 
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
-    val continuation by viewModel.continuation.collectAsStateWithLifecycle()
 
-    val cards by viewModel.cards.collectAsStateWithLifecycle()
     val deckDetail by viewModel.deckDetail.collectAsStateWithLifecycle()
+    val isImported by viewModel.isDeckImported.collectAsStateWithLifecycle()
 
     Box {
         when {
@@ -95,9 +99,8 @@ fun DeckDetailScreen(
 
             deckDetail != null -> {
                 DeckDetailContent(
+//                    viewModel = viewModel,
                     deckDetail = deckDetail!!,
-                    continuation = continuation,
-                    cards = cards,
                     loadMore = { },
                 )
             }
@@ -109,13 +112,15 @@ fun DeckDetailScreen(
 @Composable
 private fun DeckDetailContent(
 //    navController: NavHostController,
+//    viewModel: DeckDetailViewModel = hiltViewModel(),
     deckDetail: DeckDetailDto,
-    cards: List<CardDto>?,
-    continuation: Boolean,
     loadMore: () -> Unit
 ) {
     val deck = remember(deckDetail) { deckDetail.deckDto }
-    val profile = remember(deckDetail) { deckDetail.profileEntity }
+    val profile = remember(deckDetail) { deckDetail.profileDto }
+
+//    val cards by viewModel.cards.collectAsStateWithLifecycle()
+    val cards = fakeCardList
 
     val lazyListState = rememberLazyListState()
 
@@ -127,6 +132,7 @@ private fun DeckDetailContent(
             loadMore()
         }
     }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -158,12 +164,26 @@ private fun DeckDetailContent(
         ScrollbarLazyColumn(
             state = lazyListState,
             contentPadding = contentPadding,
-            modifier = Modifier.padding(horizontal = 4.dp)
         ) {
             //Deck detail header item
             item {
-                DeckDetailHeaderItem(deckDetail = deckDetail)
+                DeckDetailHeaderItem(
+                    modifier = Modifier.padding(MaterialTheme.padding.mediumSmall),
+                    deckDetail = deckDetail,
+                    profile = profile
+                )
             }
+
+            /*cards.takeIf { it != null }?.let { listCard ->
+                items(
+                    items = listCard,
+                    key = { it.id }
+                ) {
+                    Text(
+                        text = it.question
+                    )
+                }
+            }*/
         }
     }
 }
@@ -171,23 +191,36 @@ private fun DeckDetailContent(
 @Composable
 private fun DeckDetailHeaderItem(
     modifier: Modifier = Modifier,
-    deckDetail: DeckDetailDto
+    deckDetail: DeckDetailDto,
+    profile: ProfileDto
 ) {
-    BoxWithConstraints {
+    BoxWithConstraints(modifier = modifier) {
         val maxImageSize = this.maxWidth / 2
-        val imageSize = min(maxImageSize, 148.dp)
+        val imageSize = min(maxImageSize, 112.dp)
 
-        Column {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small)
+        ) {
             Row(
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                CoilImage(
-                    imageUrl = deckDetail.deckDto.thumbnail,
-                    modifier = Modifier
-                        .size(imageSize)
-                        .clip(MaterialTheme.shapes.large)
-                )
+                if (deckDetail.deckDto.thumbnail == null) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_error),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(imageSize)
+                            .clip(MaterialTheme.shapes.large)
+                    )
+                } else {
+                    CoilImage(
+                        imageUrl = deckDetail.deckDto.thumbnail,
+                        modifier = Modifier
+                            .size(imageSize)
+                            .clip(MaterialTheme.shapes.large)
+                    )
+                }
                 Column(
                     modifier = Modifier.padding(start = MaterialTheme.padding.medium)
                 ) {
@@ -204,9 +237,43 @@ private fun DeckDetailHeaderItem(
                     )
                 }
             }
-            if (deckDetail.deckDto.description.isNotEmpty()) {
-                DeckDetailDescription(description = deckDetail.deckDto.description)
-            }
+
+            DeckCreator(profile = profile)
+
+            DeckDetailDescription(description = deckDetail.deckDto.description ?: "No description")
+        }
+    }
+}
+
+@Composable
+private fun DeckCreator(
+    modifier: Modifier = Modifier,
+    profile: ProfileDto
+) {
+    Column(
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = "Author",
+            style = MaterialTheme.typography.titleMedium
+        )
+        Gap(MaterialTheme.padding.small)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            CoilImage(
+                imageUrl = profile.avatarUrl ?: "",
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+            )
+            Gap(MaterialTheme.padding.small)
+            Text(
+                text = profile.userName ?: "Unknown user",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }
@@ -218,7 +285,7 @@ private fun DeckDetailHeaderItemButton(
     onClick: () -> Unit
 ) {
     Row(
-        modifier = Modifier.padding(top = MaterialTheme.padding.medium)
+        modifier = modifier.padding(top = MaterialTheme.padding.medium)
     ) {
         Button(
             onClick = onClick,
@@ -232,19 +299,20 @@ private fun DeckDetailHeaderItemButton(
         ) {
             Icon(
                 painter = painterResource(
-                    if (isImported) R.drawable.ic_check else R.drawable.ic_add
+                    if (isImported) R.drawable.ic_check else R.drawable.ic_download
                 ),
                 contentDescription = null
             )
+            Gap(MaterialTheme.padding.small)
             Text(
                 text = stringResource(
-                    if (isImported) R.string.action_imported else R.string.action_import
+                    if (!isImported) R.string.action_download else R.string.label_already_downloaded
                 ),
                 style = MaterialTheme.typography.titleMedium
             )
         }
 
-        Gap(width = MaterialTheme.padding.small)
+        Gap(width = MaterialTheme.padding.medium)
 
         IconButton(
             onClick = {}
@@ -267,42 +335,50 @@ private fun DeckDetailDescription(
     var isExpanded by remember { mutableStateOf(false) }
     var showSeeMore by remember { mutableStateOf(false) }
 
-    Box(
-        modifier = Modifier.clickable { isExpanded = !isExpanded }
-    ) {
+    Column {
         Text(
-            text = description,
-            style = MaterialTheme.typography.bodyMedium,
-            maxLines = if (isExpanded) Int.MAX_VALUE else 3,
-            overflow = TextOverflow.Ellipsis,
-            onTextLayout = { result ->
-                showSeeMore = result.hasVisualOverflow
-            },
-            modifier = Modifier.animateContentSize(
-                animationSpec = tween(
-                    durationMillis = 200,
-                    easing = EaseOutExpo
+            text = stringResource(R.string.label_description),
+            style = MaterialTheme.typography.titleMedium
+        )
+        Gap(MaterialTheme.padding.small)
+        Box(
+            modifier = Modifier.clickable { isExpanded = !isExpanded }
+        ) {
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = if (isExpanded) Int.MAX_VALUE else 3,
+                overflow = TextOverflow.Ellipsis,
+                onTextLayout = { result ->
+                    showSeeMore = result.hasVisualOverflow
+                },
+                modifier = Modifier.animateContentSize(
+                    animationSpec = tween(
+                        durationMillis = 200,
+                        easing = EaseOutExpo
+                    )
                 )
             )
-        )
-        if (showSeeMore) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .background(MaterialTheme.colorScheme.surface)
-            ) {
-                // TODO: Add gradient effect
-                Text(
-                    text = stringResource(id = R.string.label_see_more),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        textDecoration = TextDecoration.Underline,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    modifier = Modifier.padding(start = 16.dp)
-                )
+            if (showSeeMore) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .background(MaterialTheme.colorScheme.surface)
+                ) {
+                    // TODO: Add gradient effect
+                    Text(
+                        text = stringResource(id = R.string.label_see_more),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            textDecoration = TextDecoration.Underline,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
+                }
             }
         }
     }
+
 }
 
 @Preview(showBackground = true, showSystemUi = true)
@@ -310,8 +386,6 @@ private fun DeckDetailDescription(
 private fun Test() {
     DeckDetailContent(
         deckDetail = fakeDeckDetailDto,
-        cards = fakeCardList,
-        continuation = false,
         loadMore = { }
     )
 }

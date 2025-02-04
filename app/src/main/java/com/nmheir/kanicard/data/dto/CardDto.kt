@@ -13,4 +13,6 @@ data class CardDto(
     val hint: String,
     @Json(name = "created_at")
     val createdAt: String,
+    @Json(name = "last_updated")
+    val lastUpdated: String
 )
