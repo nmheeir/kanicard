@@ -20,7 +20,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.nmheir.kanicard.R
 import com.nmheir.kanicard.core.presentation.components.ScrollbarLazyColumn
-import com.nmheir.kanicard.data.entities.Profile
+import com.nmheir.kanicard.data.entities.ProfileEntity
 import com.nmheir.kanicard.ui.component.TopAppBar
 import com.nmheir.kanicard.ui.component.image.CoilImage
 import com.nmheir.kanicard.ui.viewmodels.ProfileViewModel
@@ -32,7 +32,7 @@ fun ProfileScreen(
     scrollBehavior: TopAppBarScrollBehavior,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
-    val profile by viewModel.profile.collectAsStateWithLifecycle()
+    val profile by viewModel.profileEntity.collectAsStateWithLifecycle()
 
     val currentBackStack by navController.currentBackStackEntryAsState()
 
@@ -51,7 +51,7 @@ fun ProfileScreen(
             contentPadding = contentPadding
         ) {
             profile?.let {
-                item { UserProfile(profile = it) }
+                item { UserProfile(profileEntity = it) }
             }
         }
     }
@@ -60,18 +60,18 @@ fun ProfileScreen(
 @Composable
 private fun UserProfile(
     modifier: Modifier = Modifier,
-    profile: Profile
+    profileEntity: ProfileEntity
 ) {
     Box(modifier = modifier) {
         Row {
             CoilImage(
-                imageUrl = profile.avatarUrl ?: "",
+                imageUrl = profileEntity.avatarUrl ?: "",
                 modifier = Modifier
             )
 
             Column {
-                Text(text = profile.userName ?: "")
-                Text(text = profile.email ?: "")
+                Text(text = profileEntity.userName ?: "")
+                Text(text = profileEntity.email ?: "")
             }
 
             IconButton(

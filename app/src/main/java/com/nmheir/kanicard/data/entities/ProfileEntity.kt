@@ -2,22 +2,13 @@ package com.nmheir.kanicard.data.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import com.squareup.moshi.Json
 
 @Entity(
-    tableName = "profiles",
-    foreignKeys = [
-        ForeignKey(
-            entity = User::class,
-            parentColumns = ["id"],
-            childColumns = ["uid"],
-            onDelete = ForeignKey.CASCADE
-        )
-    ]
+    tableName = "profiles"
 )
-data class Profile(
+data class ProfileEntity(
     @PrimaryKey @Json(name = "uid") val uid: String,
     @ColumnInfo(name = "user_name")
     @Json(name = "user_name") val userName: String? = null,

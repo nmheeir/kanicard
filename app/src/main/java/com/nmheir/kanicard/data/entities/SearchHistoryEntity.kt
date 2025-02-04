@@ -11,7 +11,7 @@ import androidx.room.PrimaryKey
         unique = true
     )]
 )
-data class SearchHistory(
+data class SearchHistoryEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val query: String
 )

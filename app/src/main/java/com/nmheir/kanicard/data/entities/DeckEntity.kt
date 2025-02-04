@@ -4,8 +4,6 @@ import androidx.compose.runtime.Immutable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
-import java.time.LocalDateTime
 
 @Immutable
 @Entity(
@@ -14,8 +12,8 @@ import java.time.LocalDateTime
 data class DeckEntity(
     @Json(name = "id")
     @PrimaryKey val id: Long,
-    @Json(name = "user_id")
-    val userId: String,
+    @Json(name = "creator")
+    val creator: String,
     @Json(name = "title")
     val title: String,
     @Json(name = "thumbnail")

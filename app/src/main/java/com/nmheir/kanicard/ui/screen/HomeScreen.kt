@@ -9,16 +9,30 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabPosition
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.pullToRefresh
@@ -31,24 +45,28 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastForEachIndexed
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.nmheir.kanicard.R
-import com.nmheir.kanicard.core.domain.ui.model.AppTheme
 import com.nmheir.kanicard.core.presentation.components.padding
 import com.nmheir.kanicard.core.presentation.screens.EmptyScreen
+import com.nmheir.kanicard.core.presentation.utils.fullWidthItem
+import com.nmheir.kanicard.data.entities.DeckEntity
 import com.nmheir.kanicard.ui.activities.LocalAwareWindowInset
 import com.nmheir.kanicard.ui.component.DeckItem
 import com.nmheir.kanicard.ui.component.Gap
 import com.nmheir.kanicard.ui.component.HideOnScrollFAB
-import com.nmheir.kanicard.ui.theme.KaniTheme
+import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
+import com.nmheir.kanicard.ui.theme.colorsScheme.GreenAppleColorScheme
+import com.nmheir.kanicard.ui.viewmodels.HomeAction
+import com.nmheir.kanicard.ui.viewmodels.HomeCategory
 import com.nmheir.kanicard.ui.viewmodels.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,13 +76,20 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
 
-    val decks by viewModel.decks.collectAsStateWithLifecycle()
+    val myDecks by viewModel.myDecks.collectAsStateWithLifecycle()
+    val importedDecks by viewModel.importedDeck.collectAsStateWithLifecycle()
+    val allDecks by viewModel.allDecks.collectAsStateWithLifecycle()
+
+    val selectedHomeCategory by viewModel.selectedHomeCategory.collectAsStateWithLifecycle()
+
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val refreshState = rememberPullToRefreshState()
 
+
     val lazyListState = rememberLazyListState()
 
+    val homeCategories = HomeCategory.entries
     var showOption by remember { mutableStateOf(false) }
     var showCreateDeckDialog by remember { mutableStateOf(false) }
 
@@ -72,33 +97,27 @@ fun HomeScreen(
         contentAlignment = Alignment.TopStart,
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 12.dp)
+            .padding(horizontal = MaterialTheme.padding.small)
             .pullToRefresh(
                 isRefreshing = isRefreshing,
                 state = refreshState,
                 onRefresh = viewModel::refresh
             )
     ) {
-        if (decks?.isEmpty() == true || decks == null) {
-            EmptyScreen(stringRes = R.string.information_empty_deck)
-        }
 
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
-            contentPadding = LocalAwareWindowInset.current.asPaddingValues()
-        ) {
-            decks?.takeIf { it.isNotEmpty() }?.let { listDeck ->
-                items(
-                    items = listDeck,
-                    key = { it.id }
-                ) {
-                    DeckItem(onClick = {}, deck = it)
-                }
-            }
-        }
+        HomeContent(
+            navController = navController,
+            lazyListState = lazyListState,
+            homeCategories = homeCategories,
+            selectedCategory = selectedHomeCategory,
+            myDecks = myDecks.orEmpty(),
+            allDecks = allDecks.orEmpty(),
+            importedDecks = importedDecks.orEmpty(),
+            action = viewModel::onAction,
+        )
 
         HideOnScrollFAB(
-            visible = true,
+            visible = myDecks?.isNotEmpty() == true,
             lazyListState = lazyListState,
             icon = R.drawable.ic_add,
             onClick = { showOption = !showOption }
@@ -114,9 +133,9 @@ fun HomeScreen(
             OptionDialog(navController = navController)
         }
 
-/*        if (showCreateDeckDialog) {
+        /*        if (showCreateDeckDialog) {
 
-        }*/
+                }*/
 
 
         Indicator(
@@ -127,6 +146,145 @@ fun HomeScreen(
                 .padding(LocalAwareWindowInset.current.asPaddingValues()),
         )
     }
+}
+
+@Composable
+private fun HomeContent(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    lazyListState: LazyListState,
+    homeCategories: List<HomeCategory>,
+    selectedCategory: HomeCategory,
+    myDecks: List<DeckEntity>,
+    allDecks: List<DeckEntity>,
+    importedDecks: List<DeckEntity>,
+    action: (HomeAction) -> Unit
+) {
+    LazyColumn(
+        state = lazyListState,
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall),
+        contentPadding = LocalAwareWindowInset.current.asPaddingValues()
+    ) {
+//        My latest review section
+        item {
+            TextPreferenceWidget(
+                title = stringResource(R.string.pref_category_latest_review),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        //Tab
+        item {
+            HomeCategoryTabs(
+                categories = homeCategories,
+                selectedCategory = selectedCategory,
+                onCategorySelected = { action(HomeAction.HomeCategorySelected(it)) },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        when (selectedCategory) {
+            HomeCategory.MY_DECK -> {
+                items(
+                    items = myDecks,
+                    key = { it.id }
+                ) {
+                    DeckItem(
+                        onClick = { deckId ->
+                            navController.navigate("deck/$deckId")
+                        },
+                        deck = it
+                    )
+                    Spacer(Modifier.height(MaterialTheme.padding.extraSmall))
+                }
+            }
+
+            HomeCategory.IMPORTED_DECK -> {
+                if (importedDecks.isEmpty()) {
+                    item {
+                        EmptyScreen(R.string.information_empty_deck)
+                    }
+                } else {
+                    items(
+                        items = importedDecks,
+                        key = { it.id }
+                    ) {
+                        DeckItem(onClick = {}, deck = it)
+                        Spacer(Modifier.height(MaterialTheme.padding.extraSmall))
+                    }
+                }
+            }
+
+            HomeCategory.ALL -> {
+                items(
+                    items = allDecks,
+                    key = { it.id }
+                ) {
+                    DeckItem(onClick = {}, deck = it)
+                    Spacer(Modifier.height(MaterialTheme.padding.extraSmall))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MyLatestReview(modifier: Modifier = Modifier) {
+
+}
+
+@Composable
+private fun HomeCategoryTabs(
+    categories: List<HomeCategory>,
+    selectedCategory: HomeCategory,
+    onCategorySelected: (HomeCategory) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (categories.isEmpty()) return
+
+    val selectedIndex = categories.indexOfFirst { it == selectedCategory }
+    val indicator = @Composable { tabPositions: List<TabPosition> ->
+        HomeCategoryTabIndicator(
+            Modifier.tabIndicatorOffset(tabPositions[selectedIndex])
+        )
+    }
+
+    TabRow(
+        selectedTabIndex = selectedIndex,
+        indicator = indicator,
+        modifier = modifier.background(MaterialTheme.colorScheme.secondaryContainer)
+    ) {
+        categories.fastForEachIndexed { index, category ->
+            Tab(
+                selected = index == selectedIndex,
+                onClick = { onCategorySelected(category) },
+                text = {
+                    Text(
+                        text = when (category) {
+                            HomeCategory.MY_DECK -> stringResource(R.string.pref_category_my_deck)
+                            HomeCategory.IMPORTED_DECK -> stringResource(R.string.pref_category_import_deck)
+                            HomeCategory.ALL -> stringResource(R.string.pref_category_all_deck)
+                        },
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun HomeCategoryTabIndicator(
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.onSurface
+) {
+    Spacer(
+        modifier
+            .padding(horizontal = 24.dp)
+            .height(4.dp)
+            .background(color, RoundedCornerShape(topStartPercent = 100, topEndPercent = 100))
+    )
 }
 
 @Composable

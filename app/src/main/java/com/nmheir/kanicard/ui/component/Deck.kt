@@ -43,14 +43,14 @@ fun DeckList(modifier: Modifier = Modifier) {
 @Composable
 fun DeckItem(
     modifier: Modifier = Modifier,
-    onClick: () -> Unit,
+    onClick: (Long) -> Unit,
     deck: DeckEntity
 ) {
     var expanded by rememberSaveable {
         mutableStateOf(false)
     }
     Card(
-        onClick = onClick,
+        onClick = { onClick(deck.id) },
         shape = MaterialTheme.shapes.medium,
         modifier = Modifier
             .animateContentSize()

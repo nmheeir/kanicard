@@ -38,7 +38,7 @@ import androidx.navigation.NavHostController
 import com.nmheir.kanicard.R
 import com.nmheir.kanicard.core.presentation.components.ScrollbarLazyColumn
 import com.nmheir.kanicard.core.presentation.components.padding
-import com.nmheir.kanicard.data.entities.Profile
+import com.nmheir.kanicard.data.entities.ProfileEntity
 import com.nmheir.kanicard.ui.activities.AuthActivity
 import com.nmheir.kanicard.ui.component.DefaultDialog
 import com.nmheir.kanicard.ui.component.Gap
@@ -127,7 +127,7 @@ fun MoreScreen(
                                     launchSingleTop = true
                                 }
                             },
-                            profile = it
+                            profileEntity = it
                         )
                     }
                 }
@@ -176,7 +176,7 @@ fun MoreScreen(
 @Composable
 private fun UserProfile(
     onProfileClick: () -> Unit = {},
-    profile: Profile
+    profileEntity: ProfileEntity
 ) {
     Surface(
         shape = MaterialTheme.shapes.medium,
@@ -199,10 +199,10 @@ private fun UserProfile(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = profile.userName ?: ""
+                    text = profileEntity.userName ?: ""
                 )
                 Text(
-                    text = profile.email ?: ""
+                    text = profileEntity.email ?: ""
                 )
             }
         }
@@ -214,7 +214,7 @@ private fun UserProfile(
 private fun Test() {
     UserProfile(
         onProfileClick = { },
-        profile = Profile(
+        profileEntity = ProfileEntity(
             uid = "uid",
             userName = "userName",
             bio = "bio",

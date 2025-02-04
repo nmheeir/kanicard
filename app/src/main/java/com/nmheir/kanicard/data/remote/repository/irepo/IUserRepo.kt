@@ -1,8 +1,8 @@
 package com.nmheir.kanicard.data.remote.repository.irepo
 
-import com.nmheir.kanicard.data.entities.Profile
+import com.nmheir.kanicard.data.entities.ProfileEntity
 
 interface IUserRepo {
-    suspend fun fetchProfile(): Profile
-    suspend fun updateProfile(profile: Profile)
+    suspend fun fetchProfile(): ProfileEntity
+    suspend fun updateProfile(profileEntity: ProfileEntity)
 }

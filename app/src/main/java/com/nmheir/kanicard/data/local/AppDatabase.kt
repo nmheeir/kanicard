@@ -5,11 +5,11 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.nmheir.kanicard.data.entities.AccountSession
+import com.nmheir.kanicard.data.entities.AccountSessionEntity
 import com.nmheir.kanicard.data.entities.DeckEntity
-import com.nmheir.kanicard.data.entities.Profile
-import com.nmheir.kanicard.data.entities.SearchHistory
-import com.nmheir.kanicard.data.entities.User
+import com.nmheir.kanicard.data.entities.ImportedDeckEntity
+import com.nmheir.kanicard.data.entities.ProfileEntity
+import com.nmheir.kanicard.data.entities.SearchHistoryEntity
 
 class KaniDatabase(
     private val delegate: InternalDatabase
@@ -34,7 +34,8 @@ class KaniDatabase(
 
 @Database(
     entities = [
-        User::class, DeckEntity::class, SearchHistory::class, AccountSession::class, Profile::class
+        DeckEntity::class, SearchHistoryEntity::class, AccountSessionEntity::class, ProfileEntity::class,
+        ImportedDeckEntity::class
     ],
     version = 4,
     exportSchema = true,

@@ -1,5 +1,6 @@
 package com.nmheir.kanicard.core.presentation.screens
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,7 +32,7 @@ import kotlin.random.Random
 
 data class EmptyScreenAction(
     @StringRes val stringRes: Int,
-    val icon: ImageVector,
+    @DrawableRes val icon: Int,
     val onClick: () -> Unit
 )
 
@@ -58,7 +59,7 @@ fun EmptyScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+//            .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,

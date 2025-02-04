@@ -5,7 +5,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nmheir.kanicard.constants.RefreshTokenKey
-import com.nmheir.kanicard.data.entities.Profile
+import com.nmheir.kanicard.data.entities.ProfileEntity
 import com.nmheir.kanicard.domain.usecase.UserUseCase
 import com.nmheir.kanicard.utils.dataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,7 +29,7 @@ class MoreViewModel @Inject constructor(
 
     val isLoading = MutableStateFlow(false)
 
-    val profile = MutableStateFlow<Profile?>(null)
+    val profile = MutableStateFlow<ProfileEntity?>(null)
 
     private val _channel = Channel<MainState>()
     val channel = _channel.receiveAsFlow()

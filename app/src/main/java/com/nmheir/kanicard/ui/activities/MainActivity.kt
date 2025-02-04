@@ -78,7 +78,7 @@ import com.nmheir.kanicard.constants.SearchSourceKey
 import com.nmheir.kanicard.constants.ThemeModeKey
 import com.nmheir.kanicard.core.domain.ui.model.AppTheme
 import com.nmheir.kanicard.core.domain.ui.model.ThemeMode
-import com.nmheir.kanicard.data.entities.SearchHistory
+import com.nmheir.kanicard.data.entities.SearchHistoryEntity
 import com.nmheir.kanicard.data.local.KaniDatabase
 import com.nmheir.kanicard.ui.component.Gap
 import com.nmheir.kanicard.ui.component.InputFieldHeight
@@ -191,7 +191,7 @@ class MainActivity : ComponentActivity() {
                             navController.navigate("search/$it")
                             if (dataStore[PauseSearchHistoryKey] != true) {
                                 database.query {
-                                    insert(SearchHistory(query = it))
+                                    insert(SearchHistoryEntity(query = it))
                                 }
                             }
                         }
@@ -512,8 +512,7 @@ class MainActivity : ComponentActivity() {
                                             )
                                         }
                                     },
-                                    shape = MaterialTheme.shapes.small,
-                                    modifier = Modifier
+                                    shape = MaterialTheme.shapes.small
                                 ) {
                                     if (query.text.isEmpty()) {
                                         Text(
