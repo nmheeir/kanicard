@@ -89,10 +89,10 @@ fun DeckDetailScreen(
     val cards by viewModel.cards.collectAsStateWithLifecycle()
     val isDeckImported by viewModel.isDeckImported.collectAsStateWithLifecycle()
 
-    Box {
+    Box(modifier = Modifier.fillMaxSize()) {
         when {
             isLoading -> {
-                CircularProgressIndicator()
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
 
             deckDetail == null -> {
@@ -150,6 +150,8 @@ private fun DeckDetailContent(
                 title = {
                     Text(
                         text = deck.title,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.titleLarge
                     )
                 },

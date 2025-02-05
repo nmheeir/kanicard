@@ -38,7 +38,7 @@ class KaniDatabase(
         ProfileEntity::class,
         DownloadedDeckEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
     autoMigrations = [
 
@@ -54,6 +54,7 @@ abstract class InternalDatabase : RoomDatabase() {
         fun newInstance(context: Context) =
             KaniDatabase(
                 delegate = Room.databaseBuilder(context, InternalDatabase::class.java, DB_NAME)
+                    .fallbackToDestructiveMigration()
                     .build()
             )
     }

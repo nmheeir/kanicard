@@ -14,6 +14,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -36,12 +38,17 @@ class DeckDetailViewModel @Inject constructor(
     val isRefreshing = MutableStateFlow(false)
     val continuation = MutableStateFlow(true)
 
-    val deck = MutableStateFlow<DeckDto?>(null)
     val cards = MutableStateFlow<List<CardDto>?>(null)
     val deckDetail = MutableStateFlow<DeckDetailDto?>(null)
     val isDeckImported = MutableStateFlow<Boolean?>(null)
 
     private val pageNumber = MutableStateFlow(0)
+
+    fun onAction(action: DeckDetailAction) {
+        when (action) {
+            is DeckDetailAction.ImportDeck -> downloadDeck(action.deckDto)
+        }
+    }
 
     init {
         isLoading.value = true
@@ -51,23 +58,17 @@ class DeckDetailViewModel @Inject constructor(
         }
     }
 
-    fun onAction(action: DeckDetailAction) {
-        when (action) {
-            is DeckDetailAction.ImportDeck -> downloadDeck(action.deckDto)
-        }
-    }
-
     private suspend fun load() {
         Timber.d("load")
-        withContext(Dispatchers.IO) {
-            deckDetail.value = deckUseCase.getDeckDetail(deckId)
+        coroutineScope {
+            val deckDetailDeferred =
+                async(Dispatchers.IO) { deckUseCase.getDeckDetail(deckId) }
+            val cardsDeferred =
+                async(Dispatchers.IO) { cardUseCase.getCardsByDeckId(deckId, pageNumber.value) }
 
-//            deckDetail.value = fakeDeckDetailDto
-//            isDeckImported.value = isDeckImported()
-        }
-        withContext(Dispatchers.IO) {
-            cards.value = cardUseCase.getCardsByDeckId(deckId, pageNumber.value)
-//            cards.value = fakeCardList
+            deckDetail.value = deckDetailDeferred.await()
+            cards.value = cardsDeferred.await()
+
         }
     }
 

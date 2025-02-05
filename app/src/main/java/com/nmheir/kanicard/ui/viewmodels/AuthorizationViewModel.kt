@@ -1,12 +1,9 @@
 package com.nmheir.kanicard.ui.viewmodels
 
 import android.content.Context
-import androidx.core.content.contentValuesOf
-import androidx.datastore.dataStore
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
 import com.nmheir.kanicard.constants.RefreshTokenKey
 import com.nmheir.kanicard.utils.dataStore
 import com.nmheir.kanicard.utils.get
@@ -14,12 +11,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.status.SessionSource
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 

@@ -9,6 +9,7 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.query.Columns
+import io.github.jan.supabase.postgrest.query.Order
 import timber.log.Timber
 
 class DeckRepo(
@@ -58,6 +59,7 @@ class DeckRepo(
                 filter {
                     DeckDto::creator eq uid
                 }
+                order("id", Order.ASCENDING)
             }
             .decodeList<DeckDto>()
     }
