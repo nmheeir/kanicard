@@ -107,8 +107,3 @@ val fakeProfileDto = ProfileDto(
     bio = "bio",
     avatarUrl = "https://picsum.photos/200/302"
 )
-
-val fakeDeckDetailDto = DeckDetailDto(
-    deckDto = fakeDeckDto,
-    profileDto = fakeProfileDto
-)

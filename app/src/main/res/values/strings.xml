@@ -120,4 +120,5 @@
     <string name="action_import">Import</string>
     <string name="action_imported">Imported</string>
     <string name="action_download">Download</string>
+    <string name="action_back">Back</string>
 </resources>

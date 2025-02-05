@@ -10,8 +10,6 @@ import com.nmheir.kanicard.data.entities.DownloadedDeckEntity
 import com.nmheir.kanicard.data.local.KaniDatabase
 import com.nmheir.kanicard.domain.usecase.CardUseCase
 import com.nmheir.kanicard.domain.usecase.DeckUseCase
-import com.nmheir.kanicard.utils.fakeCardList
-import com.nmheir.kanicard.utils.fakeDeckDetailDto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -62,16 +60,14 @@ class DeckDetailViewModel @Inject constructor(
     private suspend fun load() {
         Timber.d("load")
         withContext(Dispatchers.IO) {
-            delay(2000)
-//                deckDetail.value = deckUseCase.getDeckDetail(deckId)
+            deckDetail.value = deckUseCase.getDeckDetail(deckId)
 
-            deckDetail.value = fakeDeckDetailDto
+//            deckDetail.value = fakeDeckDetailDto
 //            isDeckImported.value = isDeckImported()
         }
         withContext(Dispatchers.IO) {
-            delay(2000)
-//                cards.value = cardUseCase.getCardsByDeckId(deckId, pageNumber.value)
-            cards.value = fakeCardList
+            cards.value = cardUseCase.getCardsByDeckId(deckId, pageNumber.value)
+//            cards.value = fakeCardList
         }
     }
 

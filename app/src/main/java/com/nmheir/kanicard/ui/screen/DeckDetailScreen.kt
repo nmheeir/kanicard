@@ -10,11 +10,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
@@ -44,7 +50,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -52,17 +57,22 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.nmheir.kanicard.R
 import com.nmheir.kanicard.core.presentation.components.ScrollbarLazyColumn
+import com.nmheir.kanicard.core.presentation.components.flip.Flippable
+import com.nmheir.kanicard.core.presentation.components.flip.rememberFlipController
 import com.nmheir.kanicard.core.presentation.components.padding
 import com.nmheir.kanicard.core.presentation.screens.EmptyScreen
 import com.nmheir.kanicard.core.presentation.screens.EmptyScreenAction
 import com.nmheir.kanicard.data.dto.CardDto
 import com.nmheir.kanicard.data.dto.DeckDetailDto
+import com.nmheir.kanicard.data.dto.DeckDto
 import com.nmheir.kanicard.data.dto.ProfileDto
 import com.nmheir.kanicard.ui.component.Gap
+import com.nmheir.kanicard.ui.component.flip.CardHeight
+import com.nmheir.kanicard.ui.component.flip.SampleFlipCardBackSide
+import com.nmheir.kanicard.ui.component.flip.SampleFlipCardFrontSide
 import com.nmheir.kanicard.ui.component.image.CoilImage
+import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
 import com.nmheir.kanicard.ui.viewmodels.DeckDetailViewModel
-import com.nmheir.kanicard.utils.fakeCardList
-import com.nmheir.kanicard.utils.fakeDeckDetailDto
 import kotlinx.collections.immutable.persistentListOf
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,7 +86,8 @@ fun DeckDetailScreen(
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
     val deckDetail by viewModel.deckDetail.collectAsStateWithLifecycle()
-    val isImported by viewModel.isDeckImported.collectAsStateWithLifecycle()
+    val cards by viewModel.cards.collectAsStateWithLifecycle()
+    val isDeckImported by viewModel.isDeckImported.collectAsStateWithLifecycle()
 
     Box {
         when {
@@ -99,9 +110,10 @@ fun DeckDetailScreen(
 
             deckDetail != null -> {
                 DeckDetailContent(
-//                    viewModel = viewModel,
+                    cards = cards,
                     deckDetail = deckDetail!!,
                     loadMore = { },
+                    onBack = navController::navigateUp
                 )
             }
         }
@@ -111,18 +123,17 @@ fun DeckDetailScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DeckDetailContent(
-//    navController: NavHostController,
-//    viewModel: DeckDetailViewModel = hiltViewModel(),
+    cards: List<CardDto>?,
     deckDetail: DeckDetailDto,
-    loadMore: () -> Unit
+    loadMore: () -> Unit,
+    onBack: () -> Unit
 ) {
-    val deck = remember(deckDetail) { deckDetail.deckDto }
+    val deck = remember(deckDetail) { deckDetail.toDeck() }
     val profile = remember(deckDetail) { deckDetail.profileDto }
-
-//    val cards by viewModel.cards.collectAsStateWithLifecycle()
-    val cards = fakeCardList
+    val cardsInDeck = remember(cards) { cards }
 
     val lazyListState = rememberLazyListState()
+    val cardListState = rememberLazyGridState()
 
     LaunchedEffect(lazyListState) {
         snapshotFlow {
@@ -151,7 +162,7 @@ private fun DeckDetailContent(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = onBack) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
                             contentDescription = null
@@ -159,7 +170,8 @@ private fun DeckDetailContent(
                     }
                 }
             )
-        }
+        },
+        modifier = Modifier.fillMaxSize()
     ) { contentPadding ->
         ScrollbarLazyColumn(
             state = lazyListState,
@@ -168,22 +180,48 @@ private fun DeckDetailContent(
             //Deck detail header item
             item {
                 DeckDetailHeaderItem(
-                    modifier = Modifier.padding(MaterialTheme.padding.mediumSmall),
-                    deckDetail = deckDetail,
+                    deck = deckDetail.toDeck(),
                     profile = profile
                 )
             }
 
-            /*cards.takeIf { it != null }?.let { listCard ->
-                items(
-                    items = listCard,
-                    key = { it.id }
-                ) {
-                    Text(
-                        text = it.question
-                    )
+            item {
+                TextPreferenceWidget(title = "Sample Card")
+            }
+
+            if (cardsInDeck.isNullOrEmpty()) {
+                item {
+                    TextPreferenceWidget(title = "No cards")
                 }
-            }*/
+            } else {
+                item {
+                    LazyHorizontalGrid(
+                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
+                        contentPadding = PaddingValues(horizontal = MaterialTheme.padding.medium),
+                        state = cardListState,
+                        rows = GridCells.Fixed(1),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(CardHeight)
+                    ) {
+                        items(
+                            items = cardsInDeck,
+                            key = { it.id }
+                        ) {
+                            val flipController = rememberFlipController()
+                            Flippable(
+                                frontSide = {
+                                    SampleFlipCardFrontSide(flipController, it)
+                                },
+                                backSide = {
+                                    SampleFlipCardBackSide(flipController, it)
+                                },
+                                flipController = flipController
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -191,21 +229,21 @@ private fun DeckDetailContent(
 @Composable
 private fun DeckDetailHeaderItem(
     modifier: Modifier = Modifier,
-    deckDetail: DeckDetailDto,
+    deck: DeckDto,
     profile: ProfileDto
 ) {
     BoxWithConstraints(modifier = modifier) {
         val maxImageSize = this.maxWidth / 2
         val imageSize = min(maxImageSize, 112.dp)
 
-        Column(
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small)
-        ) {
+        Column {
             Row(
                 verticalAlignment = Alignment.Bottom,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = MaterialTheme.padding.medium)
             ) {
-                if (deckDetail.deckDto.thumbnail == null) {
+                if (deck.thumbnail == null) {
                     Image(
                         painter = painterResource(R.drawable.ic_error),
                         contentDescription = null,
@@ -215,7 +253,7 @@ private fun DeckDetailHeaderItem(
                     )
                 } else {
                     CoilImage(
-                        imageUrl = deckDetail.deckDto.thumbnail,
+                        imageUrl = deck.thumbnail,
                         modifier = Modifier
                             .size(imageSize)
                             .clip(MaterialTheme.shapes.large)
@@ -225,7 +263,7 @@ private fun DeckDetailHeaderItem(
                     modifier = Modifier.padding(start = MaterialTheme.padding.medium)
                 ) {
                     Text(
-                        text = deckDetail.deckDto.title,
+                        text = deck.title,
                         style = MaterialTheme.typography.titleLarge,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
@@ -240,7 +278,7 @@ private fun DeckDetailHeaderItem(
 
             DeckCreator(profile = profile)
 
-            DeckDetailDescription(description = deckDetail.deckDto.description ?: "No description")
+            DeckDetailDescription(description = deck.description ?: "No description")
         }
     }
 }
@@ -253,14 +291,12 @@ private fun DeckCreator(
     Column(
         modifier = modifier.fillMaxWidth()
     ) {
-        Text(
-            text = "Author",
-            style = MaterialTheme.typography.titleMedium
-        )
-        Gap(MaterialTheme.padding.small)
+        TextPreferenceWidget(title = "Author")
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = MaterialTheme.padding.medium)
         ) {
             CoilImage(
                 imageUrl = profile.avatarUrl ?: "",
@@ -288,12 +324,10 @@ private fun DeckDetailHeaderItemButton(
         modifier = modifier.padding(top = MaterialTheme.padding.medium)
     ) {
         Button(
+            enabled = !isImported,
             onClick = onClick,
             colors = ButtonDefaults.buttonColors(
-                containerColor = if (isImported)
-                    MaterialTheme.colorScheme.tertiaryContainer
-                else
-                    MaterialTheme.colorScheme.secondaryContainer
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer
             ),
             modifier = Modifier.semantics(mergeDescendants = true) { }
         ) {
@@ -329,20 +363,17 @@ private fun DeckDetailHeaderItemButton(
 
 @Composable
 private fun DeckDetailDescription(
-    modifier: Modifier = Modifier,
     description: String
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     var showSeeMore by remember { mutableStateOf(false) }
 
     Column {
-        Text(
-            text = stringResource(R.string.label_description),
-            style = MaterialTheme.typography.titleMedium
-        )
-        Gap(MaterialTheme.padding.small)
+        TextPreferenceWidget(title = stringResource(R.string.label_description))
         Box(
-            modifier = Modifier.clickable { isExpanded = !isExpanded }
+            modifier = Modifier
+                .padding(horizontal = MaterialTheme.padding.medium)
+                .clickable { isExpanded = !isExpanded }
         ) {
             Text(
                 text = description,
@@ -379,13 +410,4 @@ private fun DeckDetailDescription(
         }
     }
 
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun Test() {
-    DeckDetailContent(
-        deckDetail = fakeDeckDetailDto,
-        loadMore = { }
-    )
 }

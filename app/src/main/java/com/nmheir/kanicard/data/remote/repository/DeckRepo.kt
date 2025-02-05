@@ -1,7 +1,7 @@
 package com.nmheir.kanicard.data.remote.repository
 
+import com.nmheir.kanicard.constants.SupabaseTable
 import com.nmheir.kanicard.constants.SupabaseTable.DECKS
-import com.nmheir.kanicard.constants.SupabaseTable.PROFILE
 import com.nmheir.kanicard.data.dto.DeckDetailDto
 import com.nmheir.kanicard.data.dto.DeckDto
 import com.nmheir.kanicard.data.remote.repository.irepo.IDeckRepo
@@ -39,8 +39,8 @@ class DeckRepo(
         val test = postgrest[DECKS]
             .select(
                 Columns.raw(
-                    "id, creator, title, description, thumbnail, created_at, " +
-                            "${PROFILE}(user_name, email, avatar_url)"
+                    "id, creator, title, description, thumbnail, created_at, last_updated, " +
+                            "${SupabaseTable.PROFILE}(uid, user_name, email, avatar_url)"
                 )
             ) {
                 filter { eq("id", deckId) }
