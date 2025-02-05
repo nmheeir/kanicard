@@ -9,11 +9,13 @@ data class DownloadedDeckEntity(
     @PrimaryKey val id: Long,
     val creator: String,
     val title: String,
-    val thumbnail: String ?= null,
-    val description: String ?= null,
+    val thumbnail: String? = null,
+    val description: String? = null,
     val createdAt: String,
     val userId: String,
-    val lastUpdated: String
+    val lastUpdated: String,
+    val totalCard: Int,
+    val isPublic: Boolean
 ) {
     fun toDeckDto(): DeckDto {
         return DeckDto(
@@ -23,7 +25,9 @@ data class DownloadedDeckEntity(
             thumbnail = thumbnail,
             description = description,
             createdAt = createdAt,
-            lastUpdated = lastUpdated
+            lastUpdated = lastUpdated,
+            totalCard = totalCard,
+            isPublic = isPublic
         )
     }
 }

@@ -12,9 +12,13 @@ data class DeckDto(
     @Json(name = "description")
     val description: String? = null,
     @Json(name = "thumbnail")
-    val thumbnail: String ?= null,
+    val thumbnail: String? = null,
     @Json(name = "created_at")
     val createdAt: String,
     @Json(name = "last_updated")
-    val lastUpdated: String
+    val lastUpdated: String,
+    @Json(name = "total_card")
+    val totalCard: Int,
+    @Json(name = "is_public")
+    val isPublic: Boolean
 )

@@ -97,7 +97,9 @@ val fakeDeckDto = DeckDto(
             "Elit mauris ante fringilla est habitant; netus per leo malesuada. Vulputate nam mus himenaeos maecenas duis, phasellus sollicitudin pellentesque erat. Magna eros non fermentum commodo cubilia dictum adipiscing sollicitudin netus. Odio placerat natoque cubilia urna semper convallis porta netus. Vulputate lacus mi est purus donec orci libero. Odio volutpat sapien malesuada aenean, nostra imperdiet maecenas.",
     thumbnail = "https://picsum.photos/200/301",
     createdAt = "2024-02-04",
-    lastUpdated = "2024-02-04"
+    lastUpdated = "2024-02-04",
+    totalCard = 10,
+    isPublic = true
 )
 
 val fakeProfileDto = ProfileDto(

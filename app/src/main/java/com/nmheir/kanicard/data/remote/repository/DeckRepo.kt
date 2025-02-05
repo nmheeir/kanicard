@@ -39,8 +39,12 @@ class DeckRepo(
     override suspend fun getDeckDetail(deckId: Long): DeckDetailDto {
         val test = postgrest[DECKS]
             .select(
-                Columns.raw(
+                /*Columns.raw(
                     "id, creator, title, description, thumbnail, created_at, last_updated, " +
+                            "${SupabaseTable.PROFILE}(uid, user_name, email, avatar_url)"
+                )*/
+                Columns.raw(
+                    "*, " +
                             "${SupabaseTable.PROFILE}(uid, user_name, email, avatar_url)"
                 )
             ) {

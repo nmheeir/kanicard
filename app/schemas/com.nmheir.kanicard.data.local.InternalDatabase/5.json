@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 5,
-    "identityHash": "4443e5ec5d919fdf4f3a99c7edbb5b72",
+    "identityHash": "612422f9f842fb8f892b36c31b018e30",
     "entities": [
       {
         "tableName": "search_history",
@@ -124,7 +124,7 @@
       },
       {
         "tableName": "downloaded_decks",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `creator` TEXT NOT NULL, `title` TEXT NOT NULL, `thumbnail` TEXT, `description` TEXT, `createdAt` TEXT NOT NULL, `userId` TEXT NOT NULL, `lastUpdated` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `creator` TEXT NOT NULL, `title` TEXT NOT NULL, `thumbnail` TEXT, `description` TEXT, `createdAt` TEXT NOT NULL, `userId` TEXT NOT NULL, `lastUpdated` TEXT NOT NULL, `totalCard` INTEGER NOT NULL, `isPublic` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -173,6 +173,18 @@
             "columnName": "lastUpdated",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "totalCard",
+            "columnName": "totalCard",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isPublic",
+            "columnName": "isPublic",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -188,7 +200,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4443e5ec5d919fdf4f3a99c7edbb5b72')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '612422f9f842fb8f892b36c31b018e30')"
     ]
   }
 }

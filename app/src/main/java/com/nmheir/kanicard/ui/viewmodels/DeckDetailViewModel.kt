@@ -82,7 +82,9 @@ class DeckDetailViewModel @Inject constructor(
                 description = deck.description,
                 createdAt = deck.createdAt,
                 userId = uid!!,
-                lastUpdated = deck.lastUpdated
+                lastUpdated = deck.lastUpdated,
+                totalCard = deck.totalCard,
+                isPublic = deck.isPublic
             )
             database.insert(downloadDeck)
         } catch (e: Exception) {
