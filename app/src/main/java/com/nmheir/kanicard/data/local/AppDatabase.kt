@@ -1,6 +1,7 @@
 package com.nmheir.kanicard.data.local
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -38,10 +39,9 @@ class KaniDatabase(
         ProfileEntity::class,
         DownloadedDeckEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
     autoMigrations = [
-
     ]
 )
 @TypeConverters(Converters::class)

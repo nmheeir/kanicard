@@ -14,7 +14,7 @@ data class DownloadedDeckEntity(
     val createdAt: String,
     val userId: String,
     val lastUpdated: String,
-    val totalCard: Int,
+    val totalCard: Int = 0,
     val isPublic: Boolean
 ) {
     fun toDeckDto(): DeckDto {

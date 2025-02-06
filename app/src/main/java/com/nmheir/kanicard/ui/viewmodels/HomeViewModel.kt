@@ -22,6 +22,7 @@ class HomeViewModel @Inject constructor(
     private val client: SupabaseClient,
     private val database: KaniDatabase
 ) : ViewModel() {
+    private val uid = client.auth.currentUserOrNull()?.id
 
     val isLoading = MutableStateFlow(false)
     val isRefreshing = MutableStateFlow(false)
@@ -50,11 +51,11 @@ class HomeViewModel @Inject constructor(
         try {
             myDecks.value = deckUseCase.fetchMyDeck()
 
-            val uid = client.auth.currentUserOrNull()?.id
             downloadedDeck.value = database.getDownloadedDecks(uid!!)
                 .first().take(20)
 
-            allDecks.value = myDecks.value.orEmpty() + downloadedDeck.value.toDeckDtoList()
+            allDecks.value =
+                (myDecks.value.orEmpty() + downloadedDeck.value.toDeckDtoList()).distinctBy { it.id }
         } catch (e: Exception) {
             Timber.d(e)
         }

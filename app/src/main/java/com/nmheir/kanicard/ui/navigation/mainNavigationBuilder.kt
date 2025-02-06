@@ -86,6 +86,17 @@ fun NavGraphBuilder.mainNavigationBuilder(
         DeckDetailScreen(navController, topAppBarScrollBehavior)
     }
 
+    composable(
+        route = "card/all/{deckId}",
+        arguments = listOf(
+            navArgument("deckId") {
+                type = NavType.LongType
+            }
+        )
+    ) {
+
+    }
+
 
     /*Setting*/
     composable(Screens.Setting.route) {

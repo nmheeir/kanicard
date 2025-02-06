@@ -113,7 +113,8 @@ fun DeckDetailScreen(
                     cards = cards,
                     deckDetail = deckDetail!!,
                     loadMore = { },
-                    onBack = navController::navigateUp
+                    onBack = navController::navigateUp,
+                    viewAllCard = { navController.navigate("") }
                 )
             }
         }
@@ -126,7 +127,8 @@ private fun DeckDetailContent(
     cards: List<CardDto>?,
     deckDetail: DeckDetailDto,
     loadMore: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    viewAllCard: (Long) -> Unit
 ) {
     val deck = remember(deckDetail) { deckDetail.toDeck() }
     val profile = remember(deckDetail) { deckDetail.profileDto }
@@ -193,7 +195,21 @@ private fun DeckDetailContent(
 
             if (cardsInDeck.isNullOrEmpty()) {
                 item {
-                    TextPreferenceWidget(title = "No cards")
+                    TextPreferenceWidget(
+                        title = "No cards",
+                        widget = {
+                            IconButton(
+                                onClick = {
+                                    viewAllCard(deck.id)
+                                }
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_arrow_forward),
+                                    contentDescription = null
+                                )
+                            }
+                        }
+                    )
                 }
             } else {
                 item {
