@@ -2,7 +2,7 @@ package com.nmheir.kanicard.core.domain.fsrs.model
 
 import java.time.OffsetDateTime
 
-data class FSRSCard(
+data class FsrsCard(
     var due: OffsetDateTime,
     var stability: Double,
     var difficulty: Double,
@@ -14,8 +14,8 @@ data class FSRSCard(
     var lastReview: OffsetDateTime?
 ) {
     companion object {
-        fun createEmpty(now: OffsetDateTime): FSRSCard =
-            FSRSCard(
+        fun createEmpty(now: OffsetDateTime): FsrsCard =
+            FsrsCard(
                 due = now,
                 stability = 0.0,
                 difficulty = 0.0,

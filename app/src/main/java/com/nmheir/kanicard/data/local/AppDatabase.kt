@@ -1,11 +1,11 @@
 package com.nmheir.kanicard.data.local
 
 import android.content.Context
-import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.nmheir.kanicard.data.converters.Converters
 import com.nmheir.kanicard.data.entities.AccountSessionEntity
 import com.nmheir.kanicard.data.entities.DownloadedDeckEntity
 import com.nmheir.kanicard.data.entities.ProfileEntity

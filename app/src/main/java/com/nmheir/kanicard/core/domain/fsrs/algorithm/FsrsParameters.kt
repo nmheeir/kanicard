@@ -1,6 +1,6 @@
 package com.nmheir.kanicard.core.domain.fsrs.algorithm
 
-data class FSRSParameters(
+data class FsrsParameters(
     val requestRetention: Double = DEFAULT_REQUEST_RETENTION,
     val maximumInterval: Double = DEFAULT_MAXIMUM_INTERVAL,
     val w: List<Double> = DEFAULT_W,

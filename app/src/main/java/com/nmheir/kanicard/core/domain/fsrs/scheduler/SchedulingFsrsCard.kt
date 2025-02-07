@@ -1,6 +1,6 @@
 package com.nmheir.kanicard.core.domain.fsrs.scheduler
 
-import com.nmheir.kanicard.core.domain.fsrs.model.FSRSCard
+import com.nmheir.kanicard.core.domain.fsrs.model.FsrsCard
 import com.nmheir.kanicard.core.domain.fsrs.model.Rating
 import com.nmheir.kanicard.core.domain.fsrs.model.RecordLog
 import com.nmheir.kanicard.core.domain.fsrs.model.RecordLogItem
@@ -9,13 +9,13 @@ import com.nmheir.kanicard.core.domain.fsrs.model.State
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 
-class SchedulingFSRSCard(
-    card: FSRSCard, now: OffsetDateTime
+class SchedulingFsrsCard(
+    card: FsrsCard, now: OffsetDateTime
 ) {
-    var again: FSRSCard
-    var hard: FSRSCard
-    var good: FSRSCard
-    var easy: FSRSCard
+    var again: FsrsCard
+    var hard: FsrsCard
+    var good: FsrsCard
+    var easy: FsrsCard
     private var lastReview: OffsetDateTime = card.lastReview ?: card.due
     private var lastElapsedDays: Long = card.elapsedDays
 
@@ -30,7 +30,7 @@ class SchedulingFSRSCard(
         this.easy = card.copy()
     }
 
-    fun updateState(state: State): SchedulingFSRSCard {
+    fun updateState(state: State): SchedulingFsrsCard {
         when {
             state == State.New -> {
                 this.again.state = State.Learning
@@ -62,7 +62,7 @@ class SchedulingFSRSCard(
         hardInterval: Long,
         goodInterval: Long,
         easyInterval: Long,
-    ): SchedulingFSRSCard {
+    ): SchedulingFsrsCard {
         this.again.scheduledDays = 0
         this.hard.scheduledDays = hardInterval
         this.good.scheduledDays = goodInterval
@@ -75,7 +75,7 @@ class SchedulingFSRSCard(
         return this
     }
 
-    fun recordLog(card: FSRSCard, now: OffsetDateTime): RecordLog =
+    fun recordLog(card: FsrsCard, now: OffsetDateTime): RecordLog =
         RecordLog(
             mapOf(
                 Rating.Again to RecordLogItem(

@@ -1,6 +1,6 @@
 package com.nmheir.kanicard.core.domain.fsrs.model
 
 data class RecordLogItem(
-    val card: FSRSCard,
+    val card: FsrsCard,
     val log: ReviewLog
 )

@@ -1,10 +1,10 @@
 package com.nmheir.kanicard.core.domain.fsrs.algorithm
 
-import com.nmheir.kanicard.core.domain.fsrs.model.FSRSCard
+import com.nmheir.kanicard.core.domain.fsrs.model.FsrsCard
 import com.nmheir.kanicard.core.domain.fsrs.model.Rating
 import com.nmheir.kanicard.core.domain.fsrs.model.RecordLog
 import com.nmheir.kanicard.core.domain.fsrs.model.State
-import com.nmheir.kanicard.core.domain.fsrs.scheduler.SchedulingFSRSCard
+import com.nmheir.kanicard.core.domain.fsrs.scheduler.SchedulingFsrsCard
 import java.math.MathContext
 import java.math.RoundingMode
 import java.time.OffsetDateTime
@@ -16,14 +16,14 @@ import kotlin.math.pow
 import kotlin.random.Random
 
 class FSRS(
-    private val parameters: FSRSParameters = FSRSParameters()
+    private val parameters: FsrsParameters = FsrsParameters()
 ) {
 
     private val internalModifier: Double = (parameters.requestRetention.pow(1 / DECAY) - 1) / FACTOR
 
-    fun repeat(card: FSRSCard, now: OffsetDateTime): RecordLog {
+    fun repeat(card: FsrsCard, now: OffsetDateTime): RecordLog {
 
-        val s = SchedulingFSRSCard(card, now).updateState(card.state)
+        val s = SchedulingFsrsCard(card, now).updateState(card.state)
         var easyInterval: Long
         var goodInterval: Long
         var hardInterval: Long
@@ -70,7 +70,7 @@ class FSRS(
     }
 
     private fun nextDs(
-        s: SchedulingFSRSCard,
+        s: SchedulingFsrsCard,
         lastD: Double,
         lastS: Double,
         retrievability: Double,
@@ -104,7 +104,7 @@ class FSRS(
         )
     }
 
-    private fun initDifficultiesAndStabilities(s: SchedulingFSRSCard) {
+    private fun initDifficultiesAndStabilities(s: SchedulingFsrsCard) {
         s.again.difficulty = this.initDifficulty(Rating.Again)
         s.again.stability = this.initStability(Rating.Again)
         s.hard.difficulty = this.initDifficulty(Rating.Hard)
