@@ -31,8 +31,6 @@ dataStore = "1.1.1"
 room = "2.6.1"
 timber = "5.0.1"
 
-firebaseBom = "33.8.0"
-
 mapsplatform-secrets = "2.0.1"
 
 supabase-bom = "3.0.3"
@@ -85,10 +83,6 @@ room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
-
-firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
-firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx" }
-firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 
 supabase-bom = { module = "io.github.jan-tennert.supabase:bom", version.ref = "supabase-bom" }
 supabase-postgrest= { module = "io.github.jan-tennert.supabase:postgrest-kt" }

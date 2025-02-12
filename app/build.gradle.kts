@@ -6,8 +6,6 @@ plugins {
 
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.ksp)
-
-    id("com.google.gms.google-services")
 }
 
 android {
@@ -110,11 +108,6 @@ dependencies {
 
     //Timber
     implementation(libs.timber)
-
-    // Firebase
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth.ktx)
-    implementation(libs.firebase.analytics)
 
     //Supbase
     implementation(platform(libs.supabase.bom))

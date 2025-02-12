@@ -9,10 +9,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.nmheir.kanicard" />
-                  <option name="mobileSdkAppId" value="1:657716076673:android:66bdb7d473f9b864252d80" />
-                  <option name="projectId" value="kanicard-e8c8e" />
-                  <option name="projectNumber" value="657716076673" />
+                  <option name="appId" value="PLACEHOLDER" />
+                  <option name="mobileSdkAppId" value="" />
+                  <option name="projectId" value="" />
+                  <option name="projectNumber" value="" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
