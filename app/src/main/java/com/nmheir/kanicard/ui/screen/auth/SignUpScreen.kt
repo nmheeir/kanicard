@@ -49,7 +49,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.nmheir.kanicard.R
-import com.nmheir.kanicard.ui.activities.LocalAuthActivityWindowInset
+import com.nmheir.kanicard.ui.activities.LocalAwareWindowInset
 import com.nmheir.kanicard.ui.component.AuthTextField
 import com.nmheir.kanicard.ui.component.ErrorBox
 import com.nmheir.kanicard.ui.component.Gap
@@ -114,7 +114,7 @@ fun SignUpScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(LocalAuthActivityWindowInset.current.asPaddingValues())
+            .padding(LocalAwareWindowInset.current.asPaddingValues())
     ) {
         //Header Section
         Image(

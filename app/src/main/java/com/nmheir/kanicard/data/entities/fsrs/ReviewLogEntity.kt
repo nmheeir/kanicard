@@ -12,7 +12,7 @@ import java.time.OffsetDateTime
     tableName = "review_log",
     foreignKeys = [ForeignKey(
         entity = FsrsCardEntity::class,
-        parentColumns = ["id"],
+        parentColumns = ["cardId"],
         childColumns = ["fsrsCardId"],
         onDelete = CASCADE
     )]

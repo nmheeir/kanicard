@@ -1,7 +1,6 @@
 package com.nmheir.kanicard.ui.screen.auth
 
 import android.app.Activity
-import android.widget.CheckBox
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -19,7 +18,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxColors
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -51,7 +49,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.nmheir.kanicard.R
-import com.nmheir.kanicard.ui.activities.LocalAuthActivityWindowInset
+import com.nmheir.kanicard.ui.activities.LocalAwareWindowInset
 import com.nmheir.kanicard.ui.activities.MainActivity
 import com.nmheir.kanicard.ui.component.AuthTextField
 import com.nmheir.kanicard.ui.component.Gap
@@ -60,8 +58,6 @@ import com.nmheir.kanicard.ui.viewmodels.AuthEvent
 import com.nmheir.kanicard.ui.viewmodels.AuthViewModel
 import com.nmheir.kanicard.utils.ObserveAsEvents
 import com.nmheir.kanicard.utils.startNewActivity
-import io.github.jan.supabase.auth.status.SessionSource
-import io.github.jan.supabase.auth.status.SessionStatus
 
 @Composable
 fun SignInScreen(
@@ -89,7 +85,7 @@ fun SignInScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .padding(LocalAuthActivityWindowInset.current.asPaddingValues())
+            .padding(LocalAwareWindowInset.current.asPaddingValues())
             .verticalScroll(rememberScrollState())
     ) {
 

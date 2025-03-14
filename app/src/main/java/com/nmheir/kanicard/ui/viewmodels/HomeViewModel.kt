@@ -36,7 +36,8 @@ class HomeViewModel @Inject constructor(
     init {
         isLoading.value = true
         viewModelScope.launch {
-            load()
+//            load()
+            Timber.d(client.auth.currentUserOrNull().toString())
             isLoading.value = false
         }
     }

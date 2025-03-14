@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nmheir.kanicard.constants.RefreshTokenKey
 import com.nmheir.kanicard.data.entities.ProfileEntity
+import com.nmheir.kanicard.data.local.KaniDatabase
 import com.nmheir.kanicard.domain.usecase.UserUseCase
 import com.nmheir.kanicard.utils.dataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,6 +25,7 @@ import javax.inject.Inject
 class MoreViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val client: SupabaseClient,
+    private val database: KaniDatabase,
     private val userUseCase: UserUseCase
 ) : ViewModel() {
 
@@ -43,13 +45,10 @@ class MoreViewModel @Inject constructor(
         }
     }
 
-    private suspend fun fetchProfile() {
-        try {
-            profile.value = userUseCase.fetchProfile()
-            Timber.e(profile.toString())
-        } catch (e: Exception) {
-            _channel.send(MainState.Error("Something went wrong, please check log"))
-            Timber.d(e)
+    private fun fetchProfile() {
+        // TODO: Fetch profile 
+        viewModelScope.launch {
+            Timber.d("Fetch profile")
         }
     }
 

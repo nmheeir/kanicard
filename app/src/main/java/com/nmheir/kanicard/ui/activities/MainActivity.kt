@@ -83,7 +83,7 @@ import com.nmheir.kanicard.data.local.KaniDatabase
 import com.nmheir.kanicard.ui.component.Gap
 import com.nmheir.kanicard.ui.component.InputFieldHeight
 import com.nmheir.kanicard.ui.component.SearchBar
-import com.nmheir.kanicard.ui.navigation.mainNavigationBuilder
+import com.nmheir.kanicard.ui.navigation.navigationBuilder
 import com.nmheir.kanicard.ui.screen.Screens
 import com.nmheir.kanicard.ui.theme.KaniTheme
 import com.nmheir.kanicard.ui.theme.NavigationBarAnimationSpec
@@ -133,9 +133,9 @@ class MainActivity : ComponentActivity() {
                 setSystemBarAppearance(useDarkTheme)
             }
 
-            LaunchedEffect(Unit) {
+/*            LaunchedEffect(Unit) {
                 updateRefreshToken()
-            }
+            }*/
 
             KaniTheme(
                 darkTheme = useDarkTheme,
@@ -310,7 +310,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                         ) {
-                            mainNavigationBuilder(
+                            navigationBuilder(
                                 navController = navController,
                                 topAppBarScrollBehavior = topAppBarScrollBehavior
                             )

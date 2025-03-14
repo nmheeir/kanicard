@@ -1,6 +1,5 @@
 package com.nmheir.kanicard.ui.screen.more
 
-import android.app.Activity
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -39,7 +38,6 @@ import com.nmheir.kanicard.R
 import com.nmheir.kanicard.core.presentation.components.ScrollbarLazyColumn
 import com.nmheir.kanicard.core.presentation.components.padding
 import com.nmheir.kanicard.data.entities.ProfileEntity
-import com.nmheir.kanicard.ui.activities.AuthActivity
 import com.nmheir.kanicard.ui.component.DefaultDialog
 import com.nmheir.kanicard.ui.component.Gap
 import com.nmheir.kanicard.ui.component.LogoHeader
@@ -51,7 +49,6 @@ import com.nmheir.kanicard.ui.screen.Screens
 import com.nmheir.kanicard.ui.viewmodels.MainState
 import com.nmheir.kanicard.ui.viewmodels.MoreViewModel
 import com.nmheir.kanicard.utils.ObserveAsEvents
-import com.nmheir.kanicard.utils.startNewActivity
 
 @Composable
 fun MoreScreen(
@@ -59,7 +56,6 @@ fun MoreScreen(
     viewModel: MoreViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val profile by viewModel.profile.collectAsStateWithLifecycle()
 
     ObserveAsEvents(viewModel.channel) {
         when (it) {
@@ -68,11 +64,11 @@ fun MoreScreen(
             }
 
             MainState.Success -> {
-                (context as? Activity)?.startNewActivity(AuthActivity::class.java)
             }
         }
     }
 
+    val profile by viewModel.profile.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     var showLogoutDialog by remember { mutableStateOf(false) }
 
@@ -118,7 +114,13 @@ fun MoreScreen(
                         )
                     }
                 } else {
-                    profile?.let {
+                    if (profile == null) {
+                        Surface(
+                            onClick = {navController.navigate("sign_in")}
+                        ) {
+
+                        }
+                    } else {
                         UserProfile(
                             onProfileClick = {
                                 navController.navigate(Screens.Profile.route) {
@@ -127,7 +129,7 @@ fun MoreScreen(
                                     launchSingleTop = true
                                 }
                             },
-                            profileEntity = it
+                            profileEntity = profile!!
                         )
                     }
                 }

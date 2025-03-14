@@ -1,7 +1,10 @@
 package com.nmheir.kanicard
 
+import android.app.Activity
 import android.app.Application
 import android.os.Build
+import android.os.Bundle
+import android.util.Log
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
@@ -25,6 +28,10 @@ class App : Application(), SingletonImageLoader.Factory {
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }
+
+        Timber.d("con cac")
+
+        registerActivityLifecycleCallbacks(AppLifecycleTracker())
     }
 
     override fun newImageLoader(context: PlatformContext) = ImageLoader.Builder(context)
@@ -42,4 +49,29 @@ class App : Application(), SingletonImageLoader.Factory {
             }
         }
         .build()
+}
+
+class AppLifecycleTracker : Application.ActivityLifecycleCallbacks {
+    private val activityStack = mutableListOf<String>()
+
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+        activityStack.add(activity::class.java.simpleName)
+        Timber.tag("ActivityStack").d("Created: ${activity::class.java.simpleName}")
+    }
+
+    override fun onActivityDestroyed(activity: Activity) {
+        activityStack.remove(activity::class.java.simpleName)
+        Timber.tag("ActivityStack").d("Destroyed: ${activity::class.java.simpleName}")
+    }
+
+    fun printActivityStack() {
+        Timber.tag("ActivityStack").d("Current stack: $activityStack")
+    }
+
+    // Các phương thức còn lại có thể để trống
+    override fun onActivityStarted(activity: Activity) {}
+    override fun onActivityResumed(activity: Activity) {}
+    override fun onActivityPaused(activity: Activity) {}
+    override fun onActivityStopped(activity: Activity) {}
+    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
 }

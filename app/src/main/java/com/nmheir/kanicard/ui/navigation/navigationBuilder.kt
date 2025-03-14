@@ -4,7 +4,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -23,7 +22,7 @@ import com.nmheir.kanicard.ui.screen.settings.screen.SettingsAdvancedScreen
 import com.nmheir.kanicard.ui.screen.statistics.StatisticsScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
-fun NavGraphBuilder.mainNavigationBuilder(
+fun NavGraphBuilder.navigationBuilder(
     navController: NavHostController,
     topAppBarScrollBehavior: TopAppBarScrollBehavior
 ) {
