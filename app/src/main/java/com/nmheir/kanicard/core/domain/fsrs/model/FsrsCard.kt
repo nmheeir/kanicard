@@ -1,5 +1,6 @@
 package com.nmheir.kanicard.core.domain.fsrs.model
 
+import com.nmheir.kanicard.data.enums.State
 import java.time.OffsetDateTime
 
 data class FsrsCard(

@@ -72,25 +72,6 @@ fun MoreScreen(
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     var showLogoutDialog by remember { mutableStateOf(false) }
 
-    if (showLogoutDialog) {
-        DefaultDialog(
-            onDismiss = { showLogoutDialog = false },
-            buttons = {
-                TextButton(onClick = { showLogoutDialog = false }) {
-                    Text(text = stringResource(R.string.cancel))
-                }
-                TextButton(onClick = viewModel::signOut) {
-                    Text(text = stringResource(R.string.ok))
-                }
-            }
-        ) {
-            Text(text = stringResource(R.string.confirm_logout))
-            if (isLoading) {
-                CircularProgressIndicator()
-            }
-        }
-    }
-
     Scaffold(
         modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
     ) { contentPadding ->
@@ -115,11 +96,12 @@ fun MoreScreen(
                     }
                 } else {
                     if (profile == null) {
-                        Surface(
-                            onClick = {navController.navigate("sign_in")}
-                        ) {
+                        TextPreferenceWidget(
+                            title = "Sign in to sync your account",
+                            onPreferenceClick = {
 
-                        }
+                            }
+                        )
                     } else {
                         UserProfile(
                             onProfileClick = {
@@ -163,12 +145,32 @@ fun MoreScreen(
 
             item { HorizontalDivider() }
 
-            item {
-                TextPreferenceWidget(
-                    title = stringResource(R.string.logout),
-                    icon = R.drawable.ic_logout,
-                    onPreferenceClick = { showLogoutDialog = true }
-                )
+            profile.takeIf { it != null }?.let {
+                item {
+                    TextPreferenceWidget(
+                        title = stringResource(R.string.logout),
+                        icon = R.drawable.ic_logout,
+                        onPreferenceClick = { showLogoutDialog = true }
+                    )
+                    if (showLogoutDialog) {
+                        DefaultDialog(
+                            onDismiss = { showLogoutDialog = false },
+                            buttons = {
+                                TextButton(onClick = { showLogoutDialog = false }) {
+                                    Text(text = stringResource(R.string.cancel))
+                                }
+                                TextButton(onClick = viewModel::signOut) {
+                                    Text(text = stringResource(R.string.ok))
+                                }
+                            }
+                        ) {
+                            Text(text = stringResource(R.string.confirm_logout))
+                            if (isLoading) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                    }
+                }
             }
         }
     }

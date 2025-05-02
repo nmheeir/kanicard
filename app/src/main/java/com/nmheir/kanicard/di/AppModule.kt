@@ -1,15 +1,12 @@
 package com.nmheir.kanicard.di
 
 import android.content.Context
-import androidx.compose.runtime.clearCompositionErrors
 import com.nmheir.kanicard.data.local.InternalDatabase
 import com.nmheir.kanicard.data.local.KaniDatabase
-import com.nmheir.kanicard.data.remote.repository.CardRepo
-import com.nmheir.kanicard.data.remote.repository.DeckRepo
-import com.nmheir.kanicard.data.remote.repository.UserRepo
-import com.nmheir.kanicard.data.remote.repository.irepo.ICardRepo
-import com.nmheir.kanicard.data.remote.repository.irepo.IDeckRepo
-import com.nmheir.kanicard.data.remote.repository.irepo.IUserRepo
+import com.nmheir.kanicard.di.repository.CardRepo
+import com.nmheir.kanicard.di.repository.DeckRepo
+import com.nmheir.kanicard.di.repository.irepo.ICardRepo
+import com.nmheir.kanicard.di.repository.irepo.IDeckRepo
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,19 +28,13 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideUserRepo(postgrest: Postgrest, client: SupabaseClient): IUserRepo {
-        return UserRepo(postgrest, client)
+    fun provideDeckRepo(): IDeckRepo {
+        return DeckRepo()
     }
 
     @Provides
     @Singleton
-    fun provideDeckRepo(postgrest: Postgrest, client: SupabaseClient): IDeckRepo {
-        return DeckRepo(postgrest, client)
-    }
-
-    @Provides
-    @Singleton
-    fun provideCardRepo(postgrest: Postgrest, client: SupabaseClient): ICardRepo {
-        return CardRepo(client, postgrest)
+    fun provideCardRepo(): ICardRepo {
+        return CardRepo()
     }
 }

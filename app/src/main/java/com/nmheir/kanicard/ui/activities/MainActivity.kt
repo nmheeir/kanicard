@@ -61,7 +61,6 @@ import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.zIndex
 import androidx.core.view.WindowCompat
-import androidx.datastore.preferences.core.edit
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -72,7 +71,6 @@ import com.nmheir.kanicard.constants.AppThemeKey
 import com.nmheir.kanicard.constants.NavigationBarHeight
 import com.nmheir.kanicard.constants.OnboardingCompleteKey
 import com.nmheir.kanicard.constants.PauseSearchHistoryKey
-import com.nmheir.kanicard.constants.RefreshTokenKey
 import com.nmheir.kanicard.constants.SearchSource
 import com.nmheir.kanicard.constants.SearchSourceKey
 import com.nmheir.kanicard.constants.ThemeModeKey
@@ -80,6 +78,7 @@ import com.nmheir.kanicard.core.domain.ui.model.AppTheme
 import com.nmheir.kanicard.core.domain.ui.model.ThemeMode
 import com.nmheir.kanicard.data.entities.SearchHistoryEntity
 import com.nmheir.kanicard.data.local.KaniDatabase
+import com.nmheir.kanicard.ui.component.DefaultDialog
 import com.nmheir.kanicard.ui.component.Gap
 import com.nmheir.kanicard.ui.component.InputFieldHeight
 import com.nmheir.kanicard.ui.component.SearchBar
@@ -93,9 +92,6 @@ import com.nmheir.kanicard.utils.get
 import com.nmheir.kanicard.utils.rememberEnumPreference
 import com.nmheir.kanicard.utils.resetHeightOffset
 import dagger.hilt.android.AndroidEntryPoint
-import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.auth.auth
-import timber.log.Timber
 import javax.inject.Inject
 
 @Suppress("DEPRECATION")
@@ -104,9 +100,6 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
     @Inject
     lateinit var database: KaniDatabase
-
-    @Inject
-    lateinit var client: SupabaseClient
 
     private val onboardingComplete by lazy {
         dataStore[OnboardingCompleteKey] ?: false
@@ -133,9 +126,9 @@ class MainActivity : ComponentActivity() {
                 setSystemBarAppearance(useDarkTheme)
             }
 
-/*            LaunchedEffect(Unit) {
-                updateRefreshToken()
-            }*/
+            /*            LaunchedEffect(Unit) {
+                            updateRefreshToken()
+                        }*/
 
             KaniTheme(
                 darkTheme = useDarkTheme,
@@ -375,6 +368,7 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier
                                 .animateContentSize()
                         ) {
+                            var showSyncDialog by remember { mutableStateOf(false) }
                             AnimatedVisibility(
                                 visible = shouldShowTopBar
                             ) {
@@ -398,12 +392,22 @@ class MainActivity : ComponentActivity() {
                                         IconButton(
                                             onClick = {
                                                 // TODO: Sync function
+                                                showSyncDialog = true
                                             }
                                         ) {
                                             Icon(
                                                 painter = painterResource(R.drawable.ic_sync),
                                                 contentDescription = null
                                             )
+                                            if (showSyncDialog) {
+                                                DefaultDialog(
+                                                    onDismiss = {showSyncDialog = false}
+                                                ) {
+                                                    Text(
+                                                        text = "Sync"
+                                                    )
+                                                }
+                                            }
                                         }
 
                                         IconButton(
@@ -546,48 +550,6 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             window.navigationBarColor =
                 (if (isDark) Color.Transparent else Color.Black.copy(alpha = 0.2f)).toArgb()
-        }
-    }
-
-    private suspend fun updateRefreshToken(): Boolean {
-        if (dataStore[RefreshTokenKey] == null) {
-            val currentSession = client.auth.currentSessionOrNull()
-            if (currentSession != null) {
-                dataStore.edit {
-                    it[RefreshTokenKey] = currentSession.refreshToken
-                }
-            }
-            Timber.d("Refresh Token: " + currentSession?.refreshToken)
-            return true
-        } else {
-            try {
-                client.auth.refreshCurrentSession()
-
-                updateRefreshTokenDataStore()
-
-                Timber.d(
-                    "Refresh token from current session: " + client.auth.currentSessionOrNull()?.refreshToken
-                        .toString()
-                )
-                Timber.d("Refresh token from data store: " + dataStore[RefreshTokenKey])
-                return true
-            } catch (e: Exception) {
-                Timber.d(e)
-                return false
-            }
-        }
-    }
-
-    private suspend fun updateRefreshTokenDataStore() {
-        try {
-            val refreshToken = client.auth.currentSessionOrNull()?.refreshToken
-
-            Timber.d("updateRefreshToken: $refreshToken")
-            dataStore.edit {
-                it[RefreshTokenKey] = refreshToken!!
-            }
-        } catch (e: Exception) {
-            Timber.d(e)
         }
     }
 }

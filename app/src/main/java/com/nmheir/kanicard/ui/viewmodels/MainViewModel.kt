@@ -10,6 +10,5 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val client: SupabaseClient
 ) : ViewModel() {
 }

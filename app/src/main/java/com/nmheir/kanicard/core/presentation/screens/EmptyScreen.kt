@@ -50,7 +50,7 @@ fun EmptyScreen(
 }
 
 @Composable
-fun EmptyScreen(
+private fun EmptyScreen(
     message: String,
     modifier: Modifier = Modifier,
     actions: ImmutableList<EmptyScreenAction>? = null,

@@ -16,6 +16,6 @@ fun StatisticsScreen(modifier: Modifier = Modifier) {
         modifier = modifier
             .padding(LocalAwareWindowInset.current.asPaddingValues())
     ) {
-        val width = maxWidth
+        val width = this.maxWidth
     }
 }

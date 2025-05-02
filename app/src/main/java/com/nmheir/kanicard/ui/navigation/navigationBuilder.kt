@@ -11,9 +11,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.nmheir.kanicard.ui.screen.AddNewCardScreen
 import com.nmheir.kanicard.ui.screen.DeckDetailScreen
-import com.nmheir.kanicard.ui.screen.Screens
 import com.nmheir.kanicard.ui.screen.HomeScreen
 import com.nmheir.kanicard.ui.screen.ProfileScreen
+import com.nmheir.kanicard.ui.screen.Screens
 import com.nmheir.kanicard.ui.screen.more.MoreScreen
 import com.nmheir.kanicard.ui.screen.onboarding.OnboardingScreen
 import com.nmheir.kanicard.ui.screen.settings.screen.SettingAppearanceScreen
@@ -26,6 +26,7 @@ fun NavGraphBuilder.navigationBuilder(
     navController: NavHostController,
     topAppBarScrollBehavior: TopAppBarScrollBehavior
 ) {
+
     composable(Screens.Home.route) {
         HomeScreen(navController = navController)
     }

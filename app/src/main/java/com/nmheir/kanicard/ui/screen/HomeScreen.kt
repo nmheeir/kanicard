@@ -50,9 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.nmheir.kanicard.R
 import com.nmheir.kanicard.core.presentation.components.padding
-import com.nmheir.kanicard.core.presentation.screens.EmptyScreen
 import com.nmheir.kanicard.data.dto.DeckDto
-import com.nmheir.kanicard.data.entities.DownloadedDeckEntity
 import com.nmheir.kanicard.ui.activities.LocalAwareWindowInset
 import com.nmheir.kanicard.ui.component.DeckItem
 import com.nmheir.kanicard.ui.component.Gap
@@ -69,13 +67,6 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
 
-    val myDecks by viewModel.myDecks.collectAsStateWithLifecycle()
-    val importedDecks by viewModel.downloadedDeck.collectAsStateWithLifecycle()
-    val allDecks by viewModel.allDecks.collectAsStateWithLifecycle()
-
-    val selectedHomeCategory by viewModel.selectedHomeCategory.collectAsStateWithLifecycle()
-
-    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val refreshState = rememberPullToRefreshState()
 
@@ -97,19 +88,19 @@ fun HomeScreen(
                 onRefresh = viewModel::refresh
             )
     ) {
-        HomeContent(
-            navController = navController,
-            lazyListState = lazyListState,
-            homeCategories = homeCategories,
-            selectedCategory = selectedHomeCategory,
-            myDecks = myDecks.orEmpty(),
-            allDecks = allDecks.orEmpty(),
-            importedDecks = importedDecks.orEmpty(),
-            action = viewModel::onAction,
-        )
+//        HomeContent(
+//            navController = navController,
+//            lazyListState = lazyListState,
+//            homeCategories = homeCategories,
+//            selectedCategory = selectedHomeCategory,
+//            myDecks = myDecks.orEmpty(),
+//            allDecks = allDecks.orEmpty(),
+////            importedDecks = importedDecks.orEmpty(),
+//            action = viewModel::onAction,
+//        )
 
         HideOnScrollFAB(
-            visible = myDecks?.isNotEmpty() == true,
+            visible = true,
             lazyListState = lazyListState,
             icon = R.drawable.ic_add,
             onClick = { showOption = !showOption }
@@ -149,7 +140,7 @@ private fun HomeContent(
     selectedCategory: HomeCategory,
     myDecks: List<DeckDto>,
     allDecks: List<DeckDto>,
-    importedDecks: List<DownloadedDeckEntity>,
+//    importedDecks: List<DownloadedDeckEntity>,
     action: (HomeAction) -> Unit
 ) {
     LazyColumn(
@@ -193,7 +184,7 @@ private fun HomeContent(
             }
 
             HomeCategory.DOWNLOADED -> {
-                if (importedDecks.isEmpty()) {
+                /*if (importedDecks.isEmpty()) {
                     item {
                         EmptyScreen(R.string.information_empty_deck)
                     }
@@ -205,7 +196,7 @@ private fun HomeContent(
                         DeckItem(onClick = {}, deck = it.toDeckDto())
                         Spacer(Modifier.height(MaterialTheme.padding.extraSmall))
                     }
-                }
+                }*/
             }
 
             HomeCategory.ALL -> {

@@ -24,3 +24,5 @@ val OnboardingCompleteKey = booleanPreferencesKey("onboarding_complete")
 val ThemeModeKey = stringPreferencesKey("themeMode")
 val AppThemeKey = stringPreferencesKey("appTheme")
 val DateFormatKey = stringPreferencesKey("dateFormat")
+
+val EmailKey = stringPreferencesKey("email")

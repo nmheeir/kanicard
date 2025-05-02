@@ -23,38 +23,15 @@ import com.nmheir.kanicard.core.presentation.components.ScrollbarLazyColumn
 import com.nmheir.kanicard.data.entities.ProfileEntity
 import com.nmheir.kanicard.ui.component.TopAppBar
 import com.nmheir.kanicard.ui.component.image.CoilImage
-import com.nmheir.kanicard.ui.viewmodels.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     navController: NavHostController,
     scrollBehavior: TopAppBarScrollBehavior,
-    viewModel: ProfileViewModel = hiltViewModel()
+//    viewModel: ProfileViewModel = hiltViewModel()
 ) {
-    val profile by viewModel.profileEntity.collectAsStateWithLifecycle()
 
-    val currentBackStack by navController.currentBackStackEntryAsState()
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = stringResource(R.string.profile),
-                scrollBehavior = scrollBehavior,
-                onBack = {
-                    navController.navigateUp()
-                }
-            )
-        }
-    ) { contentPadding ->
-        ScrollbarLazyColumn(
-            contentPadding = contentPadding
-        ) {
-            profile?.let {
-                item { UserProfile(profileEntity = it) }
-            }
-        }
-    }
 }
 
 @Composable

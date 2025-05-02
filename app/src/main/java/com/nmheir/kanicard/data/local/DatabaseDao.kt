@@ -5,14 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Transaction
-import androidx.room.Update
 import androidx.room.Upsert
-import com.nmheir.kanicard.core.domain.fsrs.model.ReviewLog
-import com.nmheir.kanicard.data.entities.AccountSessionEntity
-import com.nmheir.kanicard.data.entities.DownloadedCardEntity
-import com.nmheir.kanicard.data.entities.DownloadedDeckEntity
-import com.nmheir.kanicard.data.entities.DownloadedDeckWithCards
 import com.nmheir.kanicard.data.entities.SearchHistoryEntity
 import com.nmheir.kanicard.data.entities.fsrs.FsrsCardEntity
 import com.nmheir.kanicard.data.entities.fsrs.ReviewLogEntity
@@ -26,11 +19,6 @@ interface DatabaseDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(searchHistoryEntity: SearchHistoryEntity)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(accountSessionEntity: AccountSessionEntity)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(importedDeck: DownloadedDeckEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(fsrsCard: FsrsCardEntity)
@@ -51,27 +39,9 @@ interface DatabaseDao {
     /*Delete*/
 
     @Delete
-    fun delete(accountSessionEntity: AccountSessionEntity)
-
-    @Delete
-    fun delete(importedDeck: DownloadedDeckEntity)
-
-    @Delete
     fun delete(searchHistoryEntity: SearchHistoryEntity)
 
     /*Get*/
-
-    @Query("SELECT * FROM downloaded_decks WHERE userId = :userId")
-    fun getDownloadedDecks(userId: String): Flow<List<DownloadedDeckEntity>>
-
-
-    @Query(
-        """
-        SELECT * FROM downloaded_decks WHERE userId = :userId AND id = :deckId
-    """
-    )
-    fun getImportedDeckByID(userId: String, deckId: Long): DownloadedDeckEntity?
-
 
     @Query(
         """
@@ -79,18 +49,6 @@ interface DatabaseDao {
     """
     )
     fun getFsrsCardByDeckId(deckId: Long): Flow<List<FsrsCardEntity>?>
-
-    @Query("SELECT * FROM downloaded_cards WHERE deckId = :deckId")
-    fun getDownloadedCardByDeckId(deckId: Long): Flow<List<DownloadedCardEntity>?>
-
-    /*Transaction*/
-    @Transaction
-    @Query(
-        """
-            SELECT * FROM downloaded_decks WHERE id = :deckId
-    """
-    )
-    fun getDeckWithCards(deckId: Long): Flow<DownloadedDeckWithCards>
 
     @Query("SELECT * FROM review_log")
     fun getReviewLogs() : Flow<List<ReviewLogEntity>>

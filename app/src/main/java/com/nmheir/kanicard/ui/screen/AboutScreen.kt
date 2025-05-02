@@ -8,14 +8,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
-import com.nmheir.kanicard.BuildConfig
 import com.nmheir.kanicard.R
 import com.nmheir.kanicard.core.presentation.components.ScrollbarLazyColumn
 import com.nmheir.kanicard.ui.component.LogoHeader
 import com.nmheir.kanicard.ui.component.TopAppBar
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

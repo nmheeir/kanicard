@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "KaniCard"
 include(":app")
+include(":fsrs")

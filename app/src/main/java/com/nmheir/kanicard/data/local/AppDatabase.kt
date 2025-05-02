@@ -6,13 +6,15 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.nmheir.kanicard.data.converters.Converters
-import com.nmheir.kanicard.data.entities.AccountSessionEntity
-import com.nmheir.kanicard.data.entities.DownloadedCardEntity
-import com.nmheir.kanicard.data.entities.DownloadedDeckEntity
-import com.nmheir.kanicard.data.entities.ProfileEntity
 import com.nmheir.kanicard.data.entities.SearchHistoryEntity
+import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
+import com.nmheir.kanicard.data.entities.deck.DeckConfigEntity
+import com.nmheir.kanicard.data.entities.deck.DeckEntity
 import com.nmheir.kanicard.data.entities.fsrs.FsrsCardEntity
 import com.nmheir.kanicard.data.entities.fsrs.ReviewLogEntity
+import com.nmheir.kanicard.data.entities.note.FieldDefEntity
+import com.nmheir.kanicard.data.entities.note.NoteEntity
+import com.nmheir.kanicard.data.entities.note.NoteTypeEntity
 
 class KaniDatabase(
     private val delegate: InternalDatabase
@@ -38,14 +40,16 @@ class KaniDatabase(
 @Database(
     entities = [
         SearchHistoryEntity::class,
-        AccountSessionEntity::class,
-        ProfileEntity::class,
-        DownloadedDeckEntity::class,
         FsrsCardEntity::class,
-        DownloadedCardEntity::class,
-        ReviewLogEntity::class
+        ReviewLogEntity::class,
+        DeckEntity::class,
+        NoteEntity::class,
+        NoteTypeEntity::class,
+        CardTemplateEntity::class,
+        FieldDefEntity::class,
+        DeckConfigEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
     autoMigrations = [
     ]

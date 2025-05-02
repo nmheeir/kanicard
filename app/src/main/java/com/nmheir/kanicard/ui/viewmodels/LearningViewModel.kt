@@ -1,13 +1,11 @@
 package com.nmheir.kanicard.ui.viewmodels
 
-import androidx.compose.ui.util.fastForEach
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nmheir.kanicard.core.domain.fsrs.algorithm.FSRS
 import com.nmheir.kanicard.core.domain.fsrs.model.FsrsCard
-import com.nmheir.kanicard.core.domain.fsrs.model.Rating
-import com.nmheir.kanicard.data.entities.DownloadedCardEntity
+import com.nmheir.kanicard.data.enums.Rating
 import com.nmheir.kanicard.data.entities.fsrs.FsrsCardEntity
 import com.nmheir.kanicard.data.local.KaniDatabase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +17,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import java.time.OffsetDateTime
 import javax.inject.Inject
 
@@ -39,7 +36,7 @@ class LearningViewModel @Inject constructor(
     val isLoading = MutableStateFlow(false)
 
     //danh sách thẻ trong deck
-    private val cards = MutableStateFlow<List<DownloadedCardEntity>?>(null)
+//    private val cards = MutableStateFlow<List<DownloadedCardEntity>?>(null)
 
     //danh sách thẻ cần học
     private val fsrsCards = MutableStateFlow<List<FsrsCardEntity>?>(null)
@@ -61,7 +58,7 @@ class LearningViewModel @Inject constructor(
                     deckId == null -> return@withContext
                     else -> {
                         //Lấy danh sách thẻ trong deck
-                        cards.value = database.getDownloadedCardByDeckId(deckId).first()
+//                        cards.value = database.getDownloadedCardByDeckId(deckId).first()
                         //Lấy danh sách thẻ cần học
                         fsrsCards.value = database.getFsrsCardByDeckId(deckId).first()
 
@@ -106,18 +103,18 @@ class LearningViewModel @Inject constructor(
      **/
     private suspend fun initialCardIntoFsrs() {
         coroutineScope {
-            cards.value?.fastForEach {
-                val fsrsCardEntity = FsrsCardEntity.createEmpty(
-                    cardId = it.id,
-                    deckId = it.deckId,
-                    now = OffsetDateTime.now()
-                )
-
-                withContext(Dispatchers.IO) {
-                    database.insert(fsrsCardEntity)
-                    Timber.d("Initial card into fsrs: ${fsrsCardEntity.cardId}")
-                }
-            }
+//            cards.value?.fastForEach {
+//                val fsrsCardEntity = FsrsCardEntity.createEmpty(
+//                    cardId = it.id,
+//                    deckId = it.deckId,
+//                    now = OffsetDateTime.now()
+//                )
+//
+//                withContext(Dispatchers.IO) {
+//                    database.insert(fsrsCardEntity)
+//                    Timber.d("Initial card into fsrs: ${fsrsCardEntity.cardId}")
+//                }
+//            }
         }
     }
 
@@ -128,7 +125,7 @@ class LearningViewModel @Inject constructor(
             val reviewLog = recordLog[rating]?.log!!
 
             val fsrsCardEntity = FsrsCardEntity(
-                cardId = cardId,
+                id = cardId,
                 deckId = deckId,
                 due = fsrsCard.due,
                 stability = fsrsCard.stability,

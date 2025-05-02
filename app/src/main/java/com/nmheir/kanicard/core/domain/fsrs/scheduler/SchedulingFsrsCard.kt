@@ -1,11 +1,11 @@
 package com.nmheir.kanicard.core.domain.fsrs.scheduler
 
 import com.nmheir.kanicard.core.domain.fsrs.model.FsrsCard
-import com.nmheir.kanicard.core.domain.fsrs.model.Rating
+import com.nmheir.kanicard.data.enums.Rating
 import com.nmheir.kanicard.core.domain.fsrs.model.RecordLog
 import com.nmheir.kanicard.core.domain.fsrs.model.RecordLogItem
 import com.nmheir.kanicard.core.domain.fsrs.model.ReviewLog
-import com.nmheir.kanicard.core.domain.fsrs.model.State
+import com.nmheir.kanicard.data.enums.State
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 

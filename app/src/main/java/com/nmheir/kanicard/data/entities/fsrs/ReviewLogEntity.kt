@@ -3,19 +3,21 @@ package com.nmheir.kanicard.data.entities.fsrs
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.ForeignKey.Companion.CASCADE
+import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.nmheir.kanicard.core.domain.fsrs.model.Rating
-import com.nmheir.kanicard.core.domain.fsrs.model.State
+import com.nmheir.kanicard.data.enums.Rating
+import com.nmheir.kanicard.data.enums.State
 import java.time.OffsetDateTime
 
 @Entity(
     tableName = "review_log",
     foreignKeys = [ForeignKey(
         entity = FsrsCardEntity::class,
-        parentColumns = ["cardId"],
+        parentColumns = ["id"],
         childColumns = ["fsrsCardId"],
         onDelete = CASCADE
-    )]
+    )],
+    indices = [Index("fsrsCardId")]
 )
 data class ReviewLogEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,

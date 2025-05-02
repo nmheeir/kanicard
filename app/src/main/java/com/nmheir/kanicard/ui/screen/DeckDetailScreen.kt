@@ -25,7 +25,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -53,15 +52,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.nmheir.kanicard.R
 import com.nmheir.kanicard.core.presentation.components.ScrollbarLazyColumn
 import com.nmheir.kanicard.core.presentation.components.flip.Flippable
 import com.nmheir.kanicard.core.presentation.components.flip.rememberFlipController
 import com.nmheir.kanicard.core.presentation.components.padding
-import com.nmheir.kanicard.core.presentation.screens.EmptyScreen
-import com.nmheir.kanicard.core.presentation.screens.EmptyScreenAction
 import com.nmheir.kanicard.data.dto.CardDto
 import com.nmheir.kanicard.data.dto.DeckDetailDto
 import com.nmheir.kanicard.data.dto.DeckDto
@@ -73,7 +69,6 @@ import com.nmheir.kanicard.ui.component.flip.SampleFlipCardFrontSide
 import com.nmheir.kanicard.ui.component.image.CoilImage
 import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
 import com.nmheir.kanicard.ui.viewmodels.DeckDetailViewModel
-import kotlinx.collections.immutable.persistentListOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,42 +78,8 @@ fun DeckDetailScreen(
     viewModel: DeckDetailViewModel = hiltViewModel()
 ) {
 
-    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
-    val deckDetail by viewModel.deckDetail.collectAsStateWithLifecycle()
-    val cards by viewModel.cards.collectAsStateWithLifecycle()
-    val isDeckImported by viewModel.isDeckImported.collectAsStateWithLifecycle()
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        when {
-            isLoading -> {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            }
-
-            deckDetail == null -> {
-                EmptyScreen(
-                    stringRes = R.string.err_unknown,
-                    actions = persistentListOf(
-                        EmptyScreenAction(
-                            stringRes = R.string.action_retry,
-                            icon = R.drawable.ic_refresh,
-                            onClick = { viewModel.refresh() }
-                        )
-                    )
-                )
-            }
-
-            deckDetail != null -> {
-                DeckDetailContent(
-                    cards = cards,
-                    deckDetail = deckDetail!!,
-                    loadMore = { },
-                    onBack = navController::navigateUp,
-                    viewAllCard = { navController.navigate("") }
-                )
-            }
-        }
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

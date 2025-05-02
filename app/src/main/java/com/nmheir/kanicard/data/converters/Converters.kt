@@ -1,8 +1,8 @@
 package com.nmheir.kanicard.data.converters
 
 import androidx.room.TypeConverter
-import com.nmheir.kanicard.core.domain.fsrs.model.Rating
-import com.nmheir.kanicard.core.domain.fsrs.model.State
+import com.nmheir.kanicard.data.enums.Rating
+import com.nmheir.kanicard.data.enums.State
 import java.time.OffsetDateTime
 
 class Converters {

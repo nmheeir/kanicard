@@ -2,24 +2,26 @@ package com.nmheir.kanicard.data.entities.fsrs
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.nmheir.kanicard.core.domain.fsrs.model.State
-import com.nmheir.kanicard.data.entities.DownloadedCardEntity
+import com.nmheir.kanicard.data.enums.State
+import com.nmheir.kanicard.data.entities.deck.DeckEntity
 import java.time.OffsetDateTime
 
 @Entity(
     tableName = "fsrs_card",
     foreignKeys = [
         ForeignKey(
-            entity = DownloadedCardEntity::class,
+            entity = DeckEntity::class,
             parentColumns = ["id"],
-            childColumns = ["cardId"],
+            childColumns = ["deckId"],
             onDelete = ForeignKey.CASCADE
-        )
-    ]
+        ),
+    ],
+    indices = [Index("deckId")]
 )
 data class FsrsCardEntity(
-    @PrimaryKey val cardId: Long,
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val deckId: Long,
     val due: OffsetDateTime,
     val stability: Double,
@@ -32,9 +34,9 @@ data class FsrsCardEntity(
     val lastReview: OffsetDateTime?
 ) {
     companion object {
-        fun createEmpty(cardId: Long, deckId: Long, now: OffsetDateTime): FsrsCardEntity {
+        fun createEmpty(fsrsCardId: Long, deckId: Long, now: OffsetDateTime): FsrsCardEntity {
             return FsrsCardEntity(
-                cardId = cardId,
+                id = fsrsCardId,
                 deckId = deckId,
                 due = now,
                 stability = 0.0,
