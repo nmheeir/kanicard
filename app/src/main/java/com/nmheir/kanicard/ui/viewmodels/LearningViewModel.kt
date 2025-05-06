@@ -135,7 +135,8 @@ class LearningViewModel @Inject constructor(
                 reps = fsrsCard.reps,
                 lapses = fsrsCard.lapses,
                 state = fsrsCard.state,
-                lastReview = reviewLog.review
+                lastReview = reviewLog.review,
+                nId = 0
             )
 
             //thêm vào db

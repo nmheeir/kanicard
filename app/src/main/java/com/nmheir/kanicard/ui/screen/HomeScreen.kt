@@ -52,7 +52,7 @@ import com.nmheir.kanicard.R
 import com.nmheir.kanicard.core.presentation.components.padding
 import com.nmheir.kanicard.data.dto.deck.DeckDto
 import com.nmheir.kanicard.ui.activities.LocalAwareWindowInset
-import com.nmheir.kanicard.ui.component.DeckItem
+//import com.nmheir.kanicard.ui.component.DeckItem
 import com.nmheir.kanicard.ui.component.Gap
 import com.nmheir.kanicard.ui.component.HideOnScrollFAB
 import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
@@ -173,12 +173,12 @@ private fun HomeContent(
                     items = myDecks,
                     key = { it.id }
                 ) {
-                    DeckItem(
+                   /* DeckItem(
                         onClick = { deckId ->
                             navController.navigate("deck/$deckId")
                         },
                         deck = it
-                    )
+                    )*/
                     Spacer(Modifier.height(MaterialTheme.padding.extraSmall))
                 }
             }
@@ -204,7 +204,7 @@ private fun HomeContent(
                     items = allDecks,
                     key = { it.id }
                 ) {
-                    DeckItem(onClick = {}, deck = it)
+//                    DeckItem(onClick = {}, deck = it)
                     Spacer(Modifier.height(MaterialTheme.padding.extraSmall))
                 }
             }

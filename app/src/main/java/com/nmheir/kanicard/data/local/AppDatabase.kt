@@ -64,6 +64,7 @@ abstract class InternalDatabase : RoomDatabase() {
         fun newInstance(context: Context) =
             KaniDatabase(
                 delegate = Room.databaseBuilder(context, InternalDatabase::class.java, DB_NAME)
+                    .addCallback(roomTrigger)
                     .fallbackToDestructiveMigration()
                     .build()
             )

@@ -6,16 +6,17 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import androidx.room.Upsert
+import androidx.room.Update
 import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
 import com.nmheir.kanicard.data.entities.SearchHistoryEntity
 import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
+import com.nmheir.kanicard.data.entities.deck.DeckEntity
 import com.nmheir.kanicard.data.entities.fsrs.FsrsCardEntity
 import com.nmheir.kanicard.data.entities.fsrs.ReviewLogEntity
 import com.nmheir.kanicard.data.entities.note.FieldDefEntity
 import com.nmheir.kanicard.data.entities.note.NoteEntity
 import com.nmheir.kanicard.data.entities.note.NoteTypeEntity
-import com.nmheir.kanicard.data.relations.DeckWithCards
+import com.nmheir.kanicard.data.relations.DeckWithNotesAndTemplates
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -28,6 +29,9 @@ interface DatabaseDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(fsrsCard: FsrsCardEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(deck: DeckEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(note: NoteEntity)
@@ -51,13 +55,49 @@ interface DatabaseDao {
 
 
     /*Update*/
-    @Upsert
-    fun upsert(fsrsCard: FsrsCardEntity)
+    @Update
+    fun update(fsrsCard: FsrsCardEntity)
+
+    @Update
+    fun update(deck: DeckEntity)
+
+    @Update
+    fun update(note: NoteEntity)
+
+    @Update
+    fun update(cardTemplate: CardTemplateEntity)
+
+    @Update
+    fun update(reviewLog: ReviewLogEntity)
+
+    @Update
+    fun update(noteType: NoteTypeEntity)
 
     /*Delete*/
 
     @Delete
     fun delete(searchHistoryEntity: SearchHistoryEntity)
+
+    @Delete
+    fun delete(deck: DeckEntity)
+
+    @Delete
+    fun delete(note: NoteEntity)
+
+    @Delete
+    fun delete(cardTemplate: CardTemplateEntity)
+
+    @Delete
+    fun delete(reviewLog: ReviewLogEntity)
+
+    @Delete
+    fun delete(noteType: NoteTypeEntity)
+
+    @Delete
+    fun delete(fieldDef: FieldDefEntity)
+
+    @Query("DELETE FROM notes WHERE noteId = :noteId")
+    fun deleteNote(noteId: Long)
 
     /*Get*/
 
@@ -74,6 +114,9 @@ interface DatabaseDao {
     @Query("SELECT * FROM note_types")
     fun getNoteTypes(): Flow<List<NoteTypeEntity>?>
 
+    @Query("SELECT * FROM notes WHERE noteId = :noteId")
+    fun getNoteByNoteId(noteId: Long): Flow<NoteEntity?>
+
     @Query("SELECT * FROM field_defs WHERE noteTypeId = :noteTypeId")
     fun getFieldDefByNoteTypeId(noteTypeId: Long): Flow<List<FieldDefEntity>?>
 
@@ -88,9 +131,10 @@ interface DatabaseDao {
     ORDER BY due ASC 
     """
     )
-    fun getDueCard(deckId: Long): Flow<List<FsrsCardEntity>?>
+    fun getDueCardsToday(deckId: Long): Flow<List<FsrsCardEntity>?>
 
-    @Query("""
+    @Query(
+        """
         SELECT
           d.id               AS deckId,
           d.name             AS name,
@@ -120,8 +164,13 @@ interface DatabaseDao {
           ON c.deckId = d.id
         GROUP BY d.id, d.name
         ORDER BY d.name
-    """)
+    """
+    )
     fun getAllDeckWidgetData(): Flow<List<DeckWidgetData>>
 
-    
+
+    @Transaction
+    @Query("SELECT * FROM decks WHERE id = :deckId")
+    fun getDeckWithNoteAndTemplate(deckId: Long) : Flow<DeckWithNotesAndTemplates>
+
 }

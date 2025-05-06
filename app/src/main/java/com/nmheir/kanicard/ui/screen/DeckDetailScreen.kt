@@ -3,25 +3,14 @@ package com.nmheir.kanicard.ui.screen
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.EaseOutExpo
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -29,17 +18,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,22 +35,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.nmheir.kanicard.R
-import com.nmheir.kanicard.core.presentation.components.ScrollbarLazyColumn
-import com.nmheir.kanicard.core.presentation.components.flip.Flippable
-import com.nmheir.kanicard.core.presentation.components.flip.rememberFlipController
 import com.nmheir.kanicard.core.presentation.components.padding
-import com.nmheir.kanicard.data.dto.CardDto
-import com.nmheir.kanicard.data.dto.DeckDetailDto
-import com.nmheir.kanicard.data.dto.deck.DeckDto
 import com.nmheir.kanicard.data.dto.ProfileDto
 import com.nmheir.kanicard.ui.component.Gap
-import com.nmheir.kanicard.ui.component.flip.CardHeight
-import com.nmheir.kanicard.ui.component.flip.SampleFlipCardBackSide
-import com.nmheir.kanicard.ui.component.flip.SampleFlipCardFrontSide
 import com.nmheir.kanicard.ui.component.image.CoilImage
 import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
 import com.nmheir.kanicard.ui.viewmodels.DeckDetailViewModel
@@ -82,7 +57,7 @@ fun DeckDetailScreen(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+/*@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DeckDetailContent(
     cards: List<CardDto>?,
@@ -111,12 +86,12 @@ private fun DeckDetailContent(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
+                    *//*Text(
                         text = deck.title,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.titleLarge
-                    )
+                    )*//*
                 },
                 actions = {
                     IconButton(onClick = {}) {
@@ -144,10 +119,10 @@ private fun DeckDetailContent(
         ) {
             //Deck detail header item
             item {
-                DeckDetailHeaderItem(
+                *//*DeckDetailHeaderItem(
                     deck = deckDetail.toDeck(),
                     profile = profile
-                )
+                )*//*
             }
 
             item {
@@ -203,9 +178,9 @@ private fun DeckDetailContent(
             }
         }
     }
-}
+}*/
 
-@Composable
+/*@Composable
 private fun DeckDetailHeaderItem(
     modifier: Modifier = Modifier,
     deck: DeckDto,
@@ -260,7 +235,7 @@ private fun DeckDetailHeaderItem(
             DeckDetailDescription(description = deck.description ?: "No description")
         }
     }
-}
+}*/
 
 @Composable
 private fun DeckCreator(

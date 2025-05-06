@@ -40,7 +40,7 @@ fun DeckList(modifier: Modifier = Modifier) {
 
 }
 
-@Composable
+/*@Composable
 fun DeckItem(
     modifier: Modifier = Modifier,
     onClick: (Long) -> Unit,
@@ -224,7 +224,7 @@ fun DeckItem(
             }
         }
     }
-}
+}*/
 
 @Composable
 private fun DeckOption(

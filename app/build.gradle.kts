@@ -6,6 +6,7 @@ plugins {
 
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.ksp)
+    kotlin("plugin.serialization") version "2.0.10"
 }
 
 android {
@@ -126,4 +127,7 @@ dependencies {
 
 //    Shimmer
     implementation(libs.shimmer)
+
+    //Serialization
+    implementation(libs.kotlinx.serialization.json)
 }
