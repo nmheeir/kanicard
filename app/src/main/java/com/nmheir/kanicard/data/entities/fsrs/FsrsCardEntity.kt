@@ -16,7 +16,7 @@ import java.time.OffsetDateTime
             entity = DeckEntity::class,
             parentColumns = ["id"],
             childColumns = ["deckId"],
-            onDelete = ForeignKey.CASCADE
+            onDelete = ForeignKey.NO_ACTION
         ),
         ForeignKey(
             entity = NoteEntity::class,

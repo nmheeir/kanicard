@@ -17,6 +17,7 @@ import com.nmheir.kanicard.data.entities.note.FieldDefEntity
 import com.nmheir.kanicard.data.entities.note.NoteEntity
 import com.nmheir.kanicard.data.entities.note.NoteTypeEntity
 import com.nmheir.kanicard.data.relations.DeckWithNotesAndTemplates
+import com.nmheir.kanicard.data.relations.NoteAndTemplate
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -169,8 +170,18 @@ interface DatabaseDao {
     fun getAllDeckWidgetData(): Flow<List<DeckWidgetData>>
 
 
+    //This is for Deck Detail Screen
     @Transaction
     @Query("SELECT * FROM decks WHERE id = :deckId")
-    fun getDeckWithNoteAndTemplate(deckId: Long) : Flow<DeckWithNotesAndTemplates>
+    fun getDeckWithNoteAndTemplate(deckId: Long): Flow<DeckWithNotesAndTemplates>
 
+    //This is for study case
+    @Query("SELECT * FROM notes WHERE noteId IN (:nIds)")
+    fun getNoteAndTemplates(nIds: List<Long>): Flow<List<NoteAndTemplate>>
+
+    @Query("SELECT * FROM field_defs WHERE noteTypeId = :noteTypeId")
+    fun getFieldDefs(noteTypeId: Long): Flow<List<FieldDefEntity>?>
+
+    @Query("SELECT * FROM card_templates WHERE noteTypeId = :noteTypeId")
+    fun getCardTemplate(noteTypeId: Long): Flow<CardTemplateEntity?>
 }
