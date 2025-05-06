@@ -50,7 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.nmheir.kanicard.R
 import com.nmheir.kanicard.core.presentation.components.padding
-import com.nmheir.kanicard.data.dto.DeckDto
+import com.nmheir.kanicard.data.dto.deck.DeckDto
 import com.nmheir.kanicard.ui.activities.LocalAwareWindowInset
 import com.nmheir.kanicard.ui.component.DeckItem
 import com.nmheir.kanicard.ui.component.Gap

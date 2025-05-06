@@ -1,5 +1,6 @@
 package com.nmheir.kanicard.data.dto
 
+import com.nmheir.kanicard.data.dto.deck.DeckDto
 import com.squareup.moshi.Json
 
 data class DeckDetailDto(

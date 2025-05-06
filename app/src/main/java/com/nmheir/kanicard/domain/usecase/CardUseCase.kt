@@ -1,7 +1,7 @@
 package com.nmheir.kanicard.domain.usecase
 
 import com.nmheir.kanicard.data.dto.CardDto
-import com.nmheir.kanicard.di.repository.irepo.ICardRepo
+import com.nmheir.kanicard.domain.repository.ICardRepo
 
 data class CardUseCase(
     val getCardsByDeckId: GetCardsByDeckId

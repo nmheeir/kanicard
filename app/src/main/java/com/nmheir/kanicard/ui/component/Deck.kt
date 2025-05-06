@@ -31,7 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.nmheir.kanicard.R
-import com.nmheir.kanicard.data.dto.DeckDto
+import com.nmheir.kanicard.data.dto.deck.DeckDto
 import com.nmheir.kanicard.ui.component.image.CoilImage
 
 

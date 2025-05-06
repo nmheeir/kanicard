@@ -2,7 +2,7 @@ package com.nmheir.kanicard.utils
 
 import com.nmheir.kanicard.data.dto.CardDto
 import com.nmheir.kanicard.data.dto.DeckDetailDto
-import com.nmheir.kanicard.data.dto.DeckDto
+import com.nmheir.kanicard.data.dto.deck.DeckDto
 import com.nmheir.kanicard.data.dto.ProfileDto
 
 val fakeCardList = listOf(

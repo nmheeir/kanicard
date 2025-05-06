@@ -2,7 +2,7 @@ package com.nmheir.kanicard.ui.viewmodels
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import com.nmheir.kanicard.data.dto.DeckDto
+import com.nmheir.kanicard.data.dto.deck.DeckDto
 import com.nmheir.kanicard.data.local.KaniDatabase
 import com.nmheir.kanicard.domain.usecase.CardUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel

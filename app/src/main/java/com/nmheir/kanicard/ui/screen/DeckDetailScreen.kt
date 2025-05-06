@@ -60,7 +60,7 @@ import com.nmheir.kanicard.core.presentation.components.flip.rememberFlipControl
 import com.nmheir.kanicard.core.presentation.components.padding
 import com.nmheir.kanicard.data.dto.CardDto
 import com.nmheir.kanicard.data.dto.DeckDetailDto
-import com.nmheir.kanicard.data.dto.DeckDto
+import com.nmheir.kanicard.data.dto.deck.DeckDto
 import com.nmheir.kanicard.data.dto.ProfileDto
 import com.nmheir.kanicard.ui.component.Gap
 import com.nmheir.kanicard.ui.component.flip.CardHeight

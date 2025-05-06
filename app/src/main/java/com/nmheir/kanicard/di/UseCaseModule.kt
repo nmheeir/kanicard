@@ -1,6 +1,6 @@
 package com.nmheir.kanicard.di
 
-import com.nmheir.kanicard.di.repository.irepo.ICardRepo
+import com.nmheir.kanicard.domain.repository.ICardRepo
 import com.nmheir.kanicard.domain.usecase.CardUseCase
 import com.nmheir.kanicard.domain.usecase.GetCardsByDeckId
 import dagger.Module

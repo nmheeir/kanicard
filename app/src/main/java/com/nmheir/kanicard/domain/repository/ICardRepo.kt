@@ -1,4 +1,4 @@
-package com.nmheir.kanicard.di.repository.irepo
+package com.nmheir.kanicard.domain.repository
 
 import com.nmheir.kanicard.data.dto.CardDto
 
