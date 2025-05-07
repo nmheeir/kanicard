@@ -5,8 +5,10 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.Transaction
 import androidx.room.Update
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
 import com.nmheir.kanicard.data.entities.SearchHistoryEntity
 import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
@@ -18,6 +20,7 @@ import com.nmheir.kanicard.data.entities.note.NoteEntity
 import com.nmheir.kanicard.data.entities.note.NoteTypeEntity
 import com.nmheir.kanicard.data.relations.DeckWithNotesAndTemplates
 import com.nmheir.kanicard.data.relations.NoteAndTemplate
+import com.nmheir.kanicard.extensions.toSQLiteQuery
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -184,4 +187,11 @@ interface DatabaseDao {
 
     @Query("SELECT * FROM card_templates WHERE noteTypeId = :noteTypeId")
     fun getCardTemplate(noteTypeId: Long): Flow<CardTemplateEntity?>
+
+    @RawQuery
+    fun raw(supportSQLiteQuery: SupportSQLiteQuery): Int
+
+    fun checkpoint() {
+        raw("PRAGMA wal_checkpoint(FULL)".toSQLiteQuery())
+    }
 }

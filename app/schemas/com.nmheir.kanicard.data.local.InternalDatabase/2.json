@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "e3622f0ccfdbf626a71615994cf3caa0",
+    "identityHash": "cff67e03a59ebd6ec3c99f658d6a9aa9",
     "entities": [
       {
         "tableName": "search_history",
@@ -42,7 +42,7 @@
       },
       {
         "tableName": "fsrs_card",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `deckId` INTEGER NOT NULL, `nId` INTEGER NOT NULL, `due` TEXT NOT NULL, `stability` REAL NOT NULL, `difficulty` REAL NOT NULL, `elapsedDays` INTEGER NOT NULL, `scheduledDays` INTEGER NOT NULL, `reps` INTEGER NOT NULL, `lapses` INTEGER NOT NULL, `state` TEXT NOT NULL, `lastReview` TEXT, FOREIGN KEY(`deckId`) REFERENCES `decks`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`nId`) REFERENCES `notes`(`noteId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `deckId` INTEGER NOT NULL, `nId` INTEGER NOT NULL, `due` TEXT NOT NULL, `stability` REAL NOT NULL, `difficulty` REAL NOT NULL, `elapsedDays` INTEGER NOT NULL, `scheduledDays` INTEGER NOT NULL, `reps` INTEGER NOT NULL, `lapses` INTEGER NOT NULL, `state` TEXT NOT NULL, `lastReview` TEXT, FOREIGN KEY(`deckId`) REFERENCES `decks`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`nId`) REFERENCES `notes`(`noteId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -146,7 +146,7 @@
         "foreignKeys": [
           {
             "table": "decks",
-            "onDelete": "CASCADE",
+            "onDelete": "NO ACTION",
             "onUpdate": "NO ACTION",
             "columns": [
               "deckId"
@@ -322,11 +322,17 @@
       },
       {
         "tableName": "notes",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`noteId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `templateId` INTEGER NOT NULL, `fieldJson` TEXT NOT NULL, `createdTime` TEXT NOT NULL, `modifiedTime` TEXT NOT NULL, FOREIGN KEY(`templateId`) REFERENCES `card_templates`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`noteId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `deckId` INTEGER NOT NULL, `templateId` INTEGER NOT NULL, `fieldJson` TEXT NOT NULL, `createdTime` TEXT NOT NULL, `modifiedTime` TEXT NOT NULL, FOREIGN KEY(`templateId`) REFERENCES `card_templates`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`deckId`) REFERENCES `decks`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "noteId",
             "columnName": "noteId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deckId",
+            "columnName": "deckId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -375,10 +381,21 @@
         "foreignKeys": [
           {
             "table": "card_templates",
-            "onDelete": "CASCADE",
+            "onDelete": "NO ACTION",
             "onUpdate": "NO ACTION",
             "columns": [
               "templateId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "decks",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "deckId"
             ],
             "referencedColumns": [
               "id"
@@ -432,7 +449,7 @@
       },
       {
         "tableName": "card_templates",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `noteTypeId` INTEGER NOT NULL, `name` TEXT NOT NULL, `qstFt` TEXT NOT NULL, `ansFt` TEXT NOT NULL, FOREIGN KEY(`noteTypeId`) REFERENCES `note_types`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `noteTypeId` INTEGER NOT NULL, `name` TEXT NOT NULL, `qstFt` TEXT NOT NULL, `ansFt` TEXT NOT NULL, FOREIGN KEY(`noteTypeId`) REFERENCES `note_types`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT )",
         "fields": [
           {
             "fieldPath": "id",
@@ -485,7 +502,7 @@
         "foreignKeys": [
           {
             "table": "note_types",
-            "onDelete": "CASCADE",
+            "onDelete": "RESTRICT",
             "onUpdate": "NO ACTION",
             "columns": [
               "noteTypeId"
@@ -698,7 +715,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e3622f0ccfdbf626a71615994cf3caa0')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cff67e03a59ebd6ec3c99f658d6a9aa9')"
     ]
   }
 }
