@@ -52,8 +52,9 @@ fun DeckDetailScreen(
     scrollBehavior: TopAppBarScrollBehavior,
     viewModel: DeckDetailViewModel = hiltViewModel()
 ) {
-
-
+    Text(
+        text = "Deck Detail Screen"
+    )
 
 }
 

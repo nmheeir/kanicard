@@ -2,6 +2,10 @@ package com.nmheir.kanicard.utils
 
 import com.nmheir.kanicard.data.dto.CardDto
 import com.nmheir.kanicard.data.dto.ProfileDto
+import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import kotlin.random.Random
 
 val fakeCardList = listOf(
     CardDto(
@@ -85,6 +89,22 @@ val fakeCardList = listOf(
         "2024-02-04"
     )
 )
+
+val fakeDeckWidgetData = List(10) { index ->
+    DeckWidgetData(
+        deckId = index.toLong(),
+        name = "Deck $index",
+        reviewCount = Random.nextInt(0, 100),
+        learnCount = Random.nextInt(0, 50),
+        newCount = Random.nextInt(0, 30),
+        dueToday = Random.nextInt(0, 20),
+        lastReview = if (Random.nextBoolean()) {
+            OffsetDateTime.now(ZoneOffset.UTC).minusDays(Random.nextLong(0, 30))
+        } else {
+            null
+        }
+    )
+}
 
 val fakeProfileDto = ProfileDto(
     uid = "uid",
