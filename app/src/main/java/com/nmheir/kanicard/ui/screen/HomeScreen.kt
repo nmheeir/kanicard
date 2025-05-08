@@ -1,11 +1,15 @@
+@file:kotlin.OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+
 package com.nmheir.kanicard.ui.screen
 
 //import com.nmheir.kanicard.ui.component.DeckItem
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,7 +35,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -39,6 +45,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -54,6 +62,7 @@ import com.nmheir.kanicard.R
 import com.nmheir.kanicard.core.presentation.components.padding
 import com.nmheir.kanicard.core.presentation.utils.hozPadding
 import com.nmheir.kanicard.core.presentation.utils.secondaryItemAlpha
+import com.nmheir.kanicard.data.dto.CollectionWithDeckWidgetData
 import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
 import com.nmheir.kanicard.data.entities.deck.CollectionEntity
 import com.nmheir.kanicard.ui.activities.LocalAwareWindowInset
@@ -64,11 +73,16 @@ import com.nmheir.kanicard.ui.component.Gap
 import com.nmheir.kanicard.ui.component.HideOnScrollFAB
 import com.nmheir.kanicard.ui.component.ListDialog
 import com.nmheir.kanicard.ui.component.TextFieldDialog
+import com.nmheir.kanicard.ui.component.widget.PreferenceEntry
+import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
 import com.nmheir.kanicard.ui.viewmodels.HomeUiAction
 import com.nmheir.kanicard.ui.viewmodels.HomeUiEvent
 import com.nmheir.kanicard.ui.viewmodels.HomeViewModel
 import com.nmheir.kanicard.utils.ObserveAsEvents
 import com.nmheir.kanicard.utils.isScrollingUp
+import kotlinx.coroutines.delay
+import kotlinx.serialization.serializerOrNull
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,8 +96,13 @@ fun HomeScreen(
 
     val lazyListState = rememberLazyListState()
 
+    val error by viewModel.error.collectAsStateWithLifecycle()
     val deckWidgetData by viewModel.deckWidgetData.collectAsStateWithLifecycle()
     val collections by viewModel.collections.collectAsStateWithLifecycle()
+
+    val collectionWithDeckWidgetData by viewModel.collectionWithWidgetDecksFlow.collectAsStateWithLifecycle()
+
+    Timber.d(collectionWithDeckWidgetData.toString())
 
     var showOption by remember { mutableStateOf(false) }
 
@@ -95,12 +114,11 @@ fun HomeScreen(
         contentAlignment = Alignment.TopStart,
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = MaterialTheme.padding.small)
     ) {
 
         HomeContent(
             state = lazyListState,
-            data = deckWidgetData,
+            collectionWithDeckWidgetData = collectionWithDeckWidgetData,
             navController = navController,
             action = viewModel::onAction
         )
@@ -128,7 +146,7 @@ fun HomeScreen(
     }
 
     var showDialog by remember { mutableStateOf(false) }
-    var dialogMsg by remember { mutableStateOf<Int>(0) }
+    var dialogMsg by remember { mutableIntStateOf(0) }
     ObserveAsEvents(viewModel.channel) {
         when (it) {
             is HomeUiEvent.Failure -> {
@@ -139,6 +157,14 @@ fun HomeScreen(
             is HomeUiEvent.Success -> {
 
             }
+        }
+    }
+
+    if (error != null) {
+        DefaultDialog(
+            onDismiss = { viewModel.onAction(HomeUiAction.ErrorAccept) }
+        ) {
+            Text(text = error.toString())
         }
     }
 
@@ -155,7 +181,7 @@ fun HomeScreen(
 private fun HomeContent(
     modifier: Modifier = Modifier,
     state: LazyListState,
-    data: List<DeckWidgetData>,
+    collectionWithDeckWidgetData: List<CollectionWithDeckWidgetData>,
     navController: NavHostController,
     action: (HomeUiAction) -> Unit
 ) {
@@ -166,64 +192,117 @@ private fun HomeContent(
         modifier = modifier
     ) {
         items(
-            items = data,
-            key = { it.deckId }
-        ) { deckWidgetData ->
-            Box {
-                var showOptionDialog by rememberSaveable { mutableStateOf(false) }
-                var showEditDialog by remember { mutableStateOf(false) }
-                DeckItem(
-                    deck = deckWidgetData,
-                    onLearn = { navController.navigate("learn/${deckWidgetData.deckId}") },
-                    onEdit = { showEditDialog = true },
-                    onView = { navController.navigate("deck/1") },
-                    onOption = { showOptionDialog = true }
+            items = collectionWithDeckWidgetData,
+            key = { it.collection.id }
+        ) {
+            CollectionWithDeck(
+                data = it,
+                onLearn = { navController.navigate("learn/${it}") },
+                onView = { navController.navigate("deck/${it}") },
+                action = action
+            )
+        }
+    }
+}
+
+
+@Composable
+private fun CollectionWithDeck(
+    data: CollectionWithDeckWidgetData,
+    onLearn: (Long) -> Unit,
+    onView: (Long) -> Unit,
+    action: (HomeUiAction) -> Unit
+) {
+    var showMore by rememberSaveable { mutableStateOf(false) }
+    Column(
+        modifier = Modifier.animateContentSize()
+    ) {
+        PreferenceEntry(
+            title = { Text(text = "${data.collection.name} (${data.deckWidgetDatas.size})") },
+            icon = {
+                Icon(
+                    painterResource(if (showMore) R.drawable.ic_folder_open else R.drawable.ic_folder),
+                    null
                 )
-                if (showOptionDialog) {
-                    var showDeleteDialog by remember { mutableStateOf(false) }
-                    DeckOptionDialog(
-                        onDismiss = { showOptionDialog = false },
-                        deckName = deckWidgetData.name,
-                        onClick = {
-                            when (it) {
-                                DeckOptions.Edit -> {}
-                                DeckOptions.Config -> {}
-                                DeckOptions.Delete -> {
-                                    showDeleteDialog = true
+            },
+            trailingContent = {
+                Icon(
+                    painterResource(if (showMore) R.drawable.ic_arrow_up else R.drawable.ic_arrow_down),
+                    null
+                )
+            },
+            onClick = { showMore = !showMore }
+        )
+        if (showMore) {
+            data.deckWidgetDatas.forEach { deckWidgetData ->
+                Gap(MaterialTheme.padding.extraSmall)
+                Box {
+                    var showOptionDialog by remember { mutableStateOf(false) }
+                    var showEditDialog by remember { mutableStateOf(false) }
+                    DeckItem(
+                        modifier = Modifier
+                            .hozPadding()
+                        /*.combinedClickable(
+                            enabled = true,
+                            onClick = { onLearn(deckWidgetData.deckId) },
+                            onLongClick = { showOptionDialog = true }
+                        )*/,
+                        deck = deckWidgetData,
+                        onLearn = { onLearn(deckWidgetData.deckId) },
+                        onEdit = { showEditDialog = true },
+                        onView = { onView(deckWidgetData.deckId) },
+                        onOption = { showOptionDialog = true }
+                    )
+                    if (showOptionDialog) {
+                        var showDeleteDialog by remember { mutableStateOf(false) }
+                        DeckOptionDialog(
+                            onDismiss = { showOptionDialog = false },
+                            deckName = deckWidgetData.name,
+                            onClick = {
+                                when (it) {
+                                    DeckOptions.Edit -> {
+                                        showEditDialog = true
+                                    }
+
+                                    DeckOptions.Config -> {}
+                                    DeckOptions.Delete -> {
+                                        showDeleteDialog = true
+                                    }
                                 }
                             }
-                        }
-                    )
-                    if (showDeleteDialog) {
-                        AlertDialog(
-                            onDismiss = { showDeleteDialog = false },
-                            onConfirm = {},
-                            icon = { Icon(painterResource(R.drawable.ic_delete), null) }
-                        ) {
-                            Text(
-                                text = stringResource(R.string.alert_delete_deck),
-                                style = MaterialTheme.typography.bodyLarge
-                            )
+                        )
+                        if (showDeleteDialog) {
+                            AlertDialog(
+                                onDismiss = { showDeleteDialog = false },
+                                onConfirm = {
+                                    action(HomeUiAction.DeleteDeck(deckWidgetData.deckId))
+                                },
+                                icon = { Icon(painterResource(R.drawable.ic_delete), null) }
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.alert_delete_deck),
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
                         }
                     }
-                }
-                if (showEditDialog) {
-                    TextFieldDialog(
-                        onDismiss = { showEditDialog = false },
-                        title = { Text(text = stringResource(R.string.label_edit_deck_name)) },
-                        initialTextFieldValue = TextFieldValue(
-                            text = deckWidgetData.name,
-                            selection = TextRange(deckWidgetData.name.length)
-                        ),
-                        onDone = {
-//                            action(HomeUiAction.UpdateDeckName(deckWidgetData.deckId, it))
-                        }
-                    )
+                    if (showEditDialog) {
+                        TextFieldDialog(
+                            onDismiss = { showEditDialog = false },
+                            title = { Text(text = stringResource(R.string.label_edit_deck_name)) },
+                            initialTextFieldValue = TextFieldValue(
+                                text = deckWidgetData.name,
+                                selection = TextRange(deckWidgetData.name.length)
+                            ),
+                            onDone = {
+                                action(HomeUiAction.UpdateDeckName(deckWidgetData.deckId, it))
+                            }
+                        )
+                    }
                 }
             }
         }
     }
-
 }
 
 @Composable
@@ -239,7 +318,7 @@ private fun DeckOptionDialog(
             Text(
                 text = deckName,
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
                     .fillMaxWidth()
                     .hozPadding()
@@ -340,6 +419,12 @@ private fun CreateDeckDialog(
         Column(
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small)
         ) {
+            val focusRequest = remember { FocusRequester() }
+            LaunchedEffect(Unit) {
+                delay(300)
+                focusRequest.requestFocus()
+            }
+
             var selectedCollection by remember { mutableStateOf<CollectionEntity?>(null) }
             val (name, onNameChange) = remember { mutableStateOf("") }
             OutlinedTextField(
@@ -347,7 +432,9 @@ private fun CreateDeckDialog(
                 onValueChange = onNameChange,
                 singleLine = true,
                 label = { Text(text = stringResource(R.string.label_deck_name)) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequest)
             )
 
             Box {
@@ -413,6 +500,7 @@ private fun CreateDeckDialog(
                 enabled = selectedCollection != null && name.isNotEmpty(),
                 onClick = {
                     action(HomeUiAction.CreateNewDeck(name, selectedCollection!!.id))
+                    onDismiss()
                 },
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.fillMaxWidth()

@@ -19,6 +19,7 @@ import com.nmheir.kanicard.data.entities.fsrs.ReviewLogEntity
 import com.nmheir.kanicard.data.entities.note.FieldDefEntity
 import com.nmheir.kanicard.data.entities.note.NoteEntity
 import com.nmheir.kanicard.data.entities.note.NoteTypeEntity
+import com.nmheir.kanicard.data.relations.CollectionWithDecks
 import com.nmheir.kanicard.data.relations.DeckWithNotesAndTemplates
 import com.nmheir.kanicard.data.relations.NoteAndTemplate
 import com.nmheir.kanicard.extensions.toSQLiteQuery
@@ -110,6 +111,9 @@ interface DatabaseDao {
     @Query("DELETE FROM notes WHERE noteId = :noteId")
     fun deleteNote(noteId: Long)
 
+    @Query("DELETE FROM decks WHERE id = :id")
+    suspend fun deleteDeck(id: Long)
+
     /*Get*/
 
     @Query(
@@ -134,8 +138,6 @@ interface DatabaseDao {
     @Query("SELECT * FROM card_templates WHERE noteTypeId = :noteTypeId")
     fun getCardTemplateByNoteTypeId(noteTypeId: Long): Flow<CardTemplateEntity?>
 
-    @Query("SELECT * FROM collections")
-    fun getCollections(): Flow<List<CollectionEntity>>
 
     @Query(
         """
@@ -213,6 +215,17 @@ interface DatabaseDao {
         """
     )
     suspend fun deck(id: Long?, name: String?): DeckEntity?
+
+    /*--------------------------------*/
+    /*Collection*/
+    @Query("SELECT * FROM collections")
+    fun getCollections(): Flow<List<CollectionEntity>>
+
+    @Transaction
+    @Query("SELECT * FROM collections")
+    fun getAllCollectionsWithDecks(): Flow<List<CollectionWithDecks>>
+
+    /*--------------------------------*/
 
     @RawQuery
     fun raw(supportSQLiteQuery: SupportSQLiteQuery): Int

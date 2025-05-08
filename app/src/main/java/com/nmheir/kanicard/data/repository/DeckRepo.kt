@@ -27,6 +27,10 @@ class DeckRepo(
         database.delete(deck.toDeckEntity())
     }
 
+    override suspend fun deleteById(id: Long) {
+        database.deleteDeck(id)
+    }
+
     override suspend fun update(deck: DeckDto) {
         database.update(deck.toDeckEntity())
     }
@@ -37,14 +41,6 @@ class DeckRepo(
 
     override fun getAllCollections(): Flow<List<CollectionEntity>> {
         return database.getCollections()
-    }
-
-    override fun getDeckById(deckId: Long): DeckDto? {
-        return database.getDeckById(deckId)?.toDeckDto()
-    }
-
-    override fun getDeckByName(name: String): DeckDto? {
-        return database.getDeckByName(name)?.toDeckDto()
     }
 
     override suspend fun queryDeck(
