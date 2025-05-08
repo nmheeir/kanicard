@@ -14,7 +14,7 @@ import com.nmheir.kanicard.data.entities.note.NoteTypeEntity
             entity = NoteTypeEntity::class,
             parentColumns = ["id"],
             childColumns = ["noteTypeId"],
-            onDelete = ForeignKey.CASCADE
+            onDelete = ForeignKey.RESTRICT
         )
     ],
     indices = [Index("noteTypeId")]

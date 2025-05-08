@@ -11,7 +11,6 @@ import javax.inject.Inject
 @HiltViewModel
 class DeckDetailViewModel @Inject constructor(
     private val database: KaniDatabase,
-    private val cardUseCase: CardUseCase,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 

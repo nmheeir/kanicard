@@ -5,8 +5,12 @@ import com.nmheir.kanicard.data.local.InternalDatabase
 import com.nmheir.kanicard.data.local.KaniDatabase
 import com.nmheir.kanicard.data.repository.CardRepo
 import com.nmheir.kanicard.data.repository.DeckRepo
+import com.nmheir.kanicard.data.repository.NoteRepo
+import com.nmheir.kanicard.data.repository.StatisticRepo
 import com.nmheir.kanicard.domain.repository.ICardRepo
 import com.nmheir.kanicard.domain.repository.IDeckRepo
+import com.nmheir.kanicard.domain.repository.INoteRepo
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,13 +30,19 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideDeckRepo(): IDeckRepo {
-        return DeckRepo()
+    fun provideDeckRepo(database: KaniDatabase): IDeckRepo {
+        return DeckRepo(database)
     }
 
     @Provides
     @Singleton
-    fun provideCardRepo(): ICardRepo {
-        return CardRepo()
+    fun provideCardRepo(database: KaniDatabase): ICardRepo {
+        return CardRepo(database)
+    }
+
+    @Provides
+    @Singleton
+    fun provideNoteRepo(database: KaniDatabase): INoteRepo {
+        return NoteRepo(database)
     }
 }

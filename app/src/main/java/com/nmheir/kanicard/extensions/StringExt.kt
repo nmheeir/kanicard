@@ -1,5 +1,7 @@
 package com.nmheir.kanicard.extensions
 
+import androidx.sqlite.db.SimpleSQLiteQuery
+
 inline fun <reified T : Enum<T>> String?.toEnum(defaultValue: T): T =
     if (this == null) defaultValue
     else try {
@@ -7,3 +9,5 @@ inline fun <reified T : Enum<T>> String?.toEnum(defaultValue: T): T =
     } catch (e: IllegalArgumentException) {
         defaultValue
     }
+
+fun String.toSQLiteQuery(): SimpleSQLiteQuery = SimpleSQLiteQuery(this)

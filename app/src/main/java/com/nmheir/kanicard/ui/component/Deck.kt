@@ -2,19 +2,22 @@ package com.nmheir.kanicard.ui.component
 
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Badge
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -24,201 +27,152 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nmheir.kanicard.R
-import com.nmheir.kanicard.data.dto.deck.DeckDto
-import com.nmheir.kanicard.ui.component.image.CoilImage
-
-
-@Composable
-fun DeckList(modifier: Modifier = Modifier) {
-
-}
+import com.nmheir.kanicard.core.presentation.components.padding
+import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
+import com.nmheir.kanicard.extensions.relativeTime
+import com.nmheir.kanicard.ui.theme.KaniTheme
+import com.nmheir.kanicard.utils.fakeDeckWidgetData
 
 @Composable
 fun DeckItem(
     modifier: Modifier = Modifier,
-    onClick: (Long) -> Unit,
-    deck: DeckDto
+    deck: DeckWidgetData,
+    onLearn: () -> Unit,
+    onOption: () -> Unit,
+    onEdit: () -> Unit,
+    onView: () -> Unit
 ) {
-    var expanded by rememberSaveable {
-        mutableStateOf(false)
-    }
+    var showDetail by rememberSaveable { mutableStateOf(false) }
     Card(
-        onClick = { onClick(deck.id) },
-        shape = MaterialTheme.shapes.medium,
-        modifier = Modifier
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ),
+        onClick = onLearn,
+        shape = MaterialTheme.shapes.small,
+        modifier = modifier
             .animateContentSize()
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = modifier
-                .padding(horizontal = 8.dp, vertical = 8.dp)
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
+            modifier = Modifier.padding(MaterialTheme.padding.small)
         ) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall)
             ) {
-                CoilImage(
-                    imageUrl = deck.thumbnail ?: "",
-                    modifier = Modifier
-                        .size(96.dp)
-                        .clip(MaterialTheme.shapes.medium)
-                )
                 Column(
-                    modifier = Modifier
-                        .weight(1f)
+                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
+                    modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = deck.title,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 2,
+                        text = deck.name,
                         style = MaterialTheme.typography.titleMedium
                     )
-                }
-
-                IconButton(
-                    onClick = {
-                        expanded = !expanded
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall)
+                    ) {
+                        Icon(painterResource(R.drawable.ic_schedule), null)
+                        Text(
+                            text = if (deck.lastReview == null) {
+                                stringResource(R.string.info_no_review)
+                            } else {
+                                """${stringResource(R.string.info_last_review)} ${deck.lastReview.relativeTime()}"""
+                            },
+                            style = MaterialTheme.typography.labelMedium
+                        )
                     }
+                }
+                IconButton(
+                    onClick = { showDetail = !showDetail }
                 ) {
                     Icon(
-                        painter = if (expanded) painterResource(R.drawable.ic_arrow_up) else painterResource(
-                            R.drawable.ic_arrow_down
-                        ),
-                        contentDescription = null
+                        painterResource(if (!showDetail) R.drawable.ic_arrow_down else R.drawable.ic_arrow_up),
+                        null
                     )
                 }
             }
-
-            if (expanded) {
-                HorizontalDivider(
-                    thickness = 2.dp,
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                StatBadge(
+                    count = deck.newCount,
+                    label = stringResource(R.string.label_new),
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
                 )
+                StatBadge(
+                    count = deck.reviewCount,
+                    label = stringResource(R.string.label_reviewing),
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+                StatBadge(
+                    count = deck.learnCount,
+                    label = stringResource(R.string.label_learning),
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                )
+            }
+
+            if (showDetail) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
+                    horizontalAlignment = Alignment.Start,
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "Due Today",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-
-                        Text(
-                            text = "220",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.SemiBold
-                        )
-
-                        Text(
-                            text = "Cards"
-                        )
-                    }
-
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "Studied Today",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-
-                        Text(
-                            text = "73",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.SemiBold
-                        )
-
-                        Text(
-                            text = "Cards"
-                        )
-                    }
-
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "New cards",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-
-                        Text(
-                            text = "123",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.SemiBold
-                        )
-
-                        Text(
-                            text = "Cards"
-                        )
-                    }
-                }
-                HorizontalDivider(
-                    thickness = 2.dp,
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                )
-
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    DeckOption(
-                        onClick = {},
-                        option = "View",
-                        icon = R.drawable.ic_visibility
+                    HorizontalDivider()
+                    StatisticRow(
+                        label = stringResource(R.string.label_due_today),
+                        count = deck.dueToday
                     )
-
-                    DeckOption(
-                        onClick = {},
-                        option = "Edit",
-                        icon = R.drawable.ic_edit
-                    )
-
-                    DeckOption(
-                        onClick = {
-
-                        },
-                        option = "Options",
-                        icon = R.drawable.ic_tune
-                    )
-
-                    TextButton(
-                        shape = MaterialTheme.shapes.medium,
-                        onClick = {
-
-                        },
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.inversePrimary,
-                            containerColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
+                    HorizontalDivider()
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(
-                            text = stringResource(R.string.learn),
-                            style = MaterialTheme.typography.bodySmall
-                        )
+                        Row(
+                            modifier = Modifier.weight(3f)
+                        ) {
+                            DeckFunction(
+                                label = stringResource(R.string.action_view),
+                                iconRes = R.drawable.ic_visibility,
+                                onClick = onView,
+                                modifier = Modifier.weight(1f)
+                            )
+                            DeckFunction(
+                                label = stringResource(R.string.action_edit),
+                                iconRes = R.drawable.ic_edit,
+                                onClick = onEdit,
+                                modifier = Modifier.weight(1f)
+                            )
+                            DeckFunction(
+                                label = stringResource(R.string.action_options),
+                                iconRes = R.drawable.ic_tune,
+                                onClick = onOption,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        TextButton(
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            ),
+                            shape = MaterialTheme.shapes.small,
+                            onClick = onLearn,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(text = stringResource(R.string.action_learn))
+                        }
                     }
                 }
             }
@@ -227,33 +181,98 @@ fun DeckItem(
 }
 
 @Composable
-private fun DeckOption(
+private fun DeckFunction(
     modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-    @DrawableRes icon: Int,
-    option: String
+    label: String,
+    @DrawableRes iconRes: Int,
+    onClick: () -> Unit
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .clickable {
-                onClick()
-            }
+    Button(
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        ),
+        onClick = onClick,
+        modifier = modifier,
+        contentPadding = PaddingValues(0.dp)
     ) {
-        Icon(
-            painter = painterResource(icon),
-            contentDescription = null
-        )
-        Gap(width = 4.dp)
+        Icon(painterResource(iconRes), null)
+        Gap(MaterialTheme.padding.extraSmall)
+        Text(text = label, style = MaterialTheme.typography.labelMedium)
+    }
+//    Row(
+//        verticalAlignment = Alignment.CenterVertically,
+//        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall),
+//        modifier = modifier
+//            .clickable { onClick() }
+//    ) {
+//
+//    }
+}
+
+@Composable
+private fun StatisticRow(
+    modifier: Modifier = Modifier,
+    label: String,
+    count: Int
+) {
+    ProvideTextStyle(
+        value = MaterialTheme.typography.labelMedium
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = label,
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = count.toString(),
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = "Cards",
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+private fun StatBadge(
+    modifier: Modifier = Modifier,
+    count: Int,
+    label: String,
+    containerColor: Color,
+    contentColor: Color
+) {
+    Badge(
+        containerColor = containerColor,
+        contentColor = contentColor,
+        modifier = modifier
+    ) {
         Text(
-            text = option,
-            style = MaterialTheme.typography.bodySmall
+            text = "$count $label",
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.padding(MaterialTheme.padding.extraSmall)
         )
     }
 }
 
-enum class DeckOption {
-    VIEW,
-    EDIT,
-    OPTIONS
+@Preview(showBackground = true)
+@Composable
+private fun Test() {
+    KaniTheme {
+        DeckItem(
+            deck = fakeDeckWidgetData[0],
+            onLearn = {},
+            onOption = {},
+            onEdit = {},
+            onView = {}
+        )
+    }
 }

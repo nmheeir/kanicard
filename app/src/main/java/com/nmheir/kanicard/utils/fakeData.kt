@@ -1,9 +1,11 @@
 package com.nmheir.kanicard.utils
 
 import com.nmheir.kanicard.data.dto.CardDto
-import com.nmheir.kanicard.data.dto.DeckDetailDto
-import com.nmheir.kanicard.data.dto.deck.DeckDto
 import com.nmheir.kanicard.data.dto.ProfileDto
+import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import kotlin.random.Random
 
 val fakeCardList = listOf(
     CardDto(
@@ -88,19 +90,21 @@ val fakeCardList = listOf(
     )
 )
 
-val fakeDeckDto = DeckDto(
-    id = 1,
-    creator = "nmheir",
-    title = "What is Kotlin?",
-    description = "Lorem ipsum odor amet, consectetuer adipiscing elit. Per aliquet metus massa amet ultricies malesuada primis. Imperdiet nunc eros quisque magna erat sapien cras montes egestas. Sociosqu metus metus primis laoreet; elit curabitur. Penatibus adipiscing sodales interdum lobortis orci penatibus augue imperdiet. Ipsum dictumst quam ridiculus, habitant interdum primis nam convallis. Quisque erat vivamus vitae eros habitasse consequat torquent. Pellentesque condimentum vehicula dui rutrum amet orci orci. Imperdiet mus aptent sed dis erat.\n" +
-            "\n" +
-            "Elit mauris ante fringilla est habitant; netus per leo malesuada. Vulputate nam mus himenaeos maecenas duis, phasellus sollicitudin pellentesque erat. Magna eros non fermentum commodo cubilia dictum adipiscing sollicitudin netus. Odio placerat natoque cubilia urna semper convallis porta netus. Vulputate lacus mi est purus donec orci libero. Odio volutpat sapien malesuada aenean, nostra imperdiet maecenas.",
-    thumbnail = "https://picsum.photos/200/301",
-    createdAt = "2024-02-04",
-    lastUpdated = "2024-02-04",
-    totalCard = 10,
-    isPublic = true
-)
+val fakeDeckWidgetData = List(10) { index ->
+    DeckWidgetData(
+        deckId = index.toLong(),
+        name = "Deck $index",
+        reviewCount = Random.nextInt(0, 100),
+        learnCount = Random.nextInt(0, 50),
+        newCount = Random.nextInt(0, 30),
+        dueToday = Random.nextInt(0, 20),
+        lastReview = if (Random.nextBoolean()) {
+            OffsetDateTime.now(ZoneOffset.UTC).minusDays(Random.nextLong(0, 30))
+        } else {
+            null
+        }
+    )
+}
 
 val fakeProfileDto = ProfileDto(
     uid = "uid",
