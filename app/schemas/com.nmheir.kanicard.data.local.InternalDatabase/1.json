@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "d63b5dcf1a3c6944e9704c54e1e8b06d",
+    "identityHash": "2b70d209b41872e9636651398e3f77a5",
     "entities": [
       {
         "tableName": "search_history",
@@ -42,7 +42,7 @@
       },
       {
         "tableName": "fsrs_card",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `deckId` INTEGER NOT NULL, `due` TEXT NOT NULL, `stability` REAL NOT NULL, `difficulty` REAL NOT NULL, `elapsedDays` INTEGER NOT NULL, `scheduledDays` INTEGER NOT NULL, `reps` INTEGER NOT NULL, `lapses` INTEGER NOT NULL, `state` TEXT NOT NULL, `lastReview` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`deckId`) REFERENCES `decks`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `deckId` INTEGER NOT NULL, `nId` INTEGER NOT NULL, `due` TEXT NOT NULL, `stability` REAL NOT NULL, `difficulty` REAL NOT NULL, `elapsedDays` INTEGER NOT NULL, `scheduledDays` INTEGER NOT NULL, `reps` INTEGER NOT NULL, `lapses` INTEGER NOT NULL, `state` TEXT NOT NULL, `lastReview` TEXT, FOREIGN KEY(`deckId`) REFERENCES `decks`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`nId`) REFERENCES `notes`(`noteId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -53,6 +53,12 @@
           {
             "fieldPath": "deckId",
             "columnName": "deckId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nId",
+            "columnName": "nId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -112,16 +118,35 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
             "id"
           ]
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_fsrs_card_deckId",
+            "unique": false,
+            "columnNames": [
+              "deckId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_fsrs_card_deckId` ON `${TABLE_NAME}` (`deckId`)"
+          },
+          {
+            "name": "index_fsrs_card_nId",
+            "unique": false,
+            "columnNames": [
+              "nId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_fsrs_card_nId` ON `${TABLE_NAME}` (`nId`)"
+          }
+        ],
         "foreignKeys": [
           {
             "table": "decks",
-            "onDelete": "CASCADE",
+            "onDelete": "NO ACTION",
             "onUpdate": "NO ACTION",
             "columns": [
               "deckId"
@@ -129,12 +154,23 @@
             "referencedColumns": [
               "id"
             ]
+          },
+          {
+            "table": "notes",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "nId"
+            ],
+            "referencedColumns": [
+              "noteId"
+            ]
           }
         ]
       },
       {
         "tableName": "review_log",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fsrsCardId` INTEGER NOT NULL, `rating` TEXT NOT NULL, `state` TEXT NOT NULL, `due` TEXT NOT NULL, `stability` REAL NOT NULL, `difficulty` REAL NOT NULL, `elapsedDays` INTEGER NOT NULL, `lastElapsedDays` INTEGER NOT NULL, `scheduledDays` INTEGER NOT NULL, `review` TEXT NOT NULL, FOREIGN KEY(`fsrsCardId`) REFERENCES `fsrs_card`(`cardId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fsrsCardId` INTEGER NOT NULL, `rating` TEXT NOT NULL, `state` TEXT NOT NULL, `due` TEXT NOT NULL, `stability` REAL NOT NULL, `difficulty` REAL NOT NULL, `elapsedDays` INTEGER NOT NULL, `lastElapsedDays` INTEGER NOT NULL, `scheduledDays` INTEGER NOT NULL, `review` TEXT NOT NULL, FOREIGN KEY(`fsrsCardId`) REFERENCES `fsrs_card`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -209,7 +245,17 @@
             "id"
           ]
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_review_log_fsrsCardId",
+            "unique": false,
+            "columnNames": [
+              "fsrsCardId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_review_log_fsrsCardId` ON `${TABLE_NAME}` (`fsrsCardId`)"
+          }
+        ],
         "foreignKeys": [
           {
             "table": "fsrs_card",
@@ -219,18 +265,24 @@
               "fsrsCardId"
             ],
             "referencedColumns": [
-              "cardId"
+              "id"
             ]
           }
         ]
       },
       {
         "tableName": "decks",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `createdTime` TEXT NOT NULL, `modifiedTime` TEXT NOT NULL, `flags` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `collectionId` INTEGER NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `createdTime` TEXT NOT NULL, `modifiedTime` TEXT, `flags` INTEGER, FOREIGN KEY(`collectionId`) REFERENCES `collections`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "collectionId",
+            "columnName": "collectionId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -256,13 +308,13 @@
             "fieldPath": "modifiedTime",
             "columnName": "modifiedTime",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "flags",
             "columnName": "flags",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -271,12 +323,34 @@
             "id"
           ]
         },
-        "indices": [],
-        "foreignKeys": []
+        "indices": [
+          {
+            "name": "index_decks_name",
+            "unique": true,
+            "columnNames": [
+              "name"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_decks_name` ON `${TABLE_NAME}` (`name`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "collections",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "collectionId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
       },
       {
         "tableName": "notes",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`noteId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `noteTypeId` INTEGER NOT NULL, `fieldJson` TEXT NOT NULL, `createdTime` TEXT NOT NULL, `modifiedTime` TEXT NOT NULL, FOREIGN KEY(`noteTypeId`) REFERENCES `note_types`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`noteId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `deckId` INTEGER NOT NULL, `templateId` INTEGER NOT NULL, `fieldJson` TEXT NOT NULL, `createdTime` TEXT NOT NULL, `modifiedTime` TEXT NOT NULL, FOREIGN KEY(`templateId`) REFERENCES `card_templates`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`deckId`) REFERENCES `decks`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "noteId",
@@ -285,8 +359,14 @@
             "notNull": true
           },
           {
-            "fieldPath": "noteTypeId",
-            "columnName": "noteTypeId",
+            "fieldPath": "deckId",
+            "columnName": "deckId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "templateId",
+            "columnName": "templateId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -315,14 +395,35 @@
             "noteId"
           ]
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_notes_templateId",
+            "unique": false,
+            "columnNames": [
+              "templateId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_notes_templateId` ON `${TABLE_NAME}` (`templateId`)"
+          }
+        ],
         "foreignKeys": [
           {
-            "table": "note_types",
+            "table": "card_templates",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "templateId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "decks",
             "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
-              "noteTypeId"
+              "deckId"
             ],
             "referencedColumns": [
               "id"
@@ -376,7 +477,7 @@
       },
       {
         "tableName": "card_templates",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `noteTypeId` INTEGER NOT NULL, `name` TEXT NOT NULL, `qstFt` TEXT NOT NULL, `ansFt` TEXT NOT NULL, FOREIGN KEY(`noteTypeId`) REFERENCES `note_types`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `noteTypeId` INTEGER NOT NULL, `name` TEXT NOT NULL, `qstFt` TEXT NOT NULL, `ansFt` TEXT NOT NULL, FOREIGN KEY(`noteTypeId`) REFERENCES `note_types`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT )",
         "fields": [
           {
             "fieldPath": "id",
@@ -415,11 +516,21 @@
             "id"
           ]
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_card_templates_noteTypeId",
+            "unique": false,
+            "columnNames": [
+              "noteTypeId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_card_templates_noteTypeId` ON `${TABLE_NAME}` (`noteTypeId`)"
+          }
+        ],
         "foreignKeys": [
           {
             "table": "note_types",
-            "onDelete": "CASCADE",
+            "onDelete": "RESTRICT",
             "onUpdate": "NO ACTION",
             "columns": [
               "noteTypeId"
@@ -477,7 +588,17 @@
             "id"
           ]
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_field_defs_noteTypeId",
+            "unique": false,
+            "columnNames": [
+              "noteTypeId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_field_defs_noteTypeId` ON `${TABLE_NAME}` (`noteTypeId`)"
+          }
+        ],
         "foreignKeys": [
           {
             "table": "note_types",
@@ -617,12 +738,48 @@
             ]
           }
         ]
+      },
+      {
+        "tableName": "collections",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_collections_name",
+            "unique": true,
+            "columnNames": [
+              "name"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_collections_name` ON `${TABLE_NAME}` (`name`)"
+          }
+        ],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd63b5dcf1a3c6944e9704c54e1e8b06d')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2b70d209b41872e9636651398e3f77a5')"
     ]
   }
 }

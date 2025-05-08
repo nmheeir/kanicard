@@ -124,7 +124,7 @@ fun DeckItem(
                 )
             }
 
-            if (!showDetail) {
+            if (showDetail) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
                     horizontalAlignment = Alignment.Start,
@@ -198,7 +198,7 @@ private fun DeckFunction(
     ) {
         Icon(painterResource(iconRes), null)
         Gap(MaterialTheme.padding.extraSmall)
-        Text(text = label, style = MaterialTheme.typography.labelSmall)
+        Text(text = label, style = MaterialTheme.typography.labelMedium)
     }
 //    Row(
 //        verticalAlignment = Alignment.CenterVertically,

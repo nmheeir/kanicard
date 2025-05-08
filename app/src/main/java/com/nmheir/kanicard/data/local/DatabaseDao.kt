@@ -12,6 +12,7 @@ import androidx.sqlite.db.SupportSQLiteQuery
 import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
 import com.nmheir.kanicard.data.entities.SearchHistoryEntity
 import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
+import com.nmheir.kanicard.data.entities.deck.CollectionEntity
 import com.nmheir.kanicard.data.entities.deck.DeckEntity
 import com.nmheir.kanicard.data.entities.fsrs.FsrsCardEntity
 import com.nmheir.kanicard.data.entities.fsrs.ReviewLogEntity
@@ -32,50 +33,56 @@ interface DatabaseDao {
     fun insert(searchHistoryEntity: SearchHistoryEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(fsrsCard: FsrsCardEntity)
+    suspend fun insert(fsrsCard: FsrsCardEntity)
+
+    @Insert
+    suspend fun insert(deck: DeckEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(deck: DeckEntity)
+    suspend fun insert(note: NoteEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(note: NoteEntity)
+    suspend fun insert(cardTemplate: CardTemplateEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(cardTemplate: CardTemplateEntity)
+    suspend fun insert(reviewLog: ReviewLogEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(reviewLog: ReviewLogEntity)
+    suspend fun insert(noteType: NoteTypeEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(noteType: NoteTypeEntity)
+    suspend fun insert(fieldDef: FieldDefEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(fieldDef: FieldDefEntity)
+    suspend fun insert(collection: CollectionEntity)
 
     /*Insert list*/
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun inserts(fsrsCards: List<FsrsCardEntity>)
+    suspend fun inserts(fsrsCards: List<FsrsCardEntity>)
 
 
     /*Update*/
     @Update
-    fun update(fsrsCard: FsrsCardEntity)
+    suspend fun update(fsrsCard: FsrsCardEntity)
 
     @Update
-    fun update(deck: DeckEntity)
+    suspend fun update(deck: DeckEntity)
 
     @Update
-    fun update(note: NoteEntity)
+    suspend fun update(note: NoteEntity)
 
     @Update
-    fun update(cardTemplate: CardTemplateEntity)
+    suspend fun update(cardTemplate: CardTemplateEntity)
 
     @Update
-    fun update(reviewLog: ReviewLogEntity)
+    suspend fun update(reviewLog: ReviewLogEntity)
 
     @Update
-    fun update(noteType: NoteTypeEntity)
+    suspend fun update(noteType: NoteTypeEntity)
+
+    @Query("UPDATE decks SET name = :name WHERE id = :id")
+    suspend fun updateDeckName(id: Long, name: String)
 
     /*Delete*/
 
@@ -126,6 +133,9 @@ interface DatabaseDao {
 
     @Query("SELECT * FROM card_templates WHERE noteTypeId = :noteTypeId")
     fun getCardTemplateByNoteTypeId(noteTypeId: Long): Flow<CardTemplateEntity?>
+
+    @Query("SELECT * FROM collections")
+    fun getCollections(): Flow<List<CollectionEntity>>
 
     @Query(
         """
@@ -187,6 +197,22 @@ interface DatabaseDao {
 
     @Query("SELECT * FROM card_templates WHERE noteTypeId = :noteTypeId")
     fun getCardTemplate(noteTypeId: Long): Flow<CardTemplateEntity?>
+
+    @Query("SELECT * FROM decks WHERE id = :deckId")
+    fun getDeckById(deckId: Long): DeckEntity?
+
+    @Query("SELECT * FROM decks WHERE name = :name")
+    fun getDeckByName(name: String): DeckEntity?
+
+    @Query(
+        """
+            SELECT * FROM decks 
+            WHERE (:id IS NULL OR id = :id)
+              AND (:name IS NULL OR name = :name)
+            LIMIT 1
+        """
+    )
+    suspend fun deck(id: Long?, name: String?): DeckEntity?
 
     @RawQuery
     fun raw(supportSQLiteQuery: SupportSQLiteQuery): Int

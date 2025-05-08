@@ -97,6 +97,17 @@ fun NavGraphBuilder.navigationBuilder(
 
     }
 
+    composable(
+        route = "learn/{deckId}",
+        arguments = listOf(
+            navArgument("deckId") {
+                type = NavType.LongType
+            }
+        )
+    ) {
+        Text(text = "Learn Screen")
+    }
+
 
     /*Setting*/
     composable(Screens.Setting.route) {
