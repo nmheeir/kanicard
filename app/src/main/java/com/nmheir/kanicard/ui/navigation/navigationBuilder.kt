@@ -12,6 +12,7 @@ import androidx.navigation.navArgument
 import com.nmheir.kanicard.ui.screen.AddNewCardScreen
 import com.nmheir.kanicard.ui.screen.DeckDetailScreen
 import com.nmheir.kanicard.ui.screen.HomeScreen
+import com.nmheir.kanicard.ui.screen.NoteEditorScreen
 import com.nmheir.kanicard.ui.screen.ProfileScreen
 import com.nmheir.kanicard.ui.screen.Screens
 import com.nmheir.kanicard.ui.screen.more.MoreScreen
@@ -72,8 +73,12 @@ fun NavGraphBuilder.navigationBuilder(
     composable(
         route = "add_new_card"
     ) {
-        AddNewCardScreen(navController, topAppBarScrollBehavior)
+        NoteEditorScreen(navController)
     }
+
+    composable(
+        route = "new_note_type"
+    ) {}
 
     composable(
         route = "deck/{deckId}",

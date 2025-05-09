@@ -22,6 +22,8 @@ import com.nmheir.kanicard.data.entities.note.NoteTypeEntity
 import com.nmheir.kanicard.data.relations.CollectionWithDecks
 import com.nmheir.kanicard.data.relations.DeckWithNotesAndTemplates
 import com.nmheir.kanicard.data.relations.NoteAndTemplate
+import com.nmheir.kanicard.data.relations.NoteTypeWithFieldDefs
+import com.nmheir.kanicard.data.relations.NoteTypeWithTemplates
 import com.nmheir.kanicard.extensions.toSQLiteQuery
 import kotlinx.coroutines.flow.Flow
 
@@ -49,7 +51,7 @@ interface DatabaseDao {
     suspend fun insert(reviewLog: ReviewLogEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(noteType: NoteTypeEntity)
+    suspend fun insert(noteType: NoteTypeEntity) : Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(fieldDef: FieldDefEntity)
@@ -60,7 +62,10 @@ interface DatabaseDao {
     /*Insert list*/
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun inserts(fsrsCards: List<FsrsCardEntity>)
+    suspend fun insertCards(fsrsCards: List<FsrsCardEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertFields(fields: List<FieldDefEntity>)
 
 
     /*Update*/
@@ -149,6 +154,36 @@ interface DatabaseDao {
     )
     fun getDueCardsToday(deckId: Long): Flow<List<FsrsCardEntity>?>
 
+    //This is for study case
+    @Query("SELECT * FROM notes WHERE noteId IN (:nIds)")
+    fun getNoteAndTemplates(nIds: List<Long>): Flow<List<NoteAndTemplate>>
+
+    @Query("SELECT * FROM field_defs WHERE noteTypeId = :noteTypeId")
+    fun getFieldDefs(noteTypeId: Long): Flow<List<FieldDefEntity>?>
+
+    @Query("SELECT * FROM card_templates WHERE noteTypeId = :noteTypeId")
+    fun getCardTemplate(noteTypeId: Long): Flow<CardTemplateEntity?>
+
+    /*-------------------------------------------------------------------------*/
+    /*Deck*/
+    @Query(
+        """
+            SELECT * FROM decks 
+            WHERE (:id IS NULL OR id = :id)
+              AND (:name IS NULL OR name = :name)
+            LIMIT 1
+        """
+    )
+    suspend fun deck(id: Long?, name: String?): DeckEntity?
+
+    @Query("SELECT * FROM decks")
+    fun allDecks(): Flow<List<DeckEntity>?>
+
+    //This is for Deck Detail Screen
+    @Transaction
+    @Query("SELECT * FROM decks WHERE id = :deckId")
+    fun getDeckWithNoteAndTemplate(deckId: Long): Flow<DeckWithNotesAndTemplates>
+
     @Query(
         """
         SELECT
@@ -184,37 +219,8 @@ interface DatabaseDao {
     )
     fun getAllDeckWidgetData(): Flow<List<DeckWidgetData>>
 
-
-    //This is for Deck Detail Screen
-    @Transaction
-    @Query("SELECT * FROM decks WHERE id = :deckId")
-    fun getDeckWithNoteAndTemplate(deckId: Long): Flow<DeckWithNotesAndTemplates>
-
-    //This is for study case
-    @Query("SELECT * FROM notes WHERE noteId IN (:nIds)")
-    fun getNoteAndTemplates(nIds: List<Long>): Flow<List<NoteAndTemplate>>
-
-    @Query("SELECT * FROM field_defs WHERE noteTypeId = :noteTypeId")
-    fun getFieldDefs(noteTypeId: Long): Flow<List<FieldDefEntity>?>
-
-    @Query("SELECT * FROM card_templates WHERE noteTypeId = :noteTypeId")
-    fun getCardTemplate(noteTypeId: Long): Flow<CardTemplateEntity?>
-
-    @Query("SELECT * FROM decks WHERE id = :deckId")
-    fun getDeckById(deckId: Long): DeckEntity?
-
-    @Query("SELECT * FROM decks WHERE name = :name")
-    fun getDeckByName(name: String): DeckEntity?
-
-    @Query(
-        """
-            SELECT * FROM decks 
-            WHERE (:id IS NULL OR id = :id)
-              AND (:name IS NULL OR name = :name)
-            LIMIT 1
-        """
-    )
-    suspend fun deck(id: Long?, name: String?): DeckEntity?
+    /*End Deck*/
+    /*-------------------------------------------------------------------------*/
 
     /*--------------------------------*/
     /*Collection*/
@@ -225,7 +231,24 @@ interface DatabaseDao {
     @Query("SELECT * FROM collections")
     fun getAllCollectionsWithDecks(): Flow<List<CollectionWithDecks>>
 
-    /*--------------------------------*/
+    /*End Collection*/
+    /*-------------------------------------------------------------------------*/
+
+    /*-------------------------------------------------------------------------*/
+    /*Note Type*/
+    @Query("SELECT * FROM note_types")
+    fun getAllNoteTypes(): Flow<List<NoteTypeEntity>?>
+
+    @Transaction
+    @Query("SELECT * FROM note_types WHERE id = :id")
+    suspend fun getNoteTypesWithTemplates(id: Long): NoteTypeWithTemplates?
+
+    @Transaction
+    @Query("SELECT * FROM note_types WHERE id = :id")
+    suspend fun getNoteTypeWithFieldDef(id: Long): NoteTypeWithFieldDefs?
+
+    /*End Note Type*/
+    /*-------------------------------------------------------------------------*/
 
     @RawQuery
     fun raw(supportSQLiteQuery: SupportSQLiteQuery): Int

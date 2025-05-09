@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface IDeckRepo {
     fun getAllDeckWidgetData(): Flow<List<DeckWidgetData>>
+    fun getAllDecks(): Flow<List<DeckDto>?>
     suspend fun insert(deck: DeckDto)
     suspend fun insert(collection: CollectionEntity)
     fun delete(deck: DeckDto)
