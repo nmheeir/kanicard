@@ -197,6 +197,10 @@ private fun HomeContent(
         ) {
             CollectionWithDeck(
                 data = it,
+                onAdd = {
+                    navController.currentBackStackEntry?.savedStateHandle?.set<Long>("deckId", it)
+                    navController.navigate("add_new_card")
+                },
                 onLearn = { navController.navigate("learn/${it}") },
                 onView = { navController.navigate("deck/${it}") },
                 action = action
@@ -209,6 +213,7 @@ private fun HomeContent(
 @Composable
 private fun CollectionWithDeck(
     data: CollectionWithDeckWidgetData,
+    onAdd: (Long) -> Unit,
     onLearn: (Long) -> Unit,
     onView: (Long) -> Unit,
     action: (HomeUiAction) -> Unit
@@ -242,11 +247,11 @@ private fun CollectionWithDeck(
                     DeckItem(
                         modifier = Modifier
                             .hozPadding()
-                        /*.combinedClickable(
-                            enabled = true,
-                            onClick = { onLearn(deckWidgetData.deckId) },
-                            onLongClick = { showOptionDialog = true }
-                        )*/,
+                            .combinedClickable(
+                                enabled = true,
+                                onClick = { onLearn(deckWidgetData.deckId) },
+                                onLongClick = { showOptionDialog = true }
+                            ),
                         deck = deckWidgetData,
                         onLearn = { onLearn(deckWidgetData.deckId) },
                         onEdit = { showEditDialog = true },
@@ -267,6 +272,11 @@ private fun CollectionWithDeck(
                                     DeckOptions.Config -> {}
                                     DeckOptions.Delete -> {
                                         showDeleteDialog = true
+                                    }
+
+                                    DeckOptions.Add -> {
+                                        showOptionDialog = false
+                                        onAdd(deckWidgetData.deckId)
                                     }
                                 }
                             }
@@ -525,5 +535,5 @@ private val homeAddOptions = listOf(
 )
 
 private enum class DeckOptions {
-    Edit, Config, Delete
+    Edit, Add, Config, Delete
 }

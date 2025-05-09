@@ -1,8 +1,10 @@
 package com.nmheir.kanicard.di
 
+import com.nmheir.kanicard.data.repository.FieldRepo
 import com.nmheir.kanicard.data.repository.CollectionRepo
 import com.nmheir.kanicard.data.repository.StatisticRepo
 import com.nmheir.kanicard.domain.repository.ICollectionRepo
+import com.nmheir.kanicard.domain.repository.IFieldRepo
 import com.nmheir.kanicard.domain.repository.IStatisticRepo
 import dagger.Binds
 import dagger.Module
@@ -20,4 +22,7 @@ interface RepositoryModule {
 
     @Binds
     fun bindCollectionRepo(collectionRepo: CollectionRepo): ICollectionRepo
+
+    @Binds
+    fun bindFieldRepo(fieldRepo: FieldRepo): IFieldRepo
 }

@@ -1,15 +1,18 @@
 package com.nmheir.kanicard.ui.component
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialogDefaults
@@ -17,6 +20,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -33,23 +37,26 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.nmheir.kanicard.R
+import com.nmheir.kanicard.core.presentation.utils.hozPadding
 import kotlinx.coroutines.delay
 
 @Composable
 fun DefaultDialog(
     modifier: Modifier = Modifier,
+    preventDismissRequest: Boolean = false,
     onDismiss: () -> Unit,
     icon: (@Composable () -> Unit)? = null,
     title: (@Composable () -> Unit)? = null,
     buttons: (@Composable RowScope.() -> Unit)? = null,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     Dialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = if (preventDismissRequest) ({}) else onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Surface(
@@ -138,8 +145,60 @@ fun ListDialog(
 }
 
 @Composable
+fun <T> ListOptionDialog(
+    modifier: Modifier = Modifier,
+    selectedValue: T,
+    values: List<T>,
+    valueText: @Composable (T) -> String,
+    onValueSelected: (T) -> Unit,
+    onDismiss: () -> Unit
+) {
+    ListDialog(
+        onDismiss = onDismiss,
+        modifier = modifier
+    ) {
+        if (values.isEmpty()) {
+            item {
+                Text(
+                    text = "No options",
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .hozPadding()
+                )
+            }
+        }
+        items(values) { value ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        onDismiss()
+                        onValueSelected(value)
+                    }
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                RadioButton(
+                    selected = value == selectedValue,
+                    onClick = null
+                )
+
+                Text(
+                    text = valueText(value),
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun TextFieldDialog(
     modifier: Modifier = Modifier,
+    preventDismissRequest: Boolean = false,
     icon: (@Composable () -> Unit)? = null,
     title: (@Composable () -> Unit)? = null,
     initialTextFieldValue: TextFieldValue = TextFieldValue(),
@@ -164,6 +223,7 @@ fun TextFieldDialog(
     }
 
     DefaultDialog(
+        preventDismissRequest = preventDismissRequest,
         onDismiss = onDismiss,
         modifier = modifier,
         icon = icon,
@@ -207,13 +267,16 @@ fun TextFieldDialog(
 
 @Composable
 fun AlertDialog(
+    preventDismissRequest: Boolean = false,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
+    enableButton: () -> Boolean = { true },
     icon: (@Composable () -> Unit)? = null,
     title: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     DefaultDialog(
+        preventDismissRequest = preventDismissRequest,
         onDismiss = onDismiss,
         buttons = {
             TextButton(
@@ -222,9 +285,9 @@ fun AlertDialog(
                 Text(text = stringResource(R.string.cancel))
             }
             TextButton(
+                enabled = enableButton(),
                 onClick = {
                     onConfirm()
-                    onDismiss()
                 }
             ) {
                 Text(text = stringResource(R.string.ok))

@@ -46,18 +46,13 @@ data class NoteEntity(
 /**
  * Xây dựng JSON string cho fieldJson dựa trên danh sách fieldDefs và map các giá trị nhập vào.
  *
- * @param fieldDefs: danh sách FieldDefEntity (có name, ord,…)
  * @param values: map từ tên field (tương ứng def.name) sang giá trị người dùng nhập
  * @return chuỗi JSON, ví dụ: {"name":"Alice","description":"She's very beautiful"}
  */
-fun buildFieldJson(
-    fieldDefs: List<FieldDefEntity>,
-    values: Map<String, String>
-): String {
+fun buildFieldJson(values: Map<String, String>): String {
     val jsonObject = buildJsonObject {
-        for (def in fieldDefs) {
-            val raw = values[def.name] ?: ""
-            put(def.name, JsonPrimitive(raw))
+        for ((key, value) in values) {
+            put(key, JsonPrimitive(value))
         }
     }
     return Json.encodeToString(JsonObject.serializer(), jsonObject)
