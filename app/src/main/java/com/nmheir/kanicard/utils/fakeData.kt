@@ -3,6 +3,7 @@ package com.nmheir.kanicard.utils
 import com.nmheir.kanicard.data.dto.CardDto
 import com.nmheir.kanicard.data.dto.ProfileDto
 import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
+import com.nmheir.kanicard.data.entities.note.FieldDefEntity
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import kotlin.random.Random
@@ -113,3 +114,14 @@ val fakeProfileDto = ProfileDto(
     bio = "bio",
     avatarUrl = "https://picsum.photos/200/302"
 )
+
+val fakeFields = List(5) {
+    FieldDefEntity(
+        id = it.toLong(),
+        name = "Field $it",
+        noteTypeId = 3,
+        ord = it,
+        createdTime = OffsetDateTime.now(),
+        modifiedTime = OffsetDateTime.now()
+    )
+}

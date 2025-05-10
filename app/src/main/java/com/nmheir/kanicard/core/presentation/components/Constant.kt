@@ -28,3 +28,13 @@ class Padding {
 
 val MaterialTheme.padding: Padding
     get() = Padding()
+
+object Constants {
+    object File {
+        const val KANI_CARD = "KaniCard"
+        const val KANI_CARD_BACKUP = "Backup"
+        const val KANI_CARD_IMAGE = "Images"
+        const val KANI_CARD_AUDIO = "Audios"
+        const val KANI_CARD_VIDEO = "Videos"
+    }
+}

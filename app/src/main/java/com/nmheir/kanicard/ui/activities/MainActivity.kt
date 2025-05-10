@@ -73,6 +73,7 @@ import com.nmheir.kanicard.constants.OnboardingCompleteKey
 import com.nmheir.kanicard.constants.PauseSearchHistoryKey
 import com.nmheir.kanicard.constants.SearchSource
 import com.nmheir.kanicard.constants.SearchSourceKey
+import com.nmheir.kanicard.constants.StoragePathKey
 import com.nmheir.kanicard.constants.ThemeModeKey
 import com.nmheir.kanicard.core.domain.ui.model.AppTheme
 import com.nmheir.kanicard.core.domain.ui.model.ThemeMode
@@ -83,15 +84,19 @@ import com.nmheir.kanicard.ui.component.Gap
 import com.nmheir.kanicard.ui.component.InputFieldHeight
 import com.nmheir.kanicard.ui.component.SearchBar
 import com.nmheir.kanicard.ui.navigation.navigationBuilder
+import com.nmheir.kanicard.ui.screen.PermissionScreen
 import com.nmheir.kanicard.ui.screen.Screens
 import com.nmheir.kanicard.ui.theme.KaniTheme
 import com.nmheir.kanicard.ui.theme.NavigationBarAnimationSpec
 import com.nmheir.kanicard.utils.appBarScrollBehavior
 import com.nmheir.kanicard.utils.dataStore
+import com.nmheir.kanicard.utils.delete
 import com.nmheir.kanicard.utils.get
 import com.nmheir.kanicard.utils.rememberEnumPreference
+import com.nmheir.kanicard.utils.rememberPreference
 import com.nmheir.kanicard.utils.resetHeightOffset
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 import javax.inject.Inject
 
 @Suppress("DEPRECATION")
@@ -115,6 +120,7 @@ class MainActivity : ComponentActivity() {
                 }*/
 
         setContent {
+            val (storagePath, onStoragePathChange) = rememberPreference(StoragePathKey, "")
             val appTheme by rememberEnumPreference(AppThemeKey, AppTheme.DEFAULT)
             val darkTheme by rememberEnumPreference(ThemeModeKey, ThemeMode.SYSTEM)
             val isSystemInDarkTheme = isSystemInDarkTheme()
@@ -125,10 +131,6 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(useDarkTheme) {
                 setSystemBarAppearance(useDarkTheme)
             }
-
-            /*            LaunchedEffect(Unit) {
-                            updateRefreshToken()
-                        }*/
 
             KaniTheme(
                 darkTheme = useDarkTheme,
@@ -401,7 +403,7 @@ class MainActivity : ComponentActivity() {
                                             )
                                             if (showSyncDialog) {
                                                 DefaultDialog(
-                                                    onDismiss = {showSyncDialog = false}
+                                                    onDismiss = { showSyncDialog = false }
                                                 ) {
                                                     Text(
                                                         text = "Sync"
@@ -529,6 +531,19 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             }
+                        }
+
+
+                        Timber.d("Storage path: $storagePath")
+                        Timber.d("Storage path is empty: ${storagePath.isEmpty()}")
+                        AnimatedVisibility(
+                            visible = storagePath.isEmpty() || storagePath == "null",
+                            enter = fadeIn(),
+                            exit = fadeOut()
+                        ) {
+                            PermissionScreen(
+                                onPermissionResult = onStoragePathChange
+                            )
                         }
                     }
                 }
