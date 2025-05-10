@@ -32,6 +32,30 @@ fun <T> DataStore<Preferences>.get(key: Preferences.Key<T>, defaultValue: T): T 
         data.first()[key] ?: defaultValue
     }
 
+fun <T> DataStore<Preferences>.set(key: Preferences.Key<T>, value: T) {
+    runBlocking(Dispatchers.IO) {
+        edit { preferences ->
+            preferences[key] = value
+        }
+    }
+}
+
+fun <T> DataStore<Preferences>.delete(key: Preferences.Key<T>) {
+    runBlocking(Dispatchers.IO) {
+        edit { it.remove(key) }
+    }
+}
+
+fun DataStore<Preferences>.deletes(keys: List<Preferences.Key<*>>) {
+    runBlocking(Dispatchers.IO) {
+        edit { preferences ->
+            keys.forEach { key ->
+                preferences.remove(key)
+            }
+        }
+    }
+}
+
 @Composable
 fun <T> rememberPreference(
     key: Preferences.Key<T>,

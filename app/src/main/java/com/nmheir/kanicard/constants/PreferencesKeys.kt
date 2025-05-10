@@ -19,10 +19,10 @@ enum class SearchSource {
     }
 }
 
-val RefreshTokenKey = stringPreferencesKey("refreshToken")
 val OnboardingCompleteKey = booleanPreferencesKey("onboarding_complete")
 val ThemeModeKey = stringPreferencesKey("themeMode")
 val AppThemeKey = stringPreferencesKey("appTheme")
 val DateFormatKey = stringPreferencesKey("dateFormat")
+val StoragePathKey = stringPreferencesKey("storage_path")
 
 val EmailKey = stringPreferencesKey("email")
