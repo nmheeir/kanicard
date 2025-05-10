@@ -1,12 +1,8 @@
 package com.nmheir.kanicard.ui.screen
 
-import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,7 +22,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -34,14 +29,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -49,11 +43,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.nmheir.kanicard.R
 import com.nmheir.kanicard.core.presentation.components.padding
-import com.nmheir.kanicard.core.presentation.utils.dashedBorder
 import com.nmheir.kanicard.core.presentation.utils.hozPadding
 import com.nmheir.kanicard.core.presentation.utils.secondaryItemAlpha
 import com.nmheir.kanicard.ui.component.AlertDialog
-import com.nmheir.kanicard.ui.component.DefaultDialog
 import com.nmheir.kanicard.ui.component.ListOptionDialog
 import com.nmheir.kanicard.ui.viewmodels.NewTypeDialogUiState
 import com.nmheir.kanicard.ui.viewmodels.NoteEditorUiAction
@@ -251,14 +243,14 @@ private fun NewNoteTypeDialog(
     action: (NoteEditorUiAction) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val list = remember { mutableStateListOf<String>("") }
+    val (typeName, onTypeNameChange) = remember { mutableStateOf(state.typeName) }
+    val list = remember { state.fields.toMutableStateList() }
     val shouldConfirmBeforeDismiss by remember {
         derivedStateOf {
-            list.any { it.isNotBlank() }
+            list != state.fields || typeName != state.typeName
         }
     }
     var showConfirmBeforeDismissDialog by remember { mutableStateOf(false) }
-    val (typeName, onTypeNameChange) = remember { mutableStateOf("") }
     AlertDialog(
         preventDismissRequest = true,
         enableButton = {
@@ -291,6 +283,8 @@ private fun NewNoteTypeDialog(
                     value = typeName,
                     onValueChange = onTypeNameChange,
                     textStyle = MaterialTheme.typography.bodyMedium,
+                    singleLine = true,
+                    maxLines = 1,
                     decorationBox = { innerTextField ->
                         if (typeName.isEmpty()) {
                             Text(
@@ -322,6 +316,8 @@ private fun NewNoteTypeDialog(
                         onValueChange = {
                             list[index] = it
                         },
+                        singleLine = true,
+                        maxLines = 1,
                         textStyle = MaterialTheme.typography.bodyMedium,
                         decorationBox = { innerTextField ->
                             if (fieldName.isEmpty()) {
@@ -357,7 +353,10 @@ private fun NewNoteTypeDialog(
                 showConfirmBeforeDismissDialog = false
                 onDismiss()
             },
-            onConfirm = {},
+            onConfirm = {
+                action(NoteEditorUiAction.SaveNoteToState(typeName, list))
+                onDismiss()
+            },
             title = {
                 Text(text = "Do you want to keep this state?")
             }

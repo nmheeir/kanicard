@@ -105,6 +105,17 @@ class NoteEditorViewModel @Inject constructor(
                     fieldRepo.inserts(fields)
                 }
             }
+
+            is NoteEditorUiAction.SaveNoteToState -> {
+                viewModelScope.launch {
+                    newTypeDialogUiState.update {
+                        it.copy(
+                            fields = action.fields,
+                            typeName = action.typeName
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -120,8 +131,11 @@ sealed interface NoteEditorUiAction {
     data class AddNewField(val fieldNames: List<String>) : NoteEditorUiAction
     data class CreateNewNoteType(val typeName: String, val fieldNames: List<String>) :
         NoteEditorUiAction
+
+    data class SaveNoteToState(val typeName: String, val fields: List<String>) : NoteEditorUiAction
 }
 
 data class NewTypeDialogUiState(
-    val newTypeField: List<String> = emptyList()
+    val fields: List<String> = listOf<String>(""),
+    val typeName: String = ""
 )
