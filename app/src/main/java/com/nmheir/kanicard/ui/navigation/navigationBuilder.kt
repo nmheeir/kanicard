@@ -16,6 +16,8 @@ import com.nmheir.kanicard.ui.screen.NoteEditorScreen
 import com.nmheir.kanicard.ui.screen.ProfileScreen
 import com.nmheir.kanicard.ui.screen.Screens
 import com.nmheir.kanicard.ui.screen.more.MoreScreen
+import com.nmheir.kanicard.ui.screen.note.NoteTemplateScreen
+import com.nmheir.kanicard.ui.screen.note.PreviewTemplateScreen
 import com.nmheir.kanicard.ui.screen.onboarding.OnboardingScreen
 import com.nmheir.kanicard.ui.screen.settings.screen.SettingAppearanceScreen
 import com.nmheir.kanicard.ui.screen.settings.screen.SettingScreen
@@ -83,8 +85,26 @@ fun NavGraphBuilder.navigationBuilder(
     }
 
     composable(
-        route = "new_note_type"
-    ) {}
+        route = "{type}/templates",
+        arguments = listOf(
+            navArgument("type") {
+                type = NavType.LongType
+            }
+        )
+    ) {
+        NoteTemplateScreen(navController)
+    }
+
+    composable(
+        route = "template/{id}/preview",
+        arguments = listOf(
+            navArgument("id") {
+                type = NavType.LongType
+            }
+        )
+    ) {
+        PreviewTemplateScreen(navController)
+    }
 
     composable(
         route = "deck/{deckId}",

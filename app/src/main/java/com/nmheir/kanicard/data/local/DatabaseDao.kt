@@ -241,11 +241,11 @@ interface DatabaseDao {
 
     @Transaction
     @Query("SELECT * FROM note_types WHERE id = :id")
-    suspend fun getNoteTypesWithTemplates(id: Long): NoteTypeWithTemplates?
+    fun getNoteTypesWithTemplates(id: Long): Flow<NoteTypeWithTemplates?>
 
     @Transaction
     @Query("SELECT * FROM note_types WHERE id = :id")
-    suspend fun getNoteTypeWithFieldDef(id: Long): NoteTypeWithFieldDefs?
+    fun getNoteTypeWithFieldDef(id: Long): Flow<NoteTypeWithFieldDefs?>
 
     /*End Note Type*/
     /*-------------------------------------------------------------------------*/

@@ -3,6 +3,7 @@ package com.nmheir.kanicard.utils
 import com.nmheir.kanicard.data.dto.CardDto
 import com.nmheir.kanicard.data.dto.ProfileDto
 import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
+import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
 import com.nmheir.kanicard.data.entities.note.FieldDefEntity
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
@@ -123,5 +124,15 @@ val fakeFields = List(5) {
         ord = it,
         createdTime = OffsetDateTime.now(),
         modifiedTime = OffsetDateTime.now()
+    )
+}
+
+val fakeTemplates = List(5) {
+    CardTemplateEntity(
+        id = it.toLong(),
+        noteTypeId = 3,
+        name = "Template $it",
+        qstFt = "Question $it",
+        ansFt = "Answer $it",
     )
 }

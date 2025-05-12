@@ -2,6 +2,7 @@
 
 package com.nmheir.kanicard.ui.screen
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -72,6 +73,8 @@ fun NoteEditorScreen(
     navController: NavHostController,
     viewModel: NoteEditorViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
+
     val decks by viewModel.selectableDecks.collectAsStateWithLifecycle()
     val noteTypes by viewModel.noteTypes.collectAsStateWithLifecycle()
     val selectedNoteType by viewModel.selectedNoteType.collectAsStateWithLifecycle()
@@ -201,7 +204,13 @@ fun NoteEditorScreen(
                 OptionField(
                     titles = listOf("abc", "xyz"),
                     leadingIcon = { Icon(painterResource(R.drawable.ic_folder), null) },
-                    onClick = {}
+                    onClick = {
+                        if (selectedNoteType != null) {
+                            navController.navigate("${selectedNoteType?.id}/templates")
+                        } else {
+                            Toast.makeText(context, "Please select note type", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 )
             }
 

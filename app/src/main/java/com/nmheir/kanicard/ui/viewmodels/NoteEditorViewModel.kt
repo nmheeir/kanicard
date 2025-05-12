@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.nmheir.kanicard.ui.viewmodels
 
 import android.content.Context
@@ -16,11 +18,14 @@ import com.nmheir.kanicard.domain.repository.IDeckRepo
 import com.nmheir.kanicard.domain.repository.INoteRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -55,9 +60,17 @@ class NoteEditorViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val selectedNoteType = MutableStateFlow<SelectableNoteType?>(null)
-    val fields = MutableStateFlow<List<FieldDefEntity>>(emptyList())
     val newTypeDialogUiState = MutableStateFlow<NewTypeDialogUiState>(NewTypeDialogUiState())
     val mediaFileState = MutableStateFlow<Map<Long, Pair<String, Uri>>>(emptyMap())
+
+    val fields = selectedNoteType
+        .filterNotNull()
+        .flatMapLatest {
+            noteRepo.getNoteTypeWithFieldDefs(it.id).map {
+                it?.fieldDefs ?: emptyList()
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val selectedDeck = combine(
         selectableDecks, deckId
@@ -82,16 +95,6 @@ class NoteEditorViewModel @Inject constructor(
 
     }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    init {
-        viewModelScope.launch {
-            selectedNoteType
-                .filterNotNull()
-                .distinctUntilChanged()
-                .collect {
-                    loadFields(it.id)
-                }
-        }
-    }
 
     fun onAction(action: NoteEditorUiAction) {
         when (action) {
@@ -147,12 +150,6 @@ class NoteEditorViewModel @Inject constructor(
             NoteEditorUiAction.SaveNote -> {
 
             }
-        }
-    }
-
-    private fun loadFields(noteTypeId: Long) {
-        viewModelScope.launch {
-            fields.value = noteRepo.getNoteTypeWithFieldDefs(noteTypeId)?.fieldDefs ?: emptyList()
         }
     }
 

@@ -1,11 +1,13 @@
 package com.nmheir.kanicard.di
 
-import com.nmheir.kanicard.data.repository.FieldRepo
 import com.nmheir.kanicard.data.repository.CollectionRepo
+import com.nmheir.kanicard.data.repository.FieldRepo
 import com.nmheir.kanicard.data.repository.StatisticRepo
+import com.nmheir.kanicard.data.repository.TemplateRepo
 import com.nmheir.kanicard.domain.repository.ICollectionRepo
 import com.nmheir.kanicard.domain.repository.IFieldRepo
 import com.nmheir.kanicard.domain.repository.IStatisticRepo
+import com.nmheir.kanicard.domain.repository.ITemplateRepo
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -25,4 +27,7 @@ interface RepositoryModule {
 
     @Binds
     fun bindFieldRepo(fieldRepo: FieldRepo): IFieldRepo
+
+    @Binds
+    fun bindTemplateRepo(templateRepo: TemplateRepo): ITemplateRepo
 }
