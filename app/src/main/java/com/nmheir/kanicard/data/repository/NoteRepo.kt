@@ -35,11 +35,11 @@ class NoteRepo(
         return database.getAllNoteTypes()
     }
 
-    override suspend fun getNoteTypeWithTemplates(noteTypeId: Long): NoteTypeWithTemplates? {
+    override fun getNoteTypeWithTemplates(noteTypeId: Long): Flow<NoteTypeWithTemplates?> {
         return database.getNoteTypesWithTemplates(noteTypeId)
     }
 
-    override suspend fun getNoteTypeWithFieldDefs(noteTypeId: Long): NoteTypeWithFieldDefs? {
+    override fun getNoteTypeWithFieldDefs(noteTypeId: Long): Flow<NoteTypeWithFieldDefs?> {
         return database.getNoteTypeWithFieldDef(noteTypeId)
     }
 
