@@ -3,6 +3,9 @@ package com.nmheir.kanicard.extensions
 import android.content.Context
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
+import com.nmheir.kanicard.constants.StoragePathKey
+import com.nmheir.kanicard.utils.dataStore
+import com.nmheir.kanicard.utils.get
 import timber.log.Timber
 import java.io.File
 import java.io.InputStream
@@ -14,6 +17,18 @@ operator fun File.div(child: String): File = File(this, child)
 
 fun InputStream.zipInputStream(): ZipInputStream = ZipInputStream(this)
 fun OutputStream.zipOutputStream(): ZipOutputStream = ZipOutputStream(this)
+
+fun hasFileWithName(dir: DocumentFile, fileName: String): Boolean {
+    return dir.listFiles().any { file ->
+        file.name == fileName
+    }
+}
+
+// Checks whether a file with a specified name exists in the directory
+fun getFileName(context: Context, uri: Uri): String? {
+    val docFile = DocumentFile.fromSingleUri(context, uri)
+    return docFile?.name
+}
 
 fun getOrCreateDirectory(
     context: Context, parentUri: Uri, dirName: String
@@ -44,4 +59,43 @@ fun getOrCreateDirectory(
         if (it.isDirectory) return it
     }
     return parent.createDirectory(dirName)
+}
+
+fun saveAudioToDirectory(
+    context: Context,
+) {
+    val path = context.dataStore[StoragePathKey]
+}
+
+// Get the extension using the DocumentFile API
+fun getFileExtension(context: Context, uri: Uri): String {
+    val sourceFile = DocumentFile.fromSingleUri(context, uri)
+
+    // Try getting the extension from the filename
+    sourceFile?.name?.let { name ->
+        val lastDot = name.lastIndexOf('.')
+        if (lastDot > 0) {
+            return name.substring(lastDot + 1)
+        }
+    }
+
+    // If the extension is not available from the file name, it is inferred from the MIME type.
+    val mimeType = sourceFile?.type ?: context.contentResolver.getType(uri)
+    return when (mimeType) {
+        "audio/mpeg" -> "mp3"
+        "audio/wav", "audio/x-wav" -> "wav"
+        "audio/ogg" -> "ogg"
+        "audio/aac" -> "aac"
+        "audio/x-m4a" -> "m4a"
+        else -> "mp3"  // 默认扩展名
+    }
+}
+
+fun convertFileName(context: Context, uri: Uri) : String {
+    val timestamp = System.currentTimeMillis()
+    val name = getFileName(context, uri)
+    val fileName = "${name?.substringBeforeLast(".")}_${timestamp}.${
+        name?.substringAfterLast(".")
+    }"
+    return fileName
 }

@@ -2,21 +2,21 @@
 
 package com.nmheir.kanicard.ui.screen
 
-import androidx.annotation.DrawableRes
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.BottomSheetScaffoldState
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -24,17 +24,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.ModalBottomSheetDefaults
-import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberBottomSheetScaffoldState
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -47,9 +42,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -61,14 +57,14 @@ import com.nmheir.kanicard.core.presentation.components.padding
 import com.nmheir.kanicard.core.presentation.utils.hozPadding
 import com.nmheir.kanicard.core.presentation.utils.secondaryItemAlpha
 import com.nmheir.kanicard.data.entities.note.FieldDefEntity
+import com.nmheir.kanicard.extensions.convertFileName
+import com.nmheir.kanicard.extensions.getFileName
 import com.nmheir.kanicard.ui.component.AlertDialog
+import com.nmheir.kanicard.ui.component.AttachFileSheet
 import com.nmheir.kanicard.ui.component.ListOptionDialog
-import com.nmheir.kanicard.ui.component.widget.PreferenceEntry
-import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
 import com.nmheir.kanicard.ui.viewmodels.NewTypeDialogUiState
 import com.nmheir.kanicard.ui.viewmodels.NoteEditorUiAction
 import com.nmheir.kanicard.ui.viewmodels.NoteEditorViewModel
-import com.nmheir.kanicard.utils.fakeFields
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,13 +72,12 @@ fun NoteEditorScreen(
     navController: NavHostController,
     viewModel: NoteEditorViewModel = hiltViewModel()
 ) {
-    val deckId = navController.previousBackStackEntry?.savedStateHandle?.get<Long>("deckId")
-
     val decks by viewModel.selectableDecks.collectAsStateWithLifecycle()
     val noteTypes by viewModel.noteTypes.collectAsStateWithLifecycle()
     val selectedNoteType by viewModel.selectedNoteType.collectAsStateWithLifecycle()
+    val selectedDeck by viewModel.selectedDeck.collectAsStateWithLifecycle()
     val fields by viewModel.fields.collectAsStateWithLifecycle()
-
+    val noteEditDto by viewModel.noteEditDto.collectAsStateWithLifecycle()
     val newTypeUiState by viewModel.newTypeDialogUiState.collectAsStateWithLifecycle()
 
     Scaffold(
@@ -133,7 +128,25 @@ fun NoteEditorScreen(
                     }
                 }
             )
-        }
+        },
+        bottomBar = {
+            Button(
+                shape = MaterialTheme.shapes.small,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                onClick = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .hozPadding()
+            ) {
+                Text(
+                    text = "Save",
+                )
+            }
+        },
+        modifier = Modifier.imePadding()
     ) { pv ->
         LazyColumn(
             contentPadding = pv
@@ -142,11 +155,8 @@ fun NoteEditorScreen(
                 key = "deck"
             ) {
                 var showSelectDeckDialog by remember { mutableStateOf(false) }
-                var selectedDeck by remember(decks) {
-                    mutableStateOf(decks.firstOrNull { it.id == deckId })
-                }
                 OptionField(
-                    title = selectedDeck?.name ?: "Select Deck",
+                    titles = listOf(selectedDeck?.name ?: "Select Deck"),
                     leadingIcon = { Icon(painterResource(R.drawable.ic_folder), null) },
                     onClick = { showSelectDeckDialog = true }
                 )
@@ -156,7 +166,7 @@ fun NoteEditorScreen(
                         values = decks,
                         selectedValue = selectedDeck,
                         onValueSelected = {
-                            selectedDeck = it
+                            viewModel.onAction(NoteEditorUiAction.UpdateSelectedDeck(it))
                         },
                         valueText = { it?.name ?: "Con cac" }
                     )
@@ -168,7 +178,7 @@ fun NoteEditorScreen(
             ) {
                 var showSelectNoteTypeDialog by remember { mutableStateOf(false) }
                 OptionField(
-                    title = selectedNoteType?.name ?: "Select Note Type",
+                    titles = listOf(selectedNoteType?.name ?: "Select Note Type"),
                     leadingIcon = { Icon(painterResource(R.drawable.ic_folder), null) },
                     onClick = { showSelectNoteTypeDialog = true }
                 )
@@ -188,7 +198,11 @@ fun NoteEditorScreen(
             item(
                 key = "template"
             ) {
-
+                OptionField(
+                    titles = listOf("abc", "xyz"),
+                    leadingIcon = { Icon(painterResource(R.drawable.ic_folder), null) },
+                    onClick = {}
+                )
             }
 
             items(
@@ -210,7 +224,7 @@ fun NoteEditorScreen(
 @Composable
 private fun OptionField(
     modifier: Modifier = Modifier,
-    title: String,
+    titles: List<String>,
     leadingIcon: @Composable () -> Unit,
     onClick: () -> Unit
 ) {
@@ -228,7 +242,7 @@ private fun OptionField(
         ) {
             leadingIcon()
             Text(
-                text = title,
+                text = titles.joinToString(separator = ", "),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.weight(1f)
             )
@@ -262,7 +276,9 @@ private fun FieldEditElement(
     field: FieldDefEntity,
     action: (NoteEditorUiAction) -> Unit
 ) {
+    val context = LocalContext.current
     var showAttachFileSheet by remember { mutableStateOf(false) }
+    val (value, onValueChange) = remember { mutableStateOf(TextFieldValue()) }
     Column(
         horizontalAlignment = Alignment.Start,
         modifier = Modifier.fillMaxWidth()
@@ -283,7 +299,6 @@ private fun FieldEditElement(
                 onClick = { showAttachFileSheet = true }
             )
         }
-        val (value, onValueChange) = remember { mutableStateOf("") }
         BasicTextField(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -317,69 +332,29 @@ private fun FieldEditElement(
     if (showAttachFileSheet) {
         AttachFileSheet(
             onDismiss = { showAttachFileSheet = false },
-            onAudioClipSelection = { },
-            onGallerySelection = { },
-            onVideoClipSelection = { },
-            onRecordAudioSelection = { }
+            onAudioClipSelection = {
+                //convert file name
+                val fileName = convertFileName(context, it)
+                onValueChange(TextFieldValue("![](${fileName})"))
+                action(NoteEditorUiAction.UpdateFileState(field.id, fileName, it))
+            },
+            onGallerySelection = {
+                val fileName = convertFileName(context, it)
+                onValueChange(TextFieldValue(fileName))
+                action(NoteEditorUiAction.UpdateFileState(field.id, fileName, it))
+            },
+            onVideoClipSelection = {
+                val fileName = "<video src=\"${convertFileName(context, it)}\" controls></video>"
+                onValueChange(TextFieldValue(fileName))
+                action(NoteEditorUiAction.UpdateFileState(field.id, fileName, it))
+            },
+            onRecordAudioSelection = {
+                val fileName = convertFileName(context, it)
+                onValueChange(TextFieldValue(fileName))
+                action(NoteEditorUiAction.UpdateFileState(field.id, fileName, it))
+            }
         )
     }
-}
-
-@Composable
-private fun AttachFileSheet(
-    modifier: Modifier = Modifier,
-    onAudioClipSelection: () -> Unit,
-    onGallerySelection: () -> Unit,
-    onVideoClipSelection: () -> Unit,
-    onRecordAudioSelection: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        modifier = modifier
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            AttachFileSheetOption.options.fastForEach { option ->
-                TextPreferenceWidget(
-                    title = option.title,
-                    icon = option.iconRes,
-                    onPreferenceClick = {
-                        when (option) {
-                            AttachFileSheetOption.AudioClip -> {
-
-                            }
-                            AttachFileSheetOption.Gallery -> {}
-                            AttachFileSheetOption.RecordAudio -> {}
-                            AttachFileSheetOption.VideoClip -> {}
-                        }
-                    }
-                )
-            }
-        }
-    }
-}
-
-private sealed class AttachFileSheetOption(
-    val title: String,
-    @DrawableRes val iconRes: Int
-) {
-    object RecordAudio : AttachFileSheetOption("Record Audio", R.drawable.ic_record_voice_over)
-    object Gallery : AttachFileSheetOption("Gallery", R.drawable.ic_image_fill)
-    object AudioClip : AttachFileSheetOption("Add Audio Clip", R.drawable.ic_music_note)
-    object VideoClip : AttachFileSheetOption("Add Video Clip", R.drawable.ic_video_library)
-
-    companion object {
-        val options = listOf(RecordAudio, Gallery, AudioClip, VideoClip)
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun Test() {
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -198,8 +198,7 @@ private fun HomeContent(
             CollectionWithDeck(
                 data = it,
                 onAdd = {
-                    navController.currentBackStackEntry?.savedStateHandle?.set<Long>("deckId", it)
-                    navController.navigate("add_new_card")
+                    navController.navigate("add_new_card?deckId=${it}")
                 },
                 onLearn = { navController.navigate("learn/${it}") },
                 onView = { navController.navigate("deck/${it}") },

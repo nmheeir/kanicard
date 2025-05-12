@@ -71,7 +71,13 @@ fun NavGraphBuilder.navigationBuilder(
 
     /*Card*/
     composable(
-        route = "add_new_card"
+        route = "add_new_card?deckId={deckId}",
+        arguments = listOf(
+            navArgument("deckId") {
+                type = NavType.LongType
+                defaultValue = -1L
+            }
+        )
     ) {
         NoteEditorScreen(navController)
     }
