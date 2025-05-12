@@ -72,6 +72,17 @@ class NoteEditorViewModel @Inject constructor(
         }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
+    val templates = selectedNoteType
+        .filterNotNull()
+        .flatMapLatest {
+            noteRepo.getNoteTypeWithTemplates(it.id).map {
+                if (it?.templates.isNullOrEmpty()) {
+                    listOf(sampleTemplate)
+                } else it.templates
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
     val selectedDeck = combine(
         selectableDecks, deckId
     ) { decks, id ->

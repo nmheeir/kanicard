@@ -6,13 +6,13 @@ import androidx.lifecycle.viewModelScope
 import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
 import com.nmheir.kanicard.domain.repository.INoteRepo
 import com.nmheir.kanicard.domain.repository.ITemplateRepo
-import com.nmheir.kanicard.utils.fakeTemplates
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
@@ -34,27 +34,39 @@ class NoteTemplateViewModel @Inject constructor(
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    val templates = noteTypeWithTemplates
-        .map { it?.templates ?: emptyList() }
-        .distinctUntilChanged()
-        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    val templates = MutableStateFlow<List<CardTemplateEntity>>(listOf(sampleTemplate))
 
     val type = noteTypeWithTemplates.map {
         it?.noteType
     }.distinctUntilChanged().stateIn(viewModelScope, SharingStarted.Lazily, null)
 
+    init {
+        templates.value = noteTypeWithTemplates
+            .map {
+                if (it?.templates.isNullOrEmpty()) {
+                    listOf(sampleTemplate)
+                } else it.templates
+            }.distinctUntilChanged()
+            .stateIn(viewModelScope, SharingStarted.Lazily, listOf(sampleTemplate)).value
+    }
+
     fun onAction(action: NoteTemplateUiAction) {
         when (action) {
             is NoteTemplateUiAction.AddNewTemplate -> {
-                viewModelScope.launch {
-                    templateRepo.insert(
-                        CardTemplateEntity(
-                            noteTypeId = noteTypeId,
-                            name = action.name,
-                            qstFt = "",
-                            ansFt = ""
-                        )
+                templates.update {
+                    it + sampleTemplate.copy(
+                        id = it.last().id + 1L,
+                        noteTypeId = noteTypeId,
+                        name = "Card ${it.last().id + 1}"
                     )
+                }
+            }
+
+            is NoteTemplateUiAction.DeleteTemplate -> {
+                templates.update {
+                    it.toMutableList().apply {
+                        removeAt(action.index)
+                    }
                 }
             }
         }
@@ -62,5 +74,13 @@ class NoteTemplateViewModel @Inject constructor(
 }
 
 sealed interface NoteTemplateUiAction {
-    data class AddNewTemplate(val name: String) : NoteTemplateUiAction
+    data object AddNewTemplate : NoteTemplateUiAction
+    data class DeleteTemplate(val index: Int) : NoteTemplateUiAction
 }
+
+val sampleTemplate = CardTemplateEntity(
+    noteTypeId = 0L,
+    name = "Sample Template",
+    qstFt = "",
+    ansFt = ""
+)

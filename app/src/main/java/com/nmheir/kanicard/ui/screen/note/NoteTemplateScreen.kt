@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -36,7 +35,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -62,10 +60,9 @@ import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
 import com.nmheir.kanicard.ui.component.AlertDialog
 import com.nmheir.kanicard.ui.component.DefaultDialog
 import com.nmheir.kanicard.ui.component.TextFieldDialog
-import com.nmheir.kanicard.ui.component.widget.PreferenceEntry
 import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
+import com.nmheir.kanicard.ui.viewmodels.NoteTemplateUiAction
 import com.nmheir.kanicard.ui.viewmodels.NoteTemplateViewModel
-import com.nmheir.kanicard.utils.fakeTemplates
 import kotlinx.coroutines.launch
 
 @Composable
@@ -78,10 +75,10 @@ fun NoteTemplateScreen(
     val templates by viewModel.templates.collectAsStateWithLifecycle()
     val fields by viewModel.fields.collectAsStateWithLifecycle()
 
-    val snapshotTemplates = remember(templates) { fakeTemplates.toMutableStateList() }
+    val snapshotTemplates = remember { templates.toMutableStateList() }
 
     val pagerState = rememberPagerState(initialPage = 0) {
-        snapshotTemplates.size
+        templates.size
     }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -161,18 +158,10 @@ fun NoteTemplateScreen(
                                     when (it) {
                                         NoteTemplateOption.Add -> {
                                             // TODO: Tìm cách bỏ id khi thêm template vào database
-                                            snapshotTemplates.add(
-                                                CardTemplateEntity(
-                                                    id = 1L + snapshotTemplates.last().id,
-                                                    noteTypeId = type?.id ?: 0,
-                                                    name = "Template " + (snapshotTemplates.last().id + 1).toString(),
-                                                    qstFt = "",
-                                                    ansFt = ""
-                                                )
-                                            )
+                                            viewModel.onAction(NoteTemplateUiAction.AddNewTemplate)
                                             scope.launch {
                                                 //Scroll to last template
-                                                pagerState.animateScrollToPage(snapshotTemplates.size - 1)
+                                                pagerState.animateScrollToPage(templates.size - 1)
                                             }
                                             showOption = false
                                         }
@@ -182,8 +171,15 @@ fun NoteTemplateScreen(
                                         }
 
                                         NoteTemplateOption.Delete -> {
-                                            if (snapshotTemplates.size > 1) {
-                                                snapshotTemplates.removeAt(pagerState.currentPage)
+                                            if (templates.size > 1) {
+                                                viewModel.onAction(
+                                                    NoteTemplateUiAction.DeleteTemplate(
+                                                        pagerState.currentPage
+                                                    )
+                                                )
+                                                scope.launch {
+                                                    pagerState.animateScrollToPage(templates.size)
+                                                }
                                             } else {
                                                 Toast.makeText(
                                                     context,
@@ -251,11 +247,11 @@ fun NoteTemplateScreen(
             ScrollableTabRow(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                selectedTabIndex = pagerState.currentPage,
+                selectedTabIndex = pagerState.currentPage.coerceIn(0, templates.size - 1),
                 edgePadding = 0.dp,
                 modifier = Modifier
             ) {
-                snapshotTemplates.forEachIndexed { index, template ->
+                templates.forEachIndexed { index, template ->
                     Tab(
                         selected = pagerState.currentPage == index,
                         onClick = {
@@ -272,7 +268,7 @@ fun NoteTemplateScreen(
 
             NoteTemplatePager(
                 pagerState = pagerState,
-                templates = snapshotTemplates
+                templates = templates
             )
         }
     }
@@ -289,7 +285,9 @@ private fun NoteTemplatePager(
             .fillMaxSize(),
         beyondViewportPageCount = templates.size,
         state = pagerState,
-        key = { templates[it].id }
+//        key = {
+////            templates[it].id.coerceIn(0L, templates.size.toLong())
+//        }
     ) { page ->
         NoteTemplateContent(
             template = templates[page]

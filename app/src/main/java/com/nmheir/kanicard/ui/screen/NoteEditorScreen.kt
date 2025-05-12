@@ -80,6 +80,7 @@ fun NoteEditorScreen(
     val selectedNoteType by viewModel.selectedNoteType.collectAsStateWithLifecycle()
     val selectedDeck by viewModel.selectedDeck.collectAsStateWithLifecycle()
     val fields by viewModel.fields.collectAsStateWithLifecycle()
+    val templates by viewModel.templates.collectAsStateWithLifecycle()
     val noteEditDto by viewModel.noteEditDto.collectAsStateWithLifecycle()
     val newTypeUiState by viewModel.newTypeDialogUiState.collectAsStateWithLifecycle()
 
@@ -202,13 +203,14 @@ fun NoteEditorScreen(
                 key = "template"
             ) {
                 OptionField(
-                    titles = listOf("abc", "xyz"),
+                    titles = templates.map { it.name },
                     leadingIcon = { Icon(painterResource(R.drawable.ic_folder), null) },
                     onClick = {
                         if (selectedNoteType != null) {
                             navController.navigate("${selectedNoteType?.id}/templates")
                         } else {
-                            Toast.makeText(context, "Please select note type", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Please select note type", Toast.LENGTH_SHORT)
+                                .show()
                         }
                     }
                 )
