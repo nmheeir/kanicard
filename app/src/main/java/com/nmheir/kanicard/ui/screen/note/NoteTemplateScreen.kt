@@ -59,10 +59,12 @@ import com.nmheir.kanicard.R
 import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
 import com.nmheir.kanicard.ui.component.AlertDialog
 import com.nmheir.kanicard.ui.component.DefaultDialog
+import com.nmheir.kanicard.ui.component.MarkdownEditorRow
 import com.nmheir.kanicard.ui.component.TextFieldDialog
 import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
 import com.nmheir.kanicard.ui.viewmodels.NoteTemplateUiAction
 import com.nmheir.kanicard.ui.viewmodels.NoteTemplateViewModel
+import com.nmheir.kanicard.ui.viewmodels.TemplateState
 import kotlinx.coroutines.launch
 
 @Composable
@@ -108,34 +110,39 @@ fun NoteTemplateScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = navController::navigateUp) {
-                        Icon(painterResource(R.drawable.ic_arrow_back_ios), null)
-                    }
-                },
-                actions = {
                     var showConfirmDialog by remember { mutableStateOf(false) }
                     IconButton(
-                        enabled = snapshotTemplates != templates,
                         onClick = {
                             if (snapshotTemplates != templates) {
                                 showConfirmDialog = true
                             }
                         }
                     ) {
-                        Icon(painterResource(R.drawable.ic_check), null)
-                        if (showConfirmDialog) {
-                            AlertDialog(
-                                onDismiss = {
-                                    showConfirmDialog = false
-                                    navController.navigateUp()
-                                },
-                                onConfirm = {
-                                    // TODO: Thêm hoặc cập nhật template vào trong database
-                                }
-                            ) {
-                                Text(text = "Do you want to keep this changes ?")
+                        Icon(painterResource(R.drawable.ic_arrow_back_ios), null)
+                    }
+                    if (showConfirmDialog) {
+                        AlertDialog(
+                            onDismiss = {
+                                showConfirmDialog = false
+                                navController.navigateUp()
+                            },
+                            onConfirm = {
+                                // TODO: Thêm hoặc cập nhật template vào trong database
                             }
+                        ) {
+                            Text(text = "Do you want to keep this changes ?")
                         }
+                    }
+                },
+                actions = {
+                    IconButton(
+                        enabled = snapshotTemplates != templates,
+                        onClick = {
+                            // TODO: Save template to database
+                        }
+                    ) {
+                        Icon(painterResource(R.drawable.ic_check), null)
+
                     }
                     IconButton(
                         onClick = {
@@ -268,7 +275,8 @@ fun NoteTemplateScreen(
 
             NoteTemplatePager(
                 pagerState = pagerState,
-                templates = templates
+                templates = templates,
+                action = viewModel::onAction
             )
         }
     }
@@ -278,7 +286,8 @@ fun NoteTemplateScreen(
 private fun NoteTemplatePager(
     modifier: Modifier = Modifier,
     pagerState: PagerState,
-    templates: List<CardTemplateEntity>
+    templates: List<TemplateState>,
+    action: (NoteTemplateUiAction) -> Unit
 ) {
     HorizontalPager(
         modifier = modifier
@@ -290,30 +299,41 @@ private fun NoteTemplatePager(
 //        }
     ) { page ->
         NoteTemplateContent(
-            template = templates[page]
+            template = templates[page],
+            action = { side, key, value ->
+                action(NoteTemplateUiAction.Edit(key, value, page, side))
+            }
         )
     }
 }
 
+
 @Composable
 private fun NoteTemplateContent(
     modifier: Modifier = Modifier,
-    template: CardTemplateEntity
+    template: TemplateState,
+    action: (CardSide, String, String) -> Unit
 ) {
     val (selectedCardSide, onSelectedCardSideChange) = remember { mutableStateOf<CardSide>(CardSide.Front) }
-    val qstState =
-        remember(template) { TextFieldState(initialText = template.qstFt) }
-    val ansState =
-        remember(template) { TextFieldState(initialText = template.ansFt) }
 
     Scaffold(
         modifier = modifier
             .fillMaxSize(),
         bottomBar = {
-            NoteTemplateBottomBar(
-                selectedCardSide = selectedCardSide,
-                onSelectedCardSideChange = onSelectedCardSideChange,
-            )
+            Column {
+                MarkdownEditorRow(
+                    canRedo = false,
+                    canUndo = false,
+                    onEdit = { key ->
+                        action(selectedCardSide, key, "")
+                    },
+                    onListButtonClick = {}
+                )
+                NoteTemplateBottomBar(
+                    selectedCardSide = selectedCardSide,
+                    onSelectedCardSideChange = onSelectedCardSideChange,
+                )
+            }
         }
     ) { pv ->
         when (selectedCardSide) {
@@ -322,7 +342,7 @@ private fun NoteTemplateContent(
                     modifier = Modifier
                         .padding(pv)
                         .fillMaxSize(),
-                    state = qstState,
+                    state = template.qstState,
                     side = CardSide.Front
                 )
             }
@@ -332,7 +352,7 @@ private fun NoteTemplateContent(
                     modifier = Modifier
                         .padding(pv)
                         .fillMaxSize(),
-                    state = ansState,
+                    state = template.ansState,
                     side = CardSide.Back
                 )
             }
@@ -424,7 +444,7 @@ private fun DropdownOption(
     }
 }
 
-private enum class CardSide(val title: Int, val icon: Int) {
+enum class CardSide(val title: Int, val icon: Int) {
     Front(R.string.label_front, R.drawable.ic_card_question),
     Back(R.string.label_back, R.drawable.ic_card_answer)
 }
