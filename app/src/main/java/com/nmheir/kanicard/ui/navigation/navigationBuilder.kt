@@ -9,6 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.nmheir.kanicard.ui.TestScreen
 import com.nmheir.kanicard.ui.screen.AddNewCardScreen
 import com.nmheir.kanicard.ui.screen.DeckDetailScreen
 import com.nmheir.kanicard.ui.screen.HomeScreen
@@ -31,6 +32,7 @@ fun NavGraphBuilder.navigationBuilder(
 ) {
 
     composable(Screens.Home.route) {
+//        TestScreen()
         HomeScreen(navController = navController)
     }
 

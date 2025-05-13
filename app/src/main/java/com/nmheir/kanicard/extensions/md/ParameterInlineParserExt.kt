@@ -15,6 +15,14 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 import com.nmheir.kanicard.ui.theme.KaniTheme
 import org.commonmark.Extension
+import org.commonmark.ext.autolink.AutolinkExtension
+import org.commonmark.ext.footnotes.FootnotesExtension
+import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
+import org.commonmark.ext.gfm.tables.TablesExtension
+import org.commonmark.ext.heading.anchor.HeadingAnchorExtension
+import org.commonmark.ext.image.attributes.ImageAttributesExtension
+import org.commonmark.ext.ins.InsExtension
+import org.commonmark.ext.task.list.items.TaskListItemsExtension
 import org.commonmark.node.CustomNode
 import org.commonmark.node.Node
 import org.commonmark.node.Text
@@ -170,7 +178,16 @@ object MarkdownWithParametersParser {
      * @return Rendered HTML string
      */
     fun parseToHtml(markdown: String, parameters: Map<String, String>): String {
-        val extensions = listOf<Extension>(ParameterInlineParserExtension())
+        val extensions = listOf<Extension>(
+            ParameterInlineParserExtension(),
+            TablesExtension.create(),
+            AutolinkExtension.create(),
+            FootnotesExtension.create(),
+            HeadingAnchorExtension.create(),
+            InsExtension.create(),
+            StrikethroughExtension.create(),
+            TaskListItemsExtension.create(),
+        )
 
         val parser = Parser.builder()
             .extensions(extensions)
@@ -179,7 +196,16 @@ object MarkdownWithParametersParser {
         val document = parser.parse(markdown)
 
         val renderer = HtmlRenderer.builder()
-            .extensions(listOf(ParameterHtmlRendererExtension(parameters)))
+            .extensions(listOf(
+                ParameterHtmlRendererExtension(parameters),
+                TablesExtension.create(),
+                AutolinkExtension.create(),
+                FootnotesExtension.create(),
+                HeadingAnchorExtension.create(),
+                InsExtension.create(),
+                StrikethroughExtension.create(),
+                TaskListItemsExtension.create(),
+            ))
             .build()
 
         return renderer.render(document)
@@ -250,7 +276,7 @@ fun MarkdownWithParamsPreview() {
 
 // 2. Map chứa giá trị thay thế
     val simpleParams = mapOf(
-        "ame"    to "Alice",
+        "name"    to "Alice",
         "appName" to "MyCoolApp"
     )
 
