@@ -130,4 +130,15 @@ dependencies {
 
     //Serialization
     implementation(libs.kotlinx.serialization.json)
+
+    // CommonMark, for markdown rendering and parsing
+    implementation(libs.commonmark.ext.autolink)
+    implementation(libs.commonmark.ext.footnotes)
+    implementation(libs.commonmark.ext.ins)
+    implementation(libs.commonmark.ext.task.list.items)
+    implementation(libs.commonmark.ext.gfm.strikethrough)
+    implementation(libs.commonmark.ext.gfm.tables)
+    implementation(libs.commonmark.ext.heading.anchor)
+    implementation(libs.commonmark.ext.image.attributes)
+    implementation(libs.commonmark)
 }
