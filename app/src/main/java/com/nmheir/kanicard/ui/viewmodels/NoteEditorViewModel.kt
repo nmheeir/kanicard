@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.nmheir.kanicard.data.dto.deck.SelectableDeck
 import com.nmheir.kanicard.data.dto.note.NoteEditDto
 import com.nmheir.kanicard.data.dto.note.SelectableNoteType
+import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
 import com.nmheir.kanicard.data.entities.note.FieldDefEntity
 import com.nmheir.kanicard.data.entities.note.NoteTypeEntity
 import com.nmheir.kanicard.data.repository.FieldRepo
@@ -68,6 +69,17 @@ class NoteEditorViewModel @Inject constructor(
         .flatMapLatest {
             noteRepo.getNoteTypeWithFieldDefs(it.id).map {
                 it?.fieldDefs ?: emptyList()
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    val templates = selectedNoteType
+        .filterNotNull()
+        .flatMapLatest {
+            noteRepo.getNoteTypeWithTemplates(it.id).map {
+                if (it?.templates.isNullOrEmpty()) {
+                    listOf(sampleTemplate)
+                } else it.templates
             }
         }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
@@ -195,3 +207,11 @@ sealed interface FileDataEvent {
         val uri: Uri
     ) : FileDataEvent
 }
+
+private val sampleTemplate = CardTemplateEntity(
+    id = 0L,
+    noteTypeId = 0,
+    name = "Template",
+    qstFt = "",
+    ansFt = ""
+)

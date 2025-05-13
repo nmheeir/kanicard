@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -36,7 +35,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -61,11 +59,12 @@ import com.nmheir.kanicard.R
 import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
 import com.nmheir.kanicard.ui.component.AlertDialog
 import com.nmheir.kanicard.ui.component.DefaultDialog
+import com.nmheir.kanicard.ui.component.MarkdownEditorRow
 import com.nmheir.kanicard.ui.component.TextFieldDialog
-import com.nmheir.kanicard.ui.component.widget.PreferenceEntry
 import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
+import com.nmheir.kanicard.ui.viewmodels.NoteTemplateUiAction
 import com.nmheir.kanicard.ui.viewmodels.NoteTemplateViewModel
-import com.nmheir.kanicard.utils.fakeTemplates
+import com.nmheir.kanicard.ui.viewmodels.TemplateState
 import kotlinx.coroutines.launch
 
 @Composable
@@ -78,10 +77,10 @@ fun NoteTemplateScreen(
     val templates by viewModel.templates.collectAsStateWithLifecycle()
     val fields by viewModel.fields.collectAsStateWithLifecycle()
 
-    val snapshotTemplates = remember(templates) { fakeTemplates.toMutableStateList() }
+    val snapshotTemplates = remember { templates.toMutableStateList() }
 
     val pagerState = rememberPagerState(initialPage = 0) {
-        snapshotTemplates.size
+        templates.size
     }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -111,34 +110,39 @@ fun NoteTemplateScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = navController::navigateUp) {
-                        Icon(painterResource(R.drawable.ic_arrow_back_ios), null)
-                    }
-                },
-                actions = {
                     var showConfirmDialog by remember { mutableStateOf(false) }
                     IconButton(
-                        enabled = snapshotTemplates != templates,
                         onClick = {
                             if (snapshotTemplates != templates) {
                                 showConfirmDialog = true
                             }
                         }
                     ) {
-                        Icon(painterResource(R.drawable.ic_check), null)
-                        if (showConfirmDialog) {
-                            AlertDialog(
-                                onDismiss = {
-                                    showConfirmDialog = false
-                                    navController.navigateUp()
-                                },
-                                onConfirm = {
-                                    // TODO: Thêm hoặc cập nhật template vào trong database
-                                }
-                            ) {
-                                Text(text = "Do you want to keep this changes ?")
+                        Icon(painterResource(R.drawable.ic_arrow_back_ios), null)
+                    }
+                    if (showConfirmDialog) {
+                        AlertDialog(
+                            onDismiss = {
+                                showConfirmDialog = false
+                                navController.navigateUp()
+                            },
+                            onConfirm = {
+                                // TODO: Thêm hoặc cập nhật template vào trong database
                             }
+                        ) {
+                            Text(text = "Do you want to keep this changes ?")
                         }
+                    }
+                },
+                actions = {
+                    IconButton(
+                        enabled = snapshotTemplates != templates,
+                        onClick = {
+                            // TODO: Save template to database
+                        }
+                    ) {
+                        Icon(painterResource(R.drawable.ic_check), null)
+
                     }
                     IconButton(
                         onClick = {
@@ -161,18 +165,10 @@ fun NoteTemplateScreen(
                                     when (it) {
                                         NoteTemplateOption.Add -> {
                                             // TODO: Tìm cách bỏ id khi thêm template vào database
-                                            snapshotTemplates.add(
-                                                CardTemplateEntity(
-                                                    id = 1L + snapshotTemplates.last().id,
-                                                    noteTypeId = type?.id ?: 0,
-                                                    name = "Template " + (snapshotTemplates.last().id + 1).toString(),
-                                                    qstFt = "",
-                                                    ansFt = ""
-                                                )
-                                            )
+                                            viewModel.onAction(NoteTemplateUiAction.AddNewTemplate)
                                             scope.launch {
                                                 //Scroll to last template
-                                                pagerState.animateScrollToPage(snapshotTemplates.size - 1)
+                                                pagerState.animateScrollToPage(templates.size - 1)
                                             }
                                             showOption = false
                                         }
@@ -182,8 +178,15 @@ fun NoteTemplateScreen(
                                         }
 
                                         NoteTemplateOption.Delete -> {
-                                            if (snapshotTemplates.size > 1) {
-                                                snapshotTemplates.removeAt(pagerState.currentPage)
+                                            if (templates.size > 1) {
+                                                viewModel.onAction(
+                                                    NoteTemplateUiAction.DeleteTemplate(
+                                                        pagerState.currentPage
+                                                    )
+                                                )
+                                                scope.launch {
+                                                    pagerState.animateScrollToPage(templates.size)
+                                                }
                                             } else {
                                                 Toast.makeText(
                                                     context,
@@ -251,11 +254,11 @@ fun NoteTemplateScreen(
             ScrollableTabRow(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                selectedTabIndex = pagerState.currentPage,
+                selectedTabIndex = pagerState.currentPage.coerceIn(0, templates.size - 1),
                 edgePadding = 0.dp,
                 modifier = Modifier
             ) {
-                snapshotTemplates.forEachIndexed { index, template ->
+                templates.forEachIndexed { index, template ->
                     Tab(
                         selected = pagerState.currentPage == index,
                         onClick = {
@@ -272,7 +275,8 @@ fun NoteTemplateScreen(
 
             NoteTemplatePager(
                 pagerState = pagerState,
-                templates = snapshotTemplates
+                templates = templates,
+                action = viewModel::onAction
             )
         }
     }
@@ -282,40 +286,54 @@ fun NoteTemplateScreen(
 private fun NoteTemplatePager(
     modifier: Modifier = Modifier,
     pagerState: PagerState,
-    templates: List<CardTemplateEntity>
+    templates: List<TemplateState>,
+    action: (NoteTemplateUiAction) -> Unit
 ) {
     HorizontalPager(
         modifier = modifier
             .fillMaxSize(),
         beyondViewportPageCount = templates.size,
         state = pagerState,
-        key = { templates[it].id }
+//        key = {
+////            templates[it].id.coerceIn(0L, templates.size.toLong())
+//        }
     ) { page ->
         NoteTemplateContent(
-            template = templates[page]
+            template = templates[page],
+            action = { side, key, value ->
+                action(NoteTemplateUiAction.Edit(key, value, page, side))
+            }
         )
     }
 }
 
+
 @Composable
 private fun NoteTemplateContent(
     modifier: Modifier = Modifier,
-    template: CardTemplateEntity
+    template: TemplateState,
+    action: (CardSide, String, String) -> Unit
 ) {
     val (selectedCardSide, onSelectedCardSideChange) = remember { mutableStateOf<CardSide>(CardSide.Front) }
-    val qstState =
-        remember(template) { TextFieldState(initialText = template.qstFt) }
-    val ansState =
-        remember(template) { TextFieldState(initialText = template.ansFt) }
 
     Scaffold(
         modifier = modifier
             .fillMaxSize(),
         bottomBar = {
-            NoteTemplateBottomBar(
-                selectedCardSide = selectedCardSide,
-                onSelectedCardSideChange = onSelectedCardSideChange,
-            )
+            Column {
+                MarkdownEditorRow(
+                    canRedo = false,
+                    canUndo = false,
+                    onEdit = { key ->
+                        action(selectedCardSide, key, "")
+                    },
+                    onListButtonClick = {}
+                )
+                NoteTemplateBottomBar(
+                    selectedCardSide = selectedCardSide,
+                    onSelectedCardSideChange = onSelectedCardSideChange,
+                )
+            }
         }
     ) { pv ->
         when (selectedCardSide) {
@@ -324,7 +342,7 @@ private fun NoteTemplateContent(
                     modifier = Modifier
                         .padding(pv)
                         .fillMaxSize(),
-                    state = qstState,
+                    state = template.qstState,
                     side = CardSide.Front
                 )
             }
@@ -334,7 +352,7 @@ private fun NoteTemplateContent(
                     modifier = Modifier
                         .padding(pv)
                         .fillMaxSize(),
-                    state = ansState,
+                    state = template.ansState,
                     side = CardSide.Back
                 )
             }
@@ -426,7 +444,7 @@ private fun DropdownOption(
     }
 }
 
-private enum class CardSide(val title: Int, val icon: Int) {
+enum class CardSide(val title: Int, val icon: Int) {
     Front(R.string.label_front, R.drawable.ic_card_question),
     Back(R.string.label_back, R.drawable.ic_card_answer)
 }
