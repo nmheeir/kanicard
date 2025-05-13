@@ -4,6 +4,7 @@ package com.nmheir.kanicard.ui.viewmodels
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.material3.TextField
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -74,9 +75,11 @@ class NoteTemplateViewModel @Inject constructor(
         when (action) {
             is NoteTemplateUiAction.AddNewTemplate -> {
                 templates.update {
-                    it + sampleTemplate.copy(
-                        id = it.last().id + 1L,
-                        name = "Card ${it.last().id + 1}"
+                    it + TemplateState(
+                        id = it.last().id.inc(),
+                        name = "Card ${it.last().id.inc()}",
+                        qstState = TextFieldState(),
+                        ansState = TextFieldState()
                     )
                 }
             }
