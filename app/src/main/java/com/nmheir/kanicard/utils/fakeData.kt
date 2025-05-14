@@ -5,6 +5,7 @@ import com.nmheir.kanicard.data.dto.ProfileDto
 import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
 import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
 import com.nmheir.kanicard.data.entities.note.FieldDefEntity
+import com.nmheir.kanicard.ui.viewmodels.TemplatePreview
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import kotlin.random.Random
@@ -136,3 +137,73 @@ val fakeTemplates = List(5) {
         ansFt = "Answer $it",
     )
 }
+
+val fakeTemplatePreviews = listOf(
+    TemplatePreview(
+        id = 1L,
+        name = "Simple Welcome",
+        qstHtml = "Hello **{{user}}**, welcome to *{{product}}*!",
+        ansHtml = "We're glad to have you here on {{date}}."
+    ),
+    TemplatePreview(
+        id = 2L,
+        name = "Feature Highlights",
+        qstHtml =
+            """
+        Hi {{user}},
+
+        Here's what you can expect from *{{product}}*:
+        - Easy onboarding
+        - Secure data
+        - Great community
+
+        Access it now: [Click here]({{url}})
+    """.trimIndent(),
+        ansHtml =
+            """
+        On {{date}}, your journey with **{{product}}** officially begins.
+        We're here to help every step of the way.
+    """.trimIndent()
+    ),
+    TemplatePreview(
+        id = 3L,
+        name = "Advanced Summary",
+        qstHtml =
+            """
+        ## Summary for {{user}}
+
+        Welcome to **{{product}}** – your start date: _{{date}}_.
+
+        | Info      | Detail        |
+        |-----------|---------------|
+        | User      | {{user}}      |
+        | Product   | {{product}}   |
+        | Join Date | {{date}}      |
+        
+        {{url}}
+
+        [More Info]({{url}})
+    """.trimIndent(),
+        ansHtml =
+            """
+        ```json
+        {
+          "user": "{{user}}",
+          "product": "{{product}}",
+          "date": "{{date}}",
+          "resource": "{{url}}"
+        }
+        ```
+
+        > Thank you for joining us!
+    """.trimIndent()
+    )
+
+)
+
+val fakeTemplateParams = mapOf(
+    "user" to "Alice Nguyen",
+    "product" to "NoteMaster Pro",
+    "date" to "May 13, 2025",
+    "url" to "https://google.com"
+)

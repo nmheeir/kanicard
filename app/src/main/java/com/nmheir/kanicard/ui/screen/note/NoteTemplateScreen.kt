@@ -3,7 +3,9 @@
 package com.nmheir.kanicard.ui.screen.note
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +25,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -33,7 +36,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +49,7 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
@@ -56,7 +63,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.nmheir.kanicard.R
-import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
 import com.nmheir.kanicard.ui.component.AlertDialog
 import com.nmheir.kanicard.ui.component.DefaultDialog
 import com.nmheir.kanicard.ui.component.MarkdownEditorRow
@@ -65,6 +71,9 @@ import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
 import com.nmheir.kanicard.ui.viewmodels.NoteTemplateUiAction
 import com.nmheir.kanicard.ui.viewmodels.NoteTemplateViewModel
 import com.nmheir.kanicard.ui.viewmodels.TemplateState
+import com.nmheir.kanicard.ui.viewmodels.toTemplatePreview
+import com.nmheir.kanicard.ui.viewmodels.toTemplateState
+import com.nmheir.kanicard.utils.fakeTemplatePreviews
 import kotlinx.coroutines.launch
 
 @Composable
@@ -84,6 +93,15 @@ fun NoteTemplateScreen(
     }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+    var isPreview by remember { mutableStateOf(false) }
+
+    BackHandler(isPreview) {
+        if (isPreview) {
+            focusManager.clearFocus()
+            isPreview = false
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -146,7 +164,7 @@ fun NoteTemplateScreen(
                     }
                     IconButton(
                         onClick = {
-//                            navController.navigate("template/${}")
+                            isPreview = !isPreview
                         }
                     ) {
                         Icon(painterResource(R.drawable.ic_visibility_fill), null)
@@ -278,6 +296,21 @@ fun NoteTemplateScreen(
                 templates = templates,
                 action = viewModel::onAction
             )
+
+            AnimatedVisibility(
+                visible = isPreview
+            ) {
+                val templatePreview = templates[pagerState.currentPage].toTemplatePreview()
+                ModalBottomSheet(
+                    dragHandle = null,
+                    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                    onDismissRequest = { isPreview = false }
+                ) {
+                    PreviewContent(
+                        template = templatePreview
+                    )
+                }
+            }
         }
     }
 }

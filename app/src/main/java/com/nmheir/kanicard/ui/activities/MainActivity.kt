@@ -533,10 +533,7 @@ class MainActivity : ComponentActivity() {
                             }
                         }
 
-
-                        Timber.d("Storage path: $storagePath")
-                        Timber.d("Storage path is empty: ${storagePath.isEmpty()}")
-                        AnimatedVisibility(
+                        /*AnimatedVisibility(
                             visible = storagePath.isEmpty() || storagePath == "null",
                             enter = fadeIn(),
                             exit = fadeOut()
@@ -544,7 +541,7 @@ class MainActivity : ComponentActivity() {
                             PermissionScreen(
                                 onPermissionResult = onStoragePathChange
                             )
-                        }
+                        }*/
                     }
                 }
             }

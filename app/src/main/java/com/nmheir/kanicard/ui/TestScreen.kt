@@ -95,10 +95,10 @@ fun TestScreen(modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
             )
-            ReviewFlashCard(
+            /*ReviewFlashCard(
                 html = htmlContent,
                 modifier = Modifier.fillMaxSize()
-            )
+            )*/
         }
     }
 }

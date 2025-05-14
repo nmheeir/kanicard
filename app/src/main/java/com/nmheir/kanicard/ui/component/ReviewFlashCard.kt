@@ -1,10 +1,18 @@
+@file:Suppress("DEPRECATION")
+
 package com.nmheir.kanicard.ui.component
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
+import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
 import android.webkit.WebView
+import android.webkit.WebView.enableSlowWholeDocumentDraw
 import android.webkit.WebViewClient
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
@@ -18,18 +26,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.net.toUri
-import com.nmheir.kanicard.extensions.md.MarkdownWithParametersParser
 import com.nmheir.kanicard.extensions.rememberCustomTabsIntent
 import com.nmheir.kanicard.extensions.toHexColor
-import com.nmheir.kanicard.ui.theme.KaniTheme
 import com.nmheir.kanicard.ui.theme.linkColor
-import com.nmheir.kanicard.ui.viewmodels.TemplatePreview
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 data class MarkdownStyles(
     val hexTextColor: String,
@@ -58,7 +63,8 @@ data class MarkdownStyles(
 @Composable
 fun ReviewFlashCard(
     modifier: Modifier = Modifier,
-    html: String
+    html: String,
+    onLoadingChanged: (Boolean) -> Unit
 ) {
     var template by remember { mutableStateOf("") }
     val colorScheme = MaterialTheme.colorScheme
@@ -94,7 +100,8 @@ fun ReviewFlashCard(
     var webView by remember { mutableStateOf<WebView?>(null) }
 
     AndroidView(
-        modifier = modifier,
+        modifier = modifier
+            .fillMaxHeight(0.5f),
         factory = {
             WebView(it).also { webView = it }.apply {
                 layoutParams = ViewGroup.LayoutParams(
@@ -102,6 +109,16 @@ fun ReviewFlashCard(
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
                 webViewClient = object : WebViewClient() {
+                    override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                        super.onPageStarted(view, url, favicon)
+                        onLoadingChanged(true)
+                    }
+
+                    override fun onPageFinished(view: WebView?, url: String?) {
+                        super.onPageFinished(view, url)
+                        onLoadingChanged(false)
+                    }
+
                     override fun shouldOverrideUrlLoading(
                         view: WebView?,
                         request: WebResourceRequest
@@ -113,9 +130,31 @@ fun ReviewFlashCard(
                         return true
                     }
                 }
+                webChromeClient = object : WebChromeClient() {
+                    override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                        // newProgress: Int từ 0 -> 100
+                        if (newProgress < 100) {
+                            onLoadingChanged(true)
+                        } else {
+                            onLoadingChanged(false)
+                        }
+                    }
+                }
                 settings.allowFileAccess = true
+                settings.allowContentAccess = true
+                settings.allowFileAccessFromFileURLs = true
+                settings.allowUniversalAccessFromFileURLs = true
+                setLayerType(View.LAYER_TYPE_HARDWARE, null)
+                settings.domStorageEnabled = true
                 settings.javaScriptEnabled = true
-                settings.defaultTextEncodingName = "UTF-8"
+                settings.loadsImagesAutomatically = true
+                isVerticalScrollBarEnabled = false
+                isHorizontalScrollBarEnabled = false
+                settings.setSupportZoom(false)
+                settings.builtInZoomControls = false
+                settings.displayZoomControls = false
+                settings.useWideViewPort = true
+                settings.loadWithOverviewMode = false
             }
         },
         update = {
@@ -127,12 +166,6 @@ fun ReviewFlashCard(
                 "UTF-8",
                 null
             )
-        },
-        onReset = {
-            it.clearHistory()
-            it.stopLoading()
-            it.destroy()
-            webView = null
         }
     )
 }

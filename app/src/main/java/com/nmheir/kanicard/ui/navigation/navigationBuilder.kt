@@ -9,8 +9,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.nmheir.kanicard.ui.TestScreen
-import com.nmheir.kanicard.ui.screen.AddNewCardScreen
 import com.nmheir.kanicard.ui.screen.DeckDetailScreen
 import com.nmheir.kanicard.ui.screen.HomeScreen
 import com.nmheir.kanicard.ui.screen.NoteEditorScreen
@@ -18,7 +16,6 @@ import com.nmheir.kanicard.ui.screen.ProfileScreen
 import com.nmheir.kanicard.ui.screen.Screens
 import com.nmheir.kanicard.ui.screen.more.MoreScreen
 import com.nmheir.kanicard.ui.screen.note.NoteTemplateScreen
-import com.nmheir.kanicard.ui.screen.note.PreviewTemplateScreen
 import com.nmheir.kanicard.ui.screen.onboarding.OnboardingScreen
 import com.nmheir.kanicard.ui.screen.settings.screen.SettingAppearanceScreen
 import com.nmheir.kanicard.ui.screen.settings.screen.SettingScreen
@@ -33,6 +30,7 @@ fun NavGraphBuilder.navigationBuilder(
 
     composable(Screens.Home.route) {
 //        TestScreen()
+//        PreviewTemplateScreen(navController)
         HomeScreen(navController = navController)
     }
 
@@ -95,17 +93,6 @@ fun NavGraphBuilder.navigationBuilder(
         )
     ) {
         NoteTemplateScreen(navController)
-    }
-
-    composable(
-        route = "template/{id}/preview",
-        arguments = listOf(
-            navArgument("id") {
-                type = NavType.LongType
-            }
-        )
-    ) {
-        PreviewTemplateScreen(navController)
     }
 
     composable(
