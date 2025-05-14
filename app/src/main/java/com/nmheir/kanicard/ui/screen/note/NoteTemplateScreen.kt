@@ -134,27 +134,45 @@ fun NoteTemplateScreen(
                     var showConfirmDialog by remember { mutableStateOf(false) }
                     IconButton(
                         onClick = {
+                            // TODO: Fix bug #2
                             if (snapshotTemplates.size < templates.size ||
-                                (snapshotTemplates.size == templates.size && snapshotTemplates != templates)
+                                (snapshotTemplates.size == templates.size && snapshotTemplates.toList() != templates)
                             ) {
+                                Timber.d("${snapshotTemplates.size} ${templates.size} ${snapshotTemplates.toList()} $templates")
+                                Timber.d("Equal? ${snapshotTemplates.toList() == templates}")
+                                Timber.d("Same instance? ${snapshotTemplates.toList() === templates}")
+
                                 showConfirmDialog = true
+                            } else {
+                                Timber.d("${snapshotTemplates.size} ${templates.size} ${snapshotTemplates.toList()} $templates")
+                                Timber.d("Equal? ${snapshotTemplates.toList() == templates}")
+                                Timber.d("Same instance? ${snapshotTemplates.toList() === templates}")
+                                navController.navigateUp()
                             }
                         }
                     ) {
                         Icon(painterResource(R.drawable.ic_arrow_back_ios), null)
                     }
                     if (showConfirmDialog) {
-                        AlertDialog(
-                            onDismiss = {
-                                showConfirmDialog = false
-                                navController.navigateUp()
-                            },
-                            onConfirm = {
-                                viewModel.onAction(NoteTemplateUiAction.Save)
-                                navController.navigateUp()
+                        DefaultDialog(
+                            onDismiss = { showConfirmDialog = false },
+                            buttons = {
+                                TextButton(onClick = {
+                                    showConfirmDialog = false
+                                    navController.navigateUp()
+                                }) {
+                                    Text(text = "Cancel")
+                                }
+                                TextButton(onClick = {
+                                    showConfirmDialog = false
+                                    viewModel.onAction(NoteTemplateUiAction.Save)
+                                    navController.navigateUp()
+                                }) {
+                                    Text(text = "Save")
+                                }
                             }
                         ) {
-                            Text(text = "You need to save before going back !")
+                            Text(text = "Discard changes?")
                         }
                     }
                 },
