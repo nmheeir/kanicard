@@ -32,7 +32,8 @@ fun MarkdownEditorRow(
     canUndo: Boolean,
     canRedo: Boolean,
     onEdit: (String) -> Unit,
-    onListButtonClick: () -> Unit
+    onListButtonClick: () -> Unit,
+    onInsertFieldButtonClick: () -> Unit
 ) {
     var showHeadingLevel by remember { mutableStateOf(false) }
     Row(
@@ -61,6 +62,12 @@ fun MarkdownEditorRow(
             onEdit(Constants.Editor.REDO)
         }
 
+        IconButtonTooltip(
+            iconRes = R.drawable.ic_insert_text,
+            shortCutDescription = "Insert field"
+        ) {
+            onInsertFieldButtonClick()
+        }
 
         IconButtonTooltip(
             iconRes = R.drawable.ic_title,

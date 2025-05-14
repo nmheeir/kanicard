@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 
 package com.nmheir.kanicard.ui.screen.note
 
@@ -6,6 +6,8 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +21,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,8 +41,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -63,6 +65,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.nmheir.kanicard.R
+import com.nmheir.kanicard.core.presentation.components.Constants
 import com.nmheir.kanicard.ui.component.AlertDialog
 import com.nmheir.kanicard.ui.component.DefaultDialog
 import com.nmheir.kanicard.ui.component.MarkdownEditorRow
@@ -72,9 +75,8 @@ import com.nmheir.kanicard.ui.viewmodels.NoteTemplateUiAction
 import com.nmheir.kanicard.ui.viewmodels.NoteTemplateViewModel
 import com.nmheir.kanicard.ui.viewmodels.TemplateState
 import com.nmheir.kanicard.ui.viewmodels.toTemplatePreview
-import com.nmheir.kanicard.ui.viewmodels.toTemplateState
-import com.nmheir.kanicard.utils.fakeTemplatePreviews
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @Composable
 fun NoteTemplateScreen(
@@ -85,6 +87,7 @@ fun NoteTemplateScreen(
     if (type == null) return
     val templates by viewModel.templates.collectAsStateWithLifecycle()
     val fields by viewModel.fields.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
     val snapshotTemplates = remember { templates.toMutableStateList() }
 
@@ -131,7 +134,9 @@ fun NoteTemplateScreen(
                     var showConfirmDialog by remember { mutableStateOf(false) }
                     IconButton(
                         onClick = {
-                            if (snapshotTemplates != templates) {
+                            if (snapshotTemplates.size < templates.size ||
+                                (snapshotTemplates.size == templates.size && snapshotTemplates != templates)
+                            ) {
                                 showConfirmDialog = true
                             }
                         }
@@ -145,10 +150,11 @@ fun NoteTemplateScreen(
                                 navController.navigateUp()
                             },
                             onConfirm = {
-                                // TODO: Thêm hoặc cập nhật template vào trong database
+                                viewModel.onAction(NoteTemplateUiAction.Save)
+                                navController.navigateUp()
                             }
                         ) {
-                            Text(text = "Do you want to keep this changes ?")
+                            Text(text = "You need to save before going back !")
                         }
                     }
                 },
@@ -156,7 +162,8 @@ fun NoteTemplateScreen(
                     IconButton(
                         enabled = snapshotTemplates != templates,
                         onClick = {
-                            // TODO: Save template to database
+                            viewModel.onAction(NoteTemplateUiAction.Save)
+                            navController.navigateUp()
                         }
                     ) {
                         Icon(painterResource(R.drawable.ic_check), null)
@@ -176,7 +183,7 @@ fun NoteTemplateScreen(
                         }
                         if (showOption) {
                             var showRenameDialog by remember { mutableStateOf(false) }
-                            var showInsertFieldDialog by remember { mutableStateOf(false) }
+                            var showDeleteDialog by remember { mutableStateOf(false) }
                             DropdownOption(
                                 onDismiss = { showOption = false },
                                 onClick = {
@@ -197,14 +204,7 @@ fun NoteTemplateScreen(
 
                                         NoteTemplateOption.Delete -> {
                                             if (templates.size > 1) {
-                                                viewModel.onAction(
-                                                    NoteTemplateUiAction.DeleteTemplate(
-                                                        pagerState.currentPage
-                                                    )
-                                                )
-                                                scope.launch {
-                                                    pagerState.animateScrollToPage(templates.size)
-                                                }
+                                                showDeleteDialog = true
                                             } else {
                                                 Toast.makeText(
                                                     context,
@@ -212,11 +212,6 @@ fun NoteTemplateScreen(
                                                     Toast.LENGTH_SHORT
                                                 ).show()
                                             }
-                                            showOption = false
-                                        }
-
-                                        NoteTemplateOption.InsertField -> {
-                                            showInsertFieldDialog = true
                                         }
 
                                         NoteTemplateOption.CopyAsMarkdown -> {
@@ -237,27 +232,28 @@ fun NoteTemplateScreen(
                                         selection = TextRange(type?.name?.length ?: 0)
                                     ),
                                     placeholder = { Text(text = "Rename type") },
-                                    onDone = {},
+                                    onDone = {
+                                        viewModel.onAction(NoteTemplateUiAction.RenameNoteType(it))
+                                    },
                                     title = {
                                         Text(text = "Rename type")
                                     }
                                 )
                             }
-                            if (showInsertFieldDialog) {
-                                DefaultDialog(
-                                    onDismiss = { showInsertFieldDialog = false },
-                                    buttons = {
-                                        TextButton(onClick = { showInsertFieldDialog = false }) {
-                                            Text(text = stringResource(R.string.cancel))
-                                        }
+                            if (showDeleteDialog) {
+                                AlertDialog(
+                                    onDismiss = { showDeleteDialog = false },
+                                    onConfirm = {
+                                        viewModel.onAction(
+                                            NoteTemplateUiAction.DeleteTemplate(
+                                                pagerState.currentPage
+                                            )
+                                        )
+                                        scope.launch { pagerState.animateScrollToPage(templates.size) }
+                                        showDeleteDialog = false
                                     }
                                 ) {
-                                    fields.fastForEach {
-                                        TextPreferenceWidget(
-                                            title = it.name,
-                                            onPreferenceClick = {}
-                                        )
-                                    }
+                                    Text(text = "Are you sure you want to delete this template?")
                                 }
                             }
                         }
@@ -266,52 +262,70 @@ fun NoteTemplateScreen(
             )
         }
     ) { pv ->
-        Column(
-            modifier = Modifier.padding(pv)
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(pv)
         ) {
-            ScrollableTabRow(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                selectedTabIndex = pagerState.currentPage.coerceIn(0, templates.size - 1),
-                edgePadding = 0.dp,
-                modifier = Modifier
-            ) {
-                templates.forEachIndexed { index, template ->
-                    Tab(
-                        selected = pagerState.currentPage == index,
-                        onClick = {
-                            scope.launch {
-                                pagerState.animateScrollToPage(index)
-                            }
-                        },
-                        text = {
-                            Text(text = template.name)
-                        }
-                    )
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.2f))
+                ) {
+                    CircularProgressIndicator()
                 }
             }
-
-            NoteTemplatePager(
-                pagerState = pagerState,
-                templates = templates,
-                action = viewModel::onAction
-            )
-
-            AnimatedVisibility(
-                visible = isPreview
+            Column(
+                modifier = Modifier
             ) {
-                val templatePreview = templates[pagerState.currentPage].toTemplatePreview()
-                ModalBottomSheet(
-                    dragHandle = null,
-                    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-                    onDismissRequest = { isPreview = false }
+                ScrollableTabRow(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    selectedTabIndex = pagerState.currentPage.coerceIn(0, templates.size - 1),
+                    edgePadding = 0.dp,
+                    modifier = Modifier
                 ) {
-                    PreviewContent(
-                        template = templatePreview
-                    )
+                    templates.forEachIndexed { index, template ->
+                        Tab(
+                            selected = pagerState.currentPage == index,
+                            onClick = {
+                                scope.launch {
+                                    pagerState.animateScrollToPage(index)
+                                }
+                            },
+                            text = {
+                                Text(text = template.name)
+                            }
+                        )
+                    }
+                }
+
+                NoteTemplatePager(
+                    pagerState = pagerState,
+                    templates = templates,
+                    fields = fields.map { it.name },
+                    action = viewModel::onAction
+                )
+
+                AnimatedVisibility(
+                    visible = isPreview
+                ) {
+                    val templatePreview = templates[pagerState.currentPage].toTemplatePreview()
+                    ModalBottomSheet(
+                        dragHandle = null,
+                        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                        onDismissRequest = { isPreview = false }
+                    ) {
+                        PreviewContent(
+                            template = templatePreview
+                        )
+                    }
                 }
             }
         }
+
     }
 }
 
@@ -320,12 +334,13 @@ private fun NoteTemplatePager(
     modifier: Modifier = Modifier,
     pagerState: PagerState,
     templates: List<TemplateState>,
+    fields: List<String>,
     action: (NoteTemplateUiAction) -> Unit
 ) {
     HorizontalPager(
         modifier = modifier
             .fillMaxSize(),
-        beyondViewportPageCount = templates.size,
+//        beyondViewportPageCount = templates.size,
         state = pagerState,
 //        key = {
 ////            templates[it].id.coerceIn(0L, templates.size.toLong())
@@ -333,6 +348,7 @@ private fun NoteTemplatePager(
     ) { page ->
         NoteTemplateContent(
             template = templates[page],
+            fields = fields,
             action = { side, key, value ->
                 action(NoteTemplateUiAction.Edit(key, value, page, side))
             }
@@ -340,32 +356,61 @@ private fun NoteTemplatePager(
     }
 }
 
+private typealias Key = String
+private typealias Value = String
 
 @Composable
 private fun NoteTemplateContent(
     modifier: Modifier = Modifier,
     template: TemplateState,
-    action: (CardSide, String, String) -> Unit
+    fields: List<String>,
+    action: (CardSide, Key, Value) -> Unit
 ) {
     val (selectedCardSide, onSelectedCardSideChange) = remember { mutableStateOf<CardSide>(CardSide.Front) }
-
+    val currentUndoState = if (selectedCardSide == CardSide.Front) {
+        template.qstState.undoState
+    } else {
+        template.ansState.undoState
+    }
     Scaffold(
         modifier = modifier
             .fillMaxSize(),
         bottomBar = {
             Column {
+                var showInsertFieldDialog by remember { mutableStateOf(false) }
                 MarkdownEditorRow(
-                    canRedo = false,
-                    canUndo = false,
+                    canRedo = currentUndoState.canRedo,
+                    canUndo = currentUndoState.canUndo,
                     onEdit = { key ->
                         action(selectedCardSide, key, "")
                     },
-                    onListButtonClick = {}
+                    onListButtonClick = {},
+                    onInsertFieldButtonClick = { showInsertFieldDialog = true }
                 )
                 NoteTemplateBottomBar(
                     selectedCardSide = selectedCardSide,
                     onSelectedCardSideChange = onSelectedCardSideChange,
                 )
+                if (showInsertFieldDialog) {
+                    DefaultDialog(
+                        onDismiss = { showInsertFieldDialog = false },
+                        buttons = {
+                            TextButton(onClick = { showInsertFieldDialog = false }) {
+                                Text(text = "Cancel")
+                            }
+                        }
+                    ) {
+                        fields.fastForEach {
+                            TextPreferenceWidget(
+                                title = it,
+                                onPreferenceClick = {
+                                    action(selectedCardSide, Constants.Editor.INSERT_FIELD, it)
+                                    showInsertFieldDialog = false
+                                }
+                            )
+                        }
+                    }
+                }
             }
         }
     ) { pv ->
@@ -488,6 +533,5 @@ private enum class NoteTemplateOption(
     Add(R.string.action_add),
     Rename(R.string.action_rename),
     Delete(R.string.action_delete),
-    InsertField(R.string.action_insert_field),
     CopyAsMarkdown(R.string.action_copy_as_markdown)
 }

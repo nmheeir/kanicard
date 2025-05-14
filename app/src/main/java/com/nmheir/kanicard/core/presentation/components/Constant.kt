@@ -42,6 +42,8 @@ object Constants {
         const val UNDO = "undo"
         const val REDO = "redo"
 
+        const val INSERT_FIELD = "insert_field"
+
         const val H1 = "h1"
         const val H2 = "h2"
         const val H3 = "h3"

@@ -4,7 +4,6 @@ package com.nmheir.kanicard.ui.viewmodels
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.material3.TextField
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,6 +15,7 @@ import com.nmheir.kanicard.extensions.addHeader
 import com.nmheir.kanicard.extensions.addInNewLine
 import com.nmheir.kanicard.extensions.bold
 import com.nmheir.kanicard.extensions.italic
+import com.nmheir.kanicard.extensions.md.MarkdownWithParametersParser
 import com.nmheir.kanicard.extensions.strikeThrough
 import com.nmheir.kanicard.extensions.tab
 import com.nmheir.kanicard.extensions.unTab
@@ -25,12 +25,15 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.math.absoluteValue
 
 @HiltViewModel
 class NoteTemplateViewModel @Inject constructor(
@@ -46,38 +49,50 @@ class NoteTemplateViewModel @Inject constructor(
     private val noteTypeWithFields = noteRepo.getNoteTypeWithFieldDefs(noteTypeId)
         .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
+    val isLoading = MutableStateFlow(false)
+
     val fields = noteTypeWithFields
         .map { it?.fieldDefs ?: emptyList() }
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    val templates = MutableStateFlow<List<TemplateState>>(listOf(sampleTemplate))
+    val templates = MutableStateFlow<List<TemplateState>>(emptyList())
 
     val type = noteTypeWithTemplates.map {
         it?.noteType
     }.distinctUntilChanged().stateIn(viewModelScope, SharingStarted.Lazily, null)
 
     init {
-        templates.value = noteTypeWithTemplates
+        templateRepo.getTemplatesByNoteTypeId(noteTypeId)
             .map {
-                if (it?.templates.isNullOrEmpty()) {
+                if (it.isNullOrEmpty()) {
+                    Timber.d("No template")
                     listOf(sampleTemplate)
                 } else {
-                    it.templates.map { template ->
+                    Timber.d("Has template")
+                    it.map { template ->
                         template.toTemplateState()
                     }
                 }
             }.distinctUntilChanged()
-            .stateIn(viewModelScope, SharingStarted.Lazily, listOf(sampleTemplate)).value
+            .onEach {
+                templates.value = it
+            }
+            .launchIn(viewModelScope)
     }
 
     fun onAction(action: NoteTemplateUiAction) {
         when (action) {
             is NoteTemplateUiAction.AddNewTemplate -> {
                 templates.update {
+                    val lastId = it.last().id
+                    val tempId = if (lastId > 0L) {
+                        lastId.inc() * -1L
+                    } else lastId.dec()
+
                     it + TemplateState(
-                        id = it.last().id.inc(),
-                        name = "Card ${it.last().id.inc()}",
+                        id = tempId,
+                        name = "Card ${tempId.absoluteValue}",
                         qstState = TextFieldState(),
                         ansState = TextFieldState()
                     )
@@ -85,10 +100,15 @@ class NoteTemplateViewModel @Inject constructor(
             }
 
             is NoteTemplateUiAction.DeleteTemplate -> {
-                templates.update {
-                    it.toMutableList().apply {
-                        removeAt(action.index)
+                val id = templates.value[action.index].id
+                if (id < 0L) {
+                    templates.update {
+                        it.toMutableList().apply {
+                            removeAt(action.index)
+                        }
                     }
+                } else {
+                    viewModelScope.launch { templateRepo.delete(id) }
                 }
             }
 
@@ -114,15 +134,49 @@ class NoteTemplateViewModel @Inject constructor(
                     Constants.Editor.TAB -> contentState.edit { tab() }
                     Constants.Editor.UN_TAB -> contentState.edit { unTab() }
                     Constants.Editor.LIST -> contentState.edit { addInNewLine(action.value) }
+                    Constants.Editor.INSERT_FIELD -> contentState.edit {
+                        append(" {{${action.value}}} ")
+                    }
 
                     else -> {}
                 }
             }
 
-            NoteTemplateUiAction.Save -> {
-                // TODO: Save template to database
+            is NoteTemplateUiAction.Save -> {
+                isLoading.value = true
                 viewModelScope.launch {
-                    Timber.d("Save %s", templates.value.toString())
+                    val (newTemplates, oldTemplates) =
+                        templates.value.partition { it.id < 0L }
+
+                    // When you add a new template, its id will be written as a negative number to distinguish it.
+                    val newTemplateEntity = newTemplates.map {
+                        CardTemplateEntity(
+                            noteTypeId = noteTypeId,
+                            name = it.name,
+                            qstFt = it.qstState.text.toString(),
+                            ansFt = it.ansState.text.toString()
+                        )
+                    }
+
+                    // I think it would be more optimal to check which components changed but I find it too complicated
+                    val oldTemplateEntity = oldTemplates.map {
+                        CardTemplateEntity(
+                            id = it.id,
+                            noteTypeId = noteTypeId,
+                            name = it.name,
+                            qstFt = it.qstState.text.toString(),
+                            ansFt = it.ansState.text.toString()
+                        )
+                    }
+                    templateRepo.inserts(newTemplateEntity)
+                    templateRepo.inserts(oldTemplateEntity)
+                    isLoading.value = false
+                }
+            }
+
+            is NoteTemplateUiAction.RenameNoteType -> {
+                viewModelScope.launch {
+                    noteRepo.update(type.value!!.copy(name = action.name))
                 }
             }
         }
@@ -134,6 +188,8 @@ sealed interface NoteTemplateUiAction {
     data class DeleteTemplate(val index: Int) : NoteTemplateUiAction
     data class Edit(val key: String, val value: String = "", val index: Int, val side: CardSide) :
         NoteTemplateUiAction
+
+    data class RenameNoteType(val name: String) : NoteTemplateUiAction
 
     data object Save : NoteTemplateUiAction
 }
@@ -152,11 +208,33 @@ data class TemplateState(
     val ansState: TextFieldState
 )
 
+data class TemplatePreview(
+    val id: Long,
+    val name: String,
+    val qstHtml: String,
+    val ansHtml: String
+)
+
 fun CardTemplateEntity.toTemplateState(): TemplateState {
     return TemplateState(
         id = this.id,
         name = this.name,
         qstState = TextFieldState(initialText = this.qstFt),
         ansState = TextFieldState(initialText = this.ansFt)
+    )
+}
+
+fun TemplateState.toTemplatePreview(): TemplatePreview {
+    return TemplatePreview(
+        id = this.id,
+        name = this.name,
+        qstHtml = MarkdownWithParametersParser.parseToHtml(
+            this.qstState.text.toString(),
+            emptyMap()
+        ),
+        ansHtml = MarkdownWithParametersParser.parseToHtml(
+            this.ansState.text.toString(),
+            emptyMap()
+        )
     )
 }

@@ -18,5 +18,6 @@ interface INoteRepo {
     suspend fun insert(noteType: NoteTypeEntity): Long
 
     suspend fun update(note: NoteEntity)
+    suspend fun update(type: NoteTypeEntity)
     suspend fun delete(noteId: Long)
 }

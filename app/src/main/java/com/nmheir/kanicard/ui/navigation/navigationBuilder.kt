@@ -30,7 +30,6 @@ fun NavGraphBuilder.navigationBuilder(
 
     composable(Screens.Home.route) {
 //        TestScreen()
-//        PreviewTemplateScreen(navController)
         HomeScreen(navController = navController)
     }
 

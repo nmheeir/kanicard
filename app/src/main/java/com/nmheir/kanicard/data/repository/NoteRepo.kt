@@ -55,6 +55,10 @@ class NoteRepo(
         database.update(note)
     }
 
+    override suspend fun update(type: NoteTypeEntity) {
+        database.update(type)
+    }
+
     override suspend fun delete(noteId: Long) {
         database.deleteNote(noteId)
     }

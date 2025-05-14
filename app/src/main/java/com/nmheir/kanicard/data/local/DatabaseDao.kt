@@ -51,7 +51,7 @@ interface DatabaseDao {
     suspend fun insert(reviewLog: ReviewLogEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(noteType: NoteTypeEntity) : Long
+    suspend fun insert(noteType: NoteTypeEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(fieldDef: FieldDefEntity)
@@ -66,6 +66,9 @@ interface DatabaseDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFields(fields: List<FieldDefEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTemplates(templates: List<CardTemplateEntity>)
 
 
     /*Update*/
@@ -119,6 +122,9 @@ interface DatabaseDao {
     @Query("DELETE FROM decks WHERE id = :id")
     suspend fun deleteDeck(id: Long)
 
+    @Query("DELETE FROM card_templates WHERE id = :id")
+    suspend fun deleteTemplate(id: Long)
+
     /*Get*/
 
     @Query(
@@ -141,7 +147,7 @@ interface DatabaseDao {
     fun getFieldDefByNoteTypeId(noteTypeId: Long): Flow<List<FieldDefEntity>?>
 
     @Query("SELECT * FROM card_templates WHERE noteTypeId = :noteTypeId")
-    fun getCardTemplateByNoteTypeId(noteTypeId: Long): Flow<CardTemplateEntity?>
+    fun getCardTemplateByNoteTypeId(noteTypeId: Long): Flow<List<CardTemplateEntity>?>
 
 
     @Query(
