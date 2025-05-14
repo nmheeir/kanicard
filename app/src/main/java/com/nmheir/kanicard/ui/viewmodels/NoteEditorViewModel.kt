@@ -5,32 +5,38 @@ package com.nmheir.kanicard.ui.viewmodels
 import android.content.Context
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nmheir.kanicard.data.dto.deck.SelectableDeck
-import com.nmheir.kanicard.data.dto.note.NoteEditDto
 import com.nmheir.kanicard.data.dto.note.SelectableNoteType
 import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
 import com.nmheir.kanicard.data.entities.note.FieldDefEntity
+import com.nmheir.kanicard.data.entities.note.NoteEntity
 import com.nmheir.kanicard.data.entities.note.NoteTypeEntity
+import com.nmheir.kanicard.data.entities.note.buildFieldJson
 import com.nmheir.kanicard.data.repository.FieldRepo
 import com.nmheir.kanicard.domain.repository.IDeckRepo
 import com.nmheir.kanicard.domain.repository.INoteRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.time.OffsetDateTime
 import javax.inject.Inject
 
@@ -43,6 +49,8 @@ class NoteEditorViewModel @Inject constructor(
     private val fieldRepo: FieldRepo
 ) : ViewModel() {
     private val deckId = savedStateHandle.getStateFlow<Long>("deckId", -1L)
+
+    val isSaving = MutableStateFlow(false)
 
     val selectableDecks = deckRepo.getAllDecks()
         .mapNotNull {
@@ -62,7 +70,7 @@ class NoteEditorViewModel @Inject constructor(
 
     val selectedNoteType = MutableStateFlow<SelectableNoteType?>(null)
     val newTypeDialogUiState = MutableStateFlow<NewTypeDialogUiState>(NewTypeDialogUiState())
-    val mediaFileState = MutableStateFlow<Map<Long, Pair<String, Uri>>>(emptyMap())
+    val mediaFileState = MutableStateFlow<Map<Long, Uri?>>(emptyMap())
 
     val fields = selectedNoteType
         .filterNotNull()
@@ -90,23 +98,45 @@ class NoteEditorViewModel @Inject constructor(
         decks.firstOrNull { it.id == id }
     }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    val noteEditDto = combine(
-        selectedNoteType, fields, mediaFileState
-    ) { type, fields, mediaFiles ->
-        val fieldMap = fields.associate { field ->
-            val value = mediaFiles[field.id]?.first ?: ""
-            field.name to value
+    val enableToSave = combine(
+        selectedDeck, selectedNoteType, templates
+    ) { deck, type, templates ->
+        deck != null && type != null && templates.isNotEmpty()
+    }.stateIn(viewModelScope, SharingStarted.Lazily, false)
+
+    val fieldValuesState = MutableStateFlow<List<FieldValue>>(emptyList())
+
+    init {
+        //Maybe add fieldJson in Note into combine
+        combine(
+            selectedNoteType,
+            fields // nếu bạn thực sự cần 'fields'; nếu không, bỏ qua
+        ) { type, _ ->
+            type
         }
-
-        NoteEditDto(
-            deckId = deckId.value,
-            typeId = type?.id ?: 0,
-            templateId = 0,
-            field = fieldMap
-        )
-
-    }.stateIn(viewModelScope, SharingStarted.Lazily, null)
-
+            .filterNotNull()                                 // chỉ khi type khác null
+            .flatMapLatest { type ->
+                fieldRepo.getFieldsByNoteTypeId(type.id)    // Flow<List<Field>>
+                    .map { list ->
+                        list?.map { field ->
+                            FieldValue(id = field.id, fieldName = field.name)
+                        }
+                    }
+            }
+            .distinctUntilChanged()                         // tránh phát lại cùng giá trị
+            .onEach { fieldValues ->
+                fieldValuesState.value = fieldValues ?: emptyList()
+                mediaFileState.update {
+                    emptyMap()
+                }
+                fieldValuesState.value.map {
+                    mediaFileState.update { state ->
+                        state.plus(Pair(it.id, null))
+                    }
+                }
+            }
+            .launchIn(viewModelScope)
+    }
 
     fun onAction(action: NoteEditorUiAction) {
         when (action) {
@@ -156,23 +186,64 @@ class NoteEditorViewModel @Inject constructor(
             }
 
             is NoteEditorUiAction.UpdateFileState -> {
-                updateFileState(action.fieldId, action.name, action.fileDir)
+                updateFileState(action.fieldId, action.fileName, action.fileDir)
             }
 
             NoteEditorUiAction.SaveNote -> {
-
+                saveNote()
             }
         }
     }
 
-    private fun updateFileState(fieldId: Long, name: String, fileDir: Uri) {
+    private fun updateFileState(fieldId: Long, fileName: String, fileDir: Uri?) {
         viewModelScope.launch {
-            mediaFileState.update { currentState ->
-                currentState + (fieldId to (name to fileDir))
-                /*currentState.toMutableMap().apply {
-                    this[fieldId] = Pair(name, fileDir)
-                }*/
+            fieldValuesState.update { currentList ->
+                currentList.map {
+                    if (it.id == fieldId) {
+                        it.copy(value = TextFieldState(fileName))
+                    } else {
+                        it
+                    }
+                }
             }
+
+            mediaFileState.update { currentState ->
+                currentState + (fieldId to fileDir)
+            }
+            Timber.d(fieldValuesState.value.toString())
+            Timber.d(mediaFileState.value.toString())
+        }
+    }
+
+    private fun saveNote() {
+        isSaving.value = true
+        viewModelScope.launch {
+            val medias = mediaFileState.value
+            val fields = fieldValuesState.value
+            val templates = templates.value
+            val deckId = selectedDeck.value?.id ?: -1L
+            fields.forEach {
+                if (medias[it.id] != null) {
+                    Timber.d(medias[it.id].toString())
+                }
+            }
+
+            val fieldJson = buildFieldJson(fields)
+
+            /*val noteEntities = templates.map {
+                NoteEntity(
+                    deckId = deckId,
+                    templateId = it.id,
+                    fieldJson = fieldJson,
+                    createdTime = OffsetDateTime.now(),
+                    modifiedTime = OffsetDateTime.now()
+                )
+            }
+
+            noteRepo.inserts(noteEntities)*/
+
+            delay(2000)
+            isSaving.value = false
         }
     }
 }
@@ -184,7 +255,7 @@ sealed interface NoteEditorUiAction {
         NoteEditorUiAction
 
     data class SaveNoteToState(val typeName: String, val fields: List<String>) : NoteEditorUiAction
-    data class UpdateFileState(val fieldId: Long, val name: String, val fileDir: Uri) :
+    data class UpdateFileState(val fieldId: Long, val fileName: String, val fileDir: Uri?) :
         NoteEditorUiAction
 
     data object SaveNote : NoteEditorUiAction
@@ -214,4 +285,10 @@ private val sampleTemplate = CardTemplateEntity(
     name = "Template",
     qstFt = "",
     ansFt = ""
+)
+
+data class FieldValue(
+    val id: Long,
+    val fieldName: String,
+    val value: TextFieldState = TextFieldState("")
 )

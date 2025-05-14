@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -19,6 +20,7 @@ import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,10 +65,13 @@ import com.nmheir.kanicard.extensions.convertFileName
 import com.nmheir.kanicard.extensions.getFileName
 import com.nmheir.kanicard.ui.component.AlertDialog
 import com.nmheir.kanicard.ui.component.AttachFileSheet
+import com.nmheir.kanicard.ui.component.DefaultDialog
 import com.nmheir.kanicard.ui.component.ListOptionDialog
+import com.nmheir.kanicard.ui.viewmodels.FieldValue
 import com.nmheir.kanicard.ui.viewmodels.NewTypeDialogUiState
 import com.nmheir.kanicard.ui.viewmodels.NoteEditorUiAction
 import com.nmheir.kanicard.ui.viewmodels.NoteEditorViewModel
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,8 +87,14 @@ fun NoteEditorScreen(
     val selectedDeck by viewModel.selectedDeck.collectAsStateWithLifecycle()
     val fields by viewModel.fields.collectAsStateWithLifecycle()
     val templates by viewModel.templates.collectAsStateWithLifecycle()
-    val noteEditDto by viewModel.noteEditDto.collectAsStateWithLifecycle()
     val newTypeUiState by viewModel.newTypeDialogUiState.collectAsStateWithLifecycle()
+    val enableToSave by viewModel.enableToSave.collectAsStateWithLifecycle()
+    val fieldValuesState by viewModel.fieldValuesState.collectAsStateWithLifecycle()
+    val isSaving by viewModel.isSaving.collectAsStateWithLifecycle()
+
+    LaunchedEffect(fieldValuesState) {
+        Timber.d(fieldValuesState.toString())
+    }
 
     Scaffold(
         topBar = {
@@ -135,15 +147,18 @@ fun NoteEditorScreen(
         },
         bottomBar = {
             Button(
+                enabled = enableToSave,
                 shape = MaterialTheme.shapes.small,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
-                onClick = {},
+                onClick = {
+                    viewModel.onAction(NoteEditorUiAction.SaveNote)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .hozPadding()
+                    .padding(12.dp)
             ) {
                 Text(
                     text = "Save",
@@ -152,6 +167,11 @@ fun NoteEditorScreen(
         },
         modifier = Modifier.imePadding()
     ) { pv ->
+        if (isSaving) {
+            DefaultDialog(onDismiss = {}, preventDismissRequest = true) {
+                CircularProgressIndicator()
+            }
+        }
         LazyColumn(
             contentPadding = pv
         ) {
@@ -217,7 +237,7 @@ fun NoteEditorScreen(
             }
 
             items(
-                items = fields,
+                items = fieldValuesState,
                 key = { it.id }
             ) { field ->
                 if (fields.isEmpty()) {
@@ -284,12 +304,11 @@ private fun DropdownOption(
 
 @Composable
 private fun FieldEditElement(
-    field: FieldDefEntity,
+    field: FieldValue,
     action: (NoteEditorUiAction) -> Unit
 ) {
     val context = LocalContext.current
     var showAttachFileSheet by remember { mutableStateOf(false) }
-    val (value, onValueChange) = remember { mutableStateOf(TextFieldValue()) }
     Column(
         horizontalAlignment = Alignment.Start,
         modifier = Modifier.fillMaxWidth()
@@ -299,7 +318,7 @@ private fun FieldEditElement(
             modifier = Modifier.hozPadding()
         ) {
             Text(
-                text = field.name,
+                text = field.fieldName,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.weight(1f)
             )
@@ -313,12 +332,9 @@ private fun FieldEditElement(
         BasicTextField(
             modifier = Modifier
                 .fillMaxWidth(),
-            value = value,
-            onValueChange = onValueChange,
-            singleLine = true,
-            maxLines = 1,
+            state = field.value,
             textStyle = MaterialTheme.typography.bodyLarge,
-            decorationBox = { innerTextField ->
+            decorator = { innerTextField ->
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -346,22 +362,19 @@ private fun FieldEditElement(
             onAudioClipSelection = {
                 //convert file name
                 val fileName = convertFileName(context, it)
-                onValueChange(TextFieldValue("![](${fileName})"))
                 action(NoteEditorUiAction.UpdateFileState(field.id, fileName, it))
             },
             onGallerySelection = {
                 val fileName = convertFileName(context, it)
-                onValueChange(TextFieldValue(fileName))
-                action(NoteEditorUiAction.UpdateFileState(field.id, fileName, it))
+                val imageMarkdown = "![](${fileName})"
+                action(NoteEditorUiAction.UpdateFileState(field.id, imageMarkdown, it))
             },
             onVideoClipSelection = {
                 val fileName = "<video src=\"${convertFileName(context, it)}\" controls></video>"
-                onValueChange(TextFieldValue(fileName))
                 action(NoteEditorUiAction.UpdateFileState(field.id, fileName, it))
             },
             onRecordAudioSelection = {
                 val fileName = convertFileName(context, it)
-                onValueChange(TextFieldValue(fileName))
                 action(NoteEditorUiAction.UpdateFileState(field.id, fileName, it))
             }
         )

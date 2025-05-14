@@ -11,7 +11,7 @@ class FieldRepo @Inject constructor(
     private val database: KaniDatabase
 ) : IFieldRepo {
     override fun getFieldsByNoteTypeId(noteTypeId: Long): Flow<List<FieldDefEntity>?> {
-        return flow { emptyList<FieldDefEntity>() }
+        return database.getFieldDefByNoteTypeId(noteTypeId)
     }
 
     override suspend fun inserts(fields: List<FieldDefEntity>) {

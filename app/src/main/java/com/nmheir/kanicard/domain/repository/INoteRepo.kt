@@ -15,6 +15,7 @@ interface INoteRepo {
     fun getNoteTypeWithFieldDefs(noteTypeId: Long): Flow<NoteTypeWithFieldDefs?>
 
     suspend fun insert(note: NoteEditDto)
+    suspend fun inserts(notes: List<NoteEntity>)
     suspend fun insert(noteType: NoteTypeEntity): Long
 
     suspend fun update(note: NoteEntity)
