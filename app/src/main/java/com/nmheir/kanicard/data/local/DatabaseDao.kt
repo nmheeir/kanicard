@@ -9,6 +9,7 @@ import androidx.room.RawQuery
 import androidx.room.Transaction
 import androidx.room.Update
 import androidx.sqlite.db.SupportSQLiteQuery
+import com.nmheir.kanicard.data.dto.card.CardBrowseDto
 import com.nmheir.kanicard.data.dto.deck.DeckData
 import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
 import com.nmheir.kanicard.data.entities.SearchHistoryEntity
@@ -300,6 +301,53 @@ interface DatabaseDao {
     fun getNoteAndTemplateByDeckId(dId: Long, limit: Int = 100): Flow<List<NoteAndTemplate>>
 
     /*End Note*/
+    /*-------------------------------------------------------------------------*/
+
+    /*-------------------------------------------------------------------------*/
+    /*Card*/
+
+    @Query(
+        """
+            SELECT
+              n.noteId                       AS nid,
+              t.id                           AS tId,
+              d.name                         AS dName,
+              nt.name                        AS typeName,
+              t.name                         AS templateName,
+              t.qstFt                        AS qfmt,
+              t.ansFt                        AS afmt,
+              n.fieldJson                    AS field,
+              f.lapses                       AS lapse,
+              f.state                        AS state,
+              COALESCE(r.review_count, 0)    AS reviews,
+              f.due                          AS due,
+              n.createdTime                  AS createdTime,
+              n.modifiedTime                 AS modifiedTime
+            FROM notes AS n
+            INNER JOIN decks AS d
+              ON n.deckId = d.id
+            INNER JOIN card_templates AS t
+              ON n.templateId = t.id
+            INNER JOIN note_types AS nt
+              ON t.noteTypeId = nt.id
+            INNER JOIN fsrs_card AS f
+              ON f.nId = n.noteId
+            LEFT JOIN (
+              /* Đếm số lần review cho mỗi card */
+              SELECT
+                fsrsCardId,
+                COUNT(*) AS review_count
+              FROM review_log
+              GROUP BY fsrsCardId
+            ) AS r
+              ON r.fsrsCardId = f.id
+            WHERE d.id = :dId
+            ;
+        """
+    )
+    // TODO: I don't know how to name function
+    fun getBrowseCards(dId: Long): Flow<List<CardBrowseDto>>
+    /*End Card*/
     /*-------------------------------------------------------------------------*/
 
 
