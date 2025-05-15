@@ -51,6 +51,7 @@ class NoteEditorViewModel @Inject constructor(
     private val deckId = savedStateHandle.getStateFlow<Long>("deckId", -1L)
 
     val isSaving = MutableStateFlow(false)
+    val savingProgress = MutableStateFlow(0f)
 
     val selectableDecks = deckRepo.getAllDecks()
         .mapNotNull {
@@ -230,19 +231,20 @@ class NoteEditorViewModel @Inject constructor(
 
             val fieldJson = buildFieldJson(fields)
 
-            /*val noteEntities = templates.map {
-                NoteEntity(
+            templates.forEachIndexed { index, template ->
+                val note = NoteEntity(
                     deckId = deckId,
-                    templateId = it.id,
+                    templateId = template.id,
                     fieldJson = fieldJson,
                     createdTime = OffsetDateTime.now(),
                     modifiedTime = OffsetDateTime.now()
                 )
+                noteRepo.insert(note)
+                savingProgress.value = ((index + 1).toFloat() / templates.size).coerceAtMost(1f)
             }
 
-            noteRepo.inserts(noteEntities)*/
 
-            delay(2000)
+            Toast.makeText(context, "Saved Note Success", Toast.LENGTH_SHORT).show()
             isSaving.value = false
         }
     }

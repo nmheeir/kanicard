@@ -66,10 +66,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.nmheir.kanicard.R
 import com.nmheir.kanicard.core.presentation.components.Constants
-import com.nmheir.kanicard.ui.component.AlertDialog
-import com.nmheir.kanicard.ui.component.DefaultDialog
 import com.nmheir.kanicard.ui.component.MarkdownEditorRow
-import com.nmheir.kanicard.ui.component.TextFieldDialog
+import com.nmheir.kanicard.ui.component.dialog.AlertDialog
+import com.nmheir.kanicard.ui.component.dialog.DefaultDialog
+import com.nmheir.kanicard.ui.component.dialog.TextFieldDialog
 import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
 import com.nmheir.kanicard.ui.viewmodels.NoteTemplateUiAction
 import com.nmheir.kanicard.ui.viewmodels.NoteTemplateViewModel

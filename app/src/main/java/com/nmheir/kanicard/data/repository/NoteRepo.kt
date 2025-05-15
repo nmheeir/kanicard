@@ -55,6 +55,10 @@ class NoteRepo(
         return database.insert(noteType)
     }
 
+    override suspend fun insert(note: NoteEntity) {
+        database.insert(note)
+    }
+
     override suspend fun update(note: NoteEntity) {
         database.update(note)
     }
