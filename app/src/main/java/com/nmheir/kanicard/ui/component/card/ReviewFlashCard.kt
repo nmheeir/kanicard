@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package com.nmheir.kanicard.ui.component
+package com.nmheir.kanicard.ui.component.card
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap

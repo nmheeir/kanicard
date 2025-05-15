@@ -1,24 +1,41 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.nmheir.kanicard.ui.screen
 
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.EaseOutExpo
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,342 +44,300 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.window.PopupProperties
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.nmheir.kanicard.R
+import com.nmheir.kanicard.core.presentation.components.flip.Flippable
+import com.nmheir.kanicard.core.presentation.components.flip.rememberFlipController
 import com.nmheir.kanicard.core.presentation.components.padding
-import com.nmheir.kanicard.data.dto.ProfileDto
-import com.nmheir.kanicard.ui.component.Gap
-import com.nmheir.kanicard.ui.component.image.CoilImage
+import com.nmheir.kanicard.core.presentation.utils.hozPadding
+import com.nmheir.kanicard.data.dto.note.NoteData
+import com.nmheir.kanicard.ui.component.card.FlashCardLite
+import com.nmheir.kanicard.ui.component.dialog.AlertDialog
+import com.nmheir.kanicard.ui.component.widget.PreferenceEntry
 import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
+import com.nmheir.kanicard.ui.screen.note.CardSide
+import com.nmheir.kanicard.ui.theme.KaniTheme
+import com.nmheir.kanicard.ui.viewmodels.DeckDetailUiAction
 import com.nmheir.kanicard.ui.viewmodels.DeckDetailViewModel
+import com.nmheir.kanicard.utils.fakeNoteData
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeckDetailScreen(
     navController: NavHostController,
     scrollBehavior: TopAppBarScrollBehavior,
     viewModel: DeckDetailViewModel = hiltViewModel()
 ) {
-    Text(
-        text = "Deck Detail Screen"
-    )
-
-}
-
-/*@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun DeckDetailContent(
-    cards: List<CardDto>?,
-    deckDetail: DeckDetailDto,
-    loadMore: () -> Unit,
-    onBack: () -> Unit,
-    viewAllCard: (Long) -> Unit
-) {
-    val deck = remember(deckDetail) { deckDetail.toDeck() }
-    val profile = remember(deckDetail) { deckDetail.profileDto }
-    val cardsInDeck = remember(cards) { cards }
-
-    val lazyListState = rememberLazyListState()
-    val cardListState = rememberLazyGridState()
-
-    LaunchedEffect(lazyListState) {
-        snapshotFlow {
-            lazyListState.layoutInfo.visibleItemsInfo.any { it.key == "loading" }
-        }.collect { shouldLoadMore ->
-            if (!shouldLoadMore) return@collect
-            loadMore()
-        }
-    }
+    val deckData by viewModel.deckData.collectAsStateWithLifecycle()
+    val notesData by viewModel.noteData.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    *//*Text(
-                        text = deck.title,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.titleLarge
-                    )*//*
-                },
-                actions = {
-                    IconButton(onClick = {}) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_bookmark),
-                            contentDescription = null
-                        )
+            CenterAlignedTopAppBar(
+                title = { Text(text = deckData.name) },
+                navigationIcon = {
+                    IconButton(onClick = navController::navigateUp) {
+                        Icon(painterResource(R.drawable.ic_arrow_back_ios), null)
                     }
                 },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = null
-                        )
+                actions = {
+                    Box {
+                        var showMore by remember { mutableStateOf(false) }
+                        IconButton(onClick = { showMore = true }) {
+                            Icon(painterResource(R.drawable.ic_more_vert), null)
+                        }
+                        if (showMore) {
+                            DropdownMenu(
+                                onDismissRequest = { showMore = false },
+                                expanded = true,
+                                offset = DpOffset(x = 0.dp, y = (-12).dp)
+                            ) {
+                                DeckDetailMenu.entries.fastForEach {
+                                    DropdownMenuItem(
+                                        text = { Text(text = it.title) },
+                                        onClick = {}
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             )
         },
-        modifier = Modifier.fillMaxSize()
-    ) { contentPadding ->
-        ScrollbarLazyColumn(
-            state = lazyListState,
-            contentPadding = contentPadding,
+        bottomBar = {
+            Button(
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ),
+                shape = MaterialTheme.shapes.medium,
+                onClick = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
+            ) {
+                Text(
+                    text = "Go to learn"
+                )
+            }
+        }
+    ) { pv ->
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = pv
         ) {
-            //Deck detail header item
-            item {
-                *//*DeckDetailHeaderItem(
-                    deck = deckDetail.toDeck(),
-                    profile = profile
-                )*//*
+            item(
+                key = "sample_note"
+            ) {
+                PreferenceEntry(
+                    title = { Text(text = "Sample (From ${notesData.size} notes)") },
+                    trailingContent = {
+                        Text(
+                            text = "See All",
+                            textDecoration = TextDecoration.Underline
+                        )
+                    },
+                    onClick = {
+                        navController.navigate("${deckData.id}/browse_card")
+                    }
+                )
+                SampleNoteSection(
+                    data = notesData
+                )
             }
 
-            item {
-                TextPreferenceWidget(title = "Sample Card")
-            }
-
-            if (cardsInDeck.isNullOrEmpty()) {
-                item {
-                    TextPreferenceWidget(
-                        title = "No cards",
-                        widget = {
-                            IconButton(
-                                onClick = {
-                                    viewAllCard(deck.id)
-                                }
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_arrow_forward),
-                                    contentDescription = null
-                                )
-                            }
-                        }
+            item(
+                key = "deck_size"
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.mediumSmall),
+                    modifier = Modifier
+                        .hozPadding()
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_playing_cards),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(48.dp),
+                    )
+                    Text(
+                        text = deckData.noteCount.toString() + if (deckData.noteCount > 1) " Cards" else " Card",
+                        style = MaterialTheme.typography.bodyLarge
                     )
                 }
-            } else {
-                item {
-                    LazyHorizontalGrid(
-                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
-                        contentPadding = PaddingValues(horizontal = MaterialTheme.padding.medium),
-                        state = cardListState,
-                        rows = GridCells.Fixed(1),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(CardHeight)
+                HorizontalDivider(modifier = Modifier.hozPadding())
+            }
+
+            item(
+                key = "deck_description"
+            ) {
+                val descriptionState = remember(deckData.description) {
+                    TextFieldState(initialText = if (deckData.description.isEmpty()) "No description" else deckData.description)
+                }
+
+                var canEdit by remember { mutableStateOf(false) }
+                var showConfirmDialog by remember { mutableStateOf(false) }
+                if (showConfirmDialog) {
+                    AlertDialog(
+                        onDismiss = { showConfirmDialog = false },
+                        onConfirm = {
+                            viewModel.onAction(DeckDetailUiAction.UpdateDescription(descriptionState.text.toString()))
+                        },
+                        preventDismissRequest = true
                     ) {
-                        items(
-                            items = cardsInDeck,
-                            key = { it.id }
+                        Text(text = "Do you want to save description ?")
+                    }
+                }
+                PreferenceEntry(
+                    title = { Text(text = "Description") },
+                    trailingContent = {
+                        IconButton(
+                            onClick = {
+                                if (canEdit == false) {
+                                    canEdit = true
+                                } else {
+                                    if (descriptionState.text.toString() != deckData.description) {
+                                        showConfirmDialog = true
+                                    }
+                                    else {
+                                        canEdit = false
+                                    }
+                                }
+                            }
                         ) {
-                            val flipController = rememberFlipController()
-                            Flippable(
-                                frontSide = {
-                                    SampleFlipCardFrontSide(flipController, it)
-                                },
-                                backSide = {
-                                    SampleFlipCardBackSide(flipController, it)
-                                },
-                                flipController = flipController
+                            Icon(
+                                painterResource(if (!canEdit) R.drawable.ic_edit else R.drawable.ic_edit_fill),
+                                null
                             )
                         }
                     }
-                }
+                )
+                BasicTextField(
+                    state = descriptionState,
+                    readOnly = !canEdit,
+                    textStyle = MaterialTheme.typography.bodyMedium,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Done
+                    ),
+                    lineLimits = TextFieldLineLimits.MultiLine(),
+                    decorator = { innerTextField ->
+                        if (canEdit) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .border(1.dp, Color.Black, MaterialTheme.shapes.small)
+                                    .padding(12.dp)
+                            ) {
+                                innerTextField()
+                            }
+                        } else {
+                            innerTextField()
+                        }
+                    },
+                    modifier = Modifier
+                        .hozPadding()
+                        .imePadding()
+                )
             }
-        }
-    }
-}*/
-
-/*@Composable
-private fun DeckDetailHeaderItem(
-    modifier: Modifier = Modifier,
-    deck: DeckDto,
-    profile: ProfileDto
-) {
-    BoxWithConstraints(modifier = modifier) {
-        val maxImageSize = this.maxWidth / 2
-        val imageSize = min(maxImageSize, 112.dp)
-
-        Column {
-            Row(
-                verticalAlignment = Alignment.Bottom,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = MaterialTheme.padding.medium)
-            ) {
-                if (deck.thumbnail == null) {
-                    Image(
-                        painter = painterResource(R.drawable.ic_error),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(imageSize)
-                            .clip(MaterialTheme.shapes.large)
-                    )
-                } else {
-                    CoilImage(
-                        imageUrl = deck.thumbnail,
-                        modifier = Modifier
-                            .size(imageSize)
-                            .clip(MaterialTheme.shapes.large)
-                    )
-                }
-                Column(
-                    modifier = Modifier.padding(start = MaterialTheme.padding.medium)
-                ) {
-                    Text(
-                        text = deck.title,
-                        style = MaterialTheme.typography.titleLarge,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    DeckDetailHeaderItemButton(
-                        isImported = false,
-                        onClick = { },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            }
-
-            DeckCreator(profile = profile)
-
-            DeckDetailDescription(description = deck.description ?: "No description")
-        }
-    }
-}*/
-
-@Composable
-private fun DeckCreator(
-    modifier: Modifier = Modifier,
-    profile: ProfileDto
-) {
-    Column(
-        modifier = modifier.fillMaxWidth()
-    ) {
-        TextPreferenceWidget(title = "Author")
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = MaterialTheme.padding.medium)
-        ) {
-            CoilImage(
-                imageUrl = profile.avatarUrl ?: "",
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-            )
-            Gap(MaterialTheme.padding.small)
-            Text(
-                text = profile.userName ?: "Unknown user",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.weight(1f)
-            )
         }
     }
 }
 
 @Composable
-private fun DeckDetailHeaderItemButton(
-    modifier: Modifier = Modifier,
-    isImported: Boolean,
-    onClick: () -> Unit
+private fun SampleNoteSection(
+    data: List<NoteData>
 ) {
-    Row(
-        modifier = modifier.padding(top = MaterialTheme.padding.medium)
+    val state = rememberLazyListState()
+    LazyRow(
+        state = state,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(horizontal = MaterialTheme.padding.mediumSmall)
     ) {
-        Button(
-            enabled = !isImported,
-            onClick = onClick,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.tertiaryContainer
-            ),
-            modifier = Modifier.semantics(mergeDescendants = true) { }
+        items(
+            items = data,
+            key = { it.id }
         ) {
-            Icon(
-                painter = painterResource(
-                    if (isImported) R.drawable.ic_check else R.drawable.ic_download
-                ),
-                contentDescription = null
-            )
-            Gap(MaterialTheme.padding.small)
-            Text(
-                text = stringResource(
-                    if (!isImported) R.string.action_download else R.string.label_already_downloaded
-                ),
-                style = MaterialTheme.typography.titleMedium
-            )
-        }
-
-        Gap(width = MaterialTheme.padding.medium)
-
-        IconButton(
-            onClick = {}
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_more_vert),
-                contentDescription = null
+            val flipController = rememberFlipController()
+            Flippable(
+                frontSide = {
+                    FlashCardLite(
+                        text = it.qFmt,
+                        side = CardSide.Front,
+                        modifier = Modifier,
+                        onClick = {
+                            flipController.flipToBack()
+                        }
+                    )
+                },
+                backSide = {
+                    FlashCardLite(
+                        text = it.aFmt,
+                        side = CardSide.Back,
+                        modifier = Modifier,
+                        onClick = {
+                            flipController.flipToFront()
+                        }
+                    )
+                },
+                flipController = flipController
             )
         }
     }
-
 }
 
+private enum class DeckDetailMenu(val title: String) {
+    Rename("Rename")
+}
 
+@Preview(showBackground = true)
 @Composable
-private fun DeckDetailDescription(
-    description: String
-) {
-    var isExpanded by remember { mutableStateOf(false) }
-    var showSeeMore by remember { mutableStateOf(false) }
+private fun Test() {
+    var canEdit by remember { mutableStateOf(false) }
+    val state = remember {
+        TextFieldState("adolfjalkdfjlakdjflkasd")
+    }
+
+
 
     Column {
-        TextPreferenceWidget(title = stringResource(R.string.label_description))
-        Box(
-            modifier = Modifier
-                .padding(horizontal = MaterialTheme.padding.medium)
-                .clickable { isExpanded = !isExpanded }
+        TextButton(
+            onClick = { canEdit = !canEdit }
         ) {
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = if (isExpanded) Int.MAX_VALUE else 3,
-                overflow = TextOverflow.Ellipsis,
-                onTextLayout = { result ->
-                    showSeeMore = result.hasVisualOverflow
-                },
-                modifier = Modifier.animateContentSize(
-                    animationSpec = tween(
-                        durationMillis = 200,
-                        easing = EaseOutExpo
-                    )
-                )
-            )
-            if (showSeeMore) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .background(MaterialTheme.colorScheme.surface)
-                ) {
-                    // TODO: Add gradient effect
-                    Text(
-                        text = stringResource(id = R.string.label_see_more),
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            textDecoration = TextDecoration.Underline,
-                            fontWeight = FontWeight.Bold
-                        ),
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                }
-            }
+            Text(text = "Edit")
         }
-    }
 
+        BasicTextField(
+            state = state,
+            textStyle = MaterialTheme.typography.bodySmall,
+            lineLimits = TextFieldLineLimits.MultiLine(1, 10),
+            readOnly = !canEdit,
+            decorator = { innerTextField ->
+                if (canEdit) {
+                    Box(
+                        modifier = Modifier
+                            .border(1.dp, Color.Black)
+                            .padding(4.dp)
+                    ) {
+                        innerTextField()
+                    }
+                } else {
+                    innerTextField()
+                }
+            },
+            modifier = Modifier.padding(4.dp)
+        )
+    }
 }

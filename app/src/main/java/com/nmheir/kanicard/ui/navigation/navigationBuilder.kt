@@ -9,6 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.nmheir.kanicard.ui.screen.BrowseCardScreen
 import com.nmheir.kanicard.ui.screen.DeckDetailScreen
 import com.nmheir.kanicard.ui.screen.HomeScreen
 import com.nmheir.kanicard.ui.screen.note.NoteEditorScreen
@@ -106,14 +107,14 @@ fun NavGraphBuilder.navigationBuilder(
     }
 
     composable(
-        route = "card/all/{deckId}",
+        route = "{deckId}/browse_card",
         arguments = listOf(
             navArgument("deckId") {
                 type = NavType.LongType
             }
         )
     ) {
-
+        BrowseCardScreen(navController)
     }
 
     composable(

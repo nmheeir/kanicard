@@ -9,14 +9,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.room.util.TableInfo
 import com.nmheir.kanicard.extensions.md.MarkdownWithParametersParser
 import com.nmheir.kanicard.ui.activities.LocalAwareWindowInset
-import com.nmheir.kanicard.ui.component.ReviewFlashCard
 import com.nmheir.kanicard.ui.theme.KaniTheme
-import timber.log.Timber
 
 @Composable
 fun TestScreen(modifier: Modifier = Modifier) {

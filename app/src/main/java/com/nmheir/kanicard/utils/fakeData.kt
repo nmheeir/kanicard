@@ -3,6 +3,7 @@ package com.nmheir.kanicard.utils
 import com.nmheir.kanicard.data.dto.CardDto
 import com.nmheir.kanicard.data.dto.ProfileDto
 import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
+import com.nmheir.kanicard.data.dto.note.NoteData
 import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
 import com.nmheir.kanicard.data.entities.note.FieldDefEntity
 import com.nmheir.kanicard.ui.viewmodels.TemplatePreview
@@ -207,3 +208,12 @@ val fakeTemplateParams = mapOf(
     "date" to "May 13, 2025",
     "url" to "https://google.com"
 )
+
+val fakeNoteData = List(10) {
+    NoteData(
+        id = it.toLong(),
+        dId = 0L,
+        qFmt = "Question $it",
+        aFmt = "Answer $it",
+    )
+}

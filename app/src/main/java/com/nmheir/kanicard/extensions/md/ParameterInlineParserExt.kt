@@ -296,10 +296,10 @@ fun MarkdownWithParamsPreview() {
                     modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
                 )
 
-//                Text(
-//                    text = MarkdownWithParametersParser.parseToText(markdown, params),
-//                    modifier = Modifier.fillMaxWidth()
-//                )
+                Text(
+                    text = MarkdownWithParametersParser.parseToText(simpleMarkdown, simpleParams),
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }

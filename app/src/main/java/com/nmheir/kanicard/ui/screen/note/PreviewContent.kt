@@ -24,7 +24,7 @@ import com.nmheir.kanicard.R
 import com.nmheir.kanicard.core.presentation.components.flip.FlipState
 import com.nmheir.kanicard.core.presentation.components.flip.Flippable
 import com.nmheir.kanicard.core.presentation.components.flip.rememberFlipController
-import com.nmheir.kanicard.ui.component.ReviewFlashCard
+import com.nmheir.kanicard.ui.component.card.ReviewFlashCard
 import com.nmheir.kanicard.ui.viewmodels.TemplatePreview
 
 @Composable

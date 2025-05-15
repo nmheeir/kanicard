@@ -9,6 +9,7 @@ import androidx.room.RawQuery
 import androidx.room.Transaction
 import androidx.room.Update
 import androidx.sqlite.db.SupportSQLiteQuery
+import com.nmheir.kanicard.data.dto.deck.DeckData
 import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
 import com.nmheir.kanicard.data.entities.SearchHistoryEntity
 import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
@@ -93,8 +94,20 @@ interface DatabaseDao {
     @Update
     suspend fun update(noteType: NoteTypeEntity)
 
-    @Query("UPDATE decks SET name = :name WHERE id = :id")
-    suspend fun updateDeckName(id: Long, name: String)
+    @Query(
+        """
+        UPDATE decks
+        SET
+            name = COALESCE(:name, name),
+            description = COALESCE(:description, description)
+        WHERE id = :id
+        """
+    )
+    suspend fun updateDeck(
+        id: Long,
+        name: String? = null,
+        description: String? = null
+    )
 
     /*Delete*/
 
@@ -258,6 +271,37 @@ interface DatabaseDao {
 
     /*End Note Type*/
     /*-------------------------------------------------------------------------*/
+
+    /*-------------------------------------------------------------------------*/
+    /*Note*/
+
+    @Query(
+        """
+        SELECT
+            d.id,
+            d.collectionId AS cId,
+            d.name,
+            d.description,
+            d.createdTime,
+            d.modifiedTime,
+            d.flags,
+            COUNT(n.noteId)    AS noteCount
+        FROM decks AS d
+        LEFT JOIN notes AS n
+            ON d.id = n.deckId
+        WHERE d.id = :dId
+        GROUP BY d.id
+    """
+    )
+    fun getDecksWithNoteCount(dId: Long): Flow<DeckData>
+
+    @Transaction
+    @Query("SELECT * FROM notes WHERE deckId = :dId LIMIT :limit")
+    fun getNoteAndTemplateByDeckId(dId: Long, limit: Int = 100): Flow<List<NoteAndTemplate>>
+
+    /*End Note*/
+    /*-------------------------------------------------------------------------*/
+
 
     @RawQuery
     fun raw(supportSQLiteQuery: SupportSQLiteQuery): Int
