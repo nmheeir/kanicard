@@ -23,4 +23,8 @@ class CardRepo(
         return database.getDueCardsToday(deckId)
     }
 
+    override suspend fun insert(fsrsCard: FsrsCardEntity) {
+        database.insert(fsrsCard)
+    }
+
 }

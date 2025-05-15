@@ -97,7 +97,6 @@ fun HomeScreen(
     val lazyListState = rememberLazyListState()
 
     val error by viewModel.error.collectAsStateWithLifecycle()
-    val deckWidgetData by viewModel.deckWidgetData.collectAsStateWithLifecycle()
     val collections by viewModel.collections.collectAsStateWithLifecycle()
 
     val collectionWithDeckWidgetData by viewModel.collectionWithWidgetDecksFlow.collectAsStateWithLifecycle()

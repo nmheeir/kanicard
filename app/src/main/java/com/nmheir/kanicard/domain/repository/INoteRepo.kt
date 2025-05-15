@@ -16,7 +16,7 @@ interface INoteRepo {
 
     suspend fun insert(note: NoteEditDto)
     suspend fun insert(noteType: NoteTypeEntity): Long
-    suspend fun insert(note: NoteEntity)
+    suspend fun insert(note: NoteEntity) : Long
     suspend fun inserts(notes: List<NoteEntity>)
 
     suspend fun update(note: NoteEntity)

@@ -42,7 +42,7 @@ interface DatabaseDao {
     suspend fun insert(deck: DeckEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(note: NoteEntity)
+    suspend fun insert(note: NoteEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(cardTemplate: CardTemplateEntity)

@@ -8,4 +8,6 @@ import kotlinx.coroutines.flow.Flow
 interface ICardRepo {
     suspend fun cardsByDeckId(deckId: Long, pageNumber: Int): List<CardDto>
     suspend fun getDueCardsToday(deckId: Long): Flow<List<FsrsCardEntity>?>
+
+    suspend fun insert(fsrsCard: FsrsCardEntity)
 }

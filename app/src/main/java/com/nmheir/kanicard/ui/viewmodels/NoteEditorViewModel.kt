@@ -12,11 +12,13 @@ import androidx.lifecycle.viewModelScope
 import com.nmheir.kanicard.data.dto.deck.SelectableDeck
 import com.nmheir.kanicard.data.dto.note.SelectableNoteType
 import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
+import com.nmheir.kanicard.data.entities.fsrs.FsrsCardEntity
 import com.nmheir.kanicard.data.entities.note.FieldDefEntity
 import com.nmheir.kanicard.data.entities.note.NoteEntity
 import com.nmheir.kanicard.data.entities.note.NoteTypeEntity
 import com.nmheir.kanicard.data.entities.note.buildFieldJson
 import com.nmheir.kanicard.data.repository.FieldRepo
+import com.nmheir.kanicard.domain.repository.ICardRepo
 import com.nmheir.kanicard.domain.repository.IDeckRepo
 import com.nmheir.kanicard.domain.repository.INoteRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -45,6 +47,7 @@ class NoteEditorViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val savedStateHandle: SavedStateHandle,
     private val noteRepo: INoteRepo,
+    private val cardRepo: ICardRepo,
     private val deckRepo: IDeckRepo,
     private val fieldRepo: FieldRepo
 ) : ViewModel() {
@@ -239,7 +242,10 @@ class NoteEditorViewModel @Inject constructor(
                     createdTime = OffsetDateTime.now(),
                     modifiedTime = OffsetDateTime.now()
                 )
-                noteRepo.insert(note)
+                val noteId = noteRepo.insert(note)
+                cardRepo.insert(
+                    FsrsCardEntity.createNew(deckId, noteId)
+                )
                 savingProgress.value = ((index + 1).toFloat() / templates.size).coerceAtMost(1f)
             }
 

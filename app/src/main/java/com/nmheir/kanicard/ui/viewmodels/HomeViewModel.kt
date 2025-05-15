@@ -45,7 +45,7 @@ class HomeViewModel @Inject constructor(
     val deckWidgetData = deckRepo.getAllDeckWidgetData()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    val collectionWithDecks = collectionRepo.getAllCollectionWithDecks()
+    private val collectionWithDecks = collectionRepo.getAllCollectionWithDecks()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val collectionWithWidgetDecksFlow =
