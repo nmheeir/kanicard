@@ -79,7 +79,7 @@ import com.nmheir.kanicard.core.domain.ui.model.AppTheme
 import com.nmheir.kanicard.core.domain.ui.model.ThemeMode
 import com.nmheir.kanicard.data.entities.SearchHistoryEntity
 import com.nmheir.kanicard.data.local.KaniDatabase
-import com.nmheir.kanicard.ui.component.DefaultDialog
+import com.nmheir.kanicard.ui.component.dialog.DefaultDialog
 import com.nmheir.kanicard.ui.component.Gap
 import com.nmheir.kanicard.ui.component.InputFieldHeight
 import com.nmheir.kanicard.ui.component.SearchBar
@@ -533,10 +533,7 @@ class MainActivity : ComponentActivity() {
                             }
                         }
 
-
-                        Timber.d("Storage path: $storagePath")
-                        Timber.d("Storage path is empty: ${storagePath.isEmpty()}")
-                        AnimatedVisibility(
+                        /*AnimatedVisibility(
                             visible = storagePath.isEmpty() || storagePath == "null",
                             enter = fadeIn(),
                             exit = fadeOut()
@@ -544,7 +541,7 @@ class MainActivity : ComponentActivity() {
                             PermissionScreen(
                                 onPermissionResult = onStoragePathChange
                             )
-                        }
+                        }*/
                     }
                 }
             }

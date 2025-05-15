@@ -66,13 +66,10 @@ import com.nmheir.kanicard.data.dto.CollectionWithDeckWidgetData
 import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
 import com.nmheir.kanicard.data.entities.deck.CollectionEntity
 import com.nmheir.kanicard.ui.activities.LocalAwareWindowInset
-import com.nmheir.kanicard.ui.component.AlertDialog
 import com.nmheir.kanicard.ui.component.DeckItem
-import com.nmheir.kanicard.ui.component.DefaultDialog
+import com.nmheir.kanicard.ui.component.dialog.DefaultDialog
 import com.nmheir.kanicard.ui.component.Gap
 import com.nmheir.kanicard.ui.component.HideOnScrollFAB
-import com.nmheir.kanicard.ui.component.ListDialog
-import com.nmheir.kanicard.ui.component.TextFieldDialog
 import com.nmheir.kanicard.ui.component.widget.PreferenceEntry
 import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
 import com.nmheir.kanicard.ui.viewmodels.HomeUiAction
@@ -83,6 +80,9 @@ import com.nmheir.kanicard.utils.isScrollingUp
 import kotlinx.coroutines.delay
 import kotlinx.serialization.serializerOrNull
 import timber.log.Timber
+import com.nmheir.kanicard.ui.component.dialog.ListDialog
+import com.nmheir.kanicard.ui.component.dialog.AlertDialog
+import com.nmheir.kanicard.ui.component.dialog.TextFieldDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -97,7 +97,6 @@ fun HomeScreen(
     val lazyListState = rememberLazyListState()
 
     val error by viewModel.error.collectAsStateWithLifecycle()
-    val deckWidgetData by viewModel.deckWidgetData.collectAsStateWithLifecycle()
     val collections by viewModel.collections.collectAsStateWithLifecycle()
 
     val collectionWithDeckWidgetData by viewModel.collectionWithWidgetDecksFlow.collectAsStateWithLifecycle()

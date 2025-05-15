@@ -38,7 +38,7 @@ import com.nmheir.kanicard.R
 import com.nmheir.kanicard.core.presentation.components.ScrollbarLazyColumn
 import com.nmheir.kanicard.core.presentation.components.padding
 import com.nmheir.kanicard.data.entities.ProfileEntity
-import com.nmheir.kanicard.ui.component.DefaultDialog
+import com.nmheir.kanicard.ui.component.dialog.DefaultDialog
 import com.nmheir.kanicard.ui.component.Gap
 import com.nmheir.kanicard.ui.component.LogoHeader
 import com.nmheir.kanicard.ui.component.image.CoilImage

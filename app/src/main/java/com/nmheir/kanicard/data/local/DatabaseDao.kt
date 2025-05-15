@@ -9,6 +9,8 @@ import androidx.room.RawQuery
 import androidx.room.Transaction
 import androidx.room.Update
 import androidx.sqlite.db.SupportSQLiteQuery
+import com.nmheir.kanicard.data.dto.card.CardBrowseDto
+import com.nmheir.kanicard.data.dto.deck.DeckData
 import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
 import com.nmheir.kanicard.data.entities.SearchHistoryEntity
 import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
@@ -42,7 +44,7 @@ interface DatabaseDao {
     suspend fun insert(deck: DeckEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(note: NoteEntity)
+    suspend fun insert(note: NoteEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(cardTemplate: CardTemplateEntity)
@@ -51,7 +53,7 @@ interface DatabaseDao {
     suspend fun insert(reviewLog: ReviewLogEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(noteType: NoteTypeEntity) : Long
+    suspend fun insert(noteType: NoteTypeEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(fieldDef: FieldDefEntity)
@@ -66,6 +68,12 @@ interface DatabaseDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFields(fields: List<FieldDefEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTemplates(templates: List<CardTemplateEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertNotes(notes: List<NoteEntity>)
 
 
     /*Update*/
@@ -87,8 +95,20 @@ interface DatabaseDao {
     @Update
     suspend fun update(noteType: NoteTypeEntity)
 
-    @Query("UPDATE decks SET name = :name WHERE id = :id")
-    suspend fun updateDeckName(id: Long, name: String)
+    @Query(
+        """
+        UPDATE decks
+        SET
+            name = COALESCE(:name, name),
+            description = COALESCE(:description, description)
+        WHERE id = :id
+        """
+    )
+    suspend fun updateDeck(
+        id: Long,
+        name: String? = null,
+        description: String? = null
+    )
 
     /*Delete*/
 
@@ -119,6 +139,9 @@ interface DatabaseDao {
     @Query("DELETE FROM decks WHERE id = :id")
     suspend fun deleteDeck(id: Long)
 
+    @Query("DELETE FROM card_templates WHERE id = :id")
+    suspend fun deleteTemplate(id: Long)
+
     /*Get*/
 
     @Query(
@@ -141,7 +164,7 @@ interface DatabaseDao {
     fun getFieldDefByNoteTypeId(noteTypeId: Long): Flow<List<FieldDefEntity>?>
 
     @Query("SELECT * FROM card_templates WHERE noteTypeId = :noteTypeId")
-    fun getCardTemplateByNoteTypeId(noteTypeId: Long): Flow<CardTemplateEntity?>
+    fun getCardTemplateByNoteTypeId(noteTypeId: Long): Flow<List<CardTemplateEntity>?>
 
 
     @Query(
@@ -249,6 +272,84 @@ interface DatabaseDao {
 
     /*End Note Type*/
     /*-------------------------------------------------------------------------*/
+
+    /*-------------------------------------------------------------------------*/
+    /*Note*/
+
+    @Query(
+        """
+        SELECT
+            d.id,
+            d.collectionId AS cId,
+            d.name,
+            d.description,
+            d.createdTime,
+            d.modifiedTime,
+            d.flags,
+            COUNT(n.noteId)    AS noteCount
+        FROM decks AS d
+        LEFT JOIN notes AS n
+            ON d.id = n.deckId
+        WHERE d.id = :dId
+        GROUP BY d.id
+    """
+    )
+    fun getDecksWithNoteCount(dId: Long): Flow<DeckData>
+
+    @Transaction
+    @Query("SELECT * FROM notes WHERE deckId = :dId LIMIT :limit")
+    fun getNoteAndTemplateByDeckId(dId: Long, limit: Int = 100): Flow<List<NoteAndTemplate>>
+
+    /*End Note*/
+    /*-------------------------------------------------------------------------*/
+
+    /*-------------------------------------------------------------------------*/
+    /*Card*/
+
+    @Query(
+        """
+            SELECT
+              n.noteId                       AS nid,
+              t.id                           AS tId,
+              d.name                         AS dName,
+              nt.name                        AS typeName,
+              t.name                         AS templateName,
+              t.qstFt                        AS qfmt,
+              t.ansFt                        AS afmt,
+              n.fieldJson                    AS field,
+              f.lapses                       AS lapse,
+              f.state                        AS state,
+              COALESCE(r.review_count, 0)    AS reviews,
+              f.due                          AS due,
+              n.createdTime                  AS createdTime,
+              n.modifiedTime                 AS modifiedTime
+            FROM notes AS n
+            INNER JOIN decks AS d
+              ON n.deckId = d.id
+            INNER JOIN card_templates AS t
+              ON n.templateId = t.id
+            INNER JOIN note_types AS nt
+              ON t.noteTypeId = nt.id
+            INNER JOIN fsrs_card AS f
+              ON f.nId = n.noteId
+            LEFT JOIN (
+              /* Đếm số lần review cho mỗi card */
+              SELECT
+                fsrsCardId,
+                COUNT(*) AS review_count
+              FROM review_log
+              GROUP BY fsrsCardId
+            ) AS r
+              ON r.fsrsCardId = f.id
+            WHERE d.id = :dId
+            ;
+        """
+    )
+    // TODO: I don't know how to name function
+    fun getBrowseCards(dId: Long): Flow<List<CardBrowseDto>>
+    /*End Card*/
+    /*-------------------------------------------------------------------------*/
+
 
     @RawQuery
     fun raw(supportSQLiteQuery: SupportSQLiteQuery): Int

@@ -1,5 +1,6 @@
 package com.nmheir.kanicard.data.repository
 
+import com.nmheir.kanicard.data.dto.deck.DeckData
 import com.nmheir.kanicard.data.dto.deck.DeckDto
 import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
 import com.nmheir.kanicard.data.entities.deck.CollectionEntity
@@ -7,8 +8,9 @@ import com.nmheir.kanicard.data.local.KaniDatabase
 import com.nmheir.kanicard.domain.repository.IDeckRepo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
+import javax.inject.Inject
 
-class DeckRepo(
+class DeckRepo @Inject constructor(
     private val database: KaniDatabase
 ) : IDeckRepo {
 
@@ -22,6 +24,22 @@ class DeckRepo(
                 deckEntity.toDeckDto()
             }
         }
+    }
+
+
+    override fun getAllCollections(): Flow<List<CollectionEntity>> {
+        return database.getCollections()
+    }
+
+    override fun getDeckDataById(dId: Long): Flow<DeckData> {
+        return database.getDecksWithNoteCount(dId)
+    }
+
+    override suspend fun queryDeck(
+        id: Long?,
+        name: String?
+    ): DeckDto? {
+        return database.deck(id, name)?.toDeckDto()
     }
 
     override suspend fun insert(deck: DeckDto) {
@@ -44,19 +62,15 @@ class DeckRepo(
         database.update(deck.toDeckEntity())
     }
 
+    override suspend fun update(
+        id: Long,
+        name: String?,
+        description: String?
+    ) {
+        database.updateDeck(id, name, description)
+    }
+
     override suspend fun updateName(id: Long, name: String) {
-        database.updateDeckName(id, name)
+        database.updateDeck(id, name = name)
     }
-
-    override fun getAllCollections(): Flow<List<CollectionEntity>> {
-        return database.getCollections()
-    }
-
-    override suspend fun queryDeck(
-        id: Long?,
-        name: String?
-    ): DeckDto? {
-        return database.deck(id, name)?.toDeckDto()
-    }
-
 }

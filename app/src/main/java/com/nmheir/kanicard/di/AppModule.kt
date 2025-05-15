@@ -30,18 +30,6 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideDeckRepo(database: KaniDatabase): IDeckRepo {
-        return DeckRepo(database)
-    }
-
-    @Provides
-    @Singleton
-    fun provideCardRepo(database: KaniDatabase): ICardRepo {
-        return CardRepo(database)
-    }
-
-    @Provides
-    @Singleton
     fun provideNoteRepo(database: KaniDatabase): INoteRepo {
         return NoteRepo(database)
     }

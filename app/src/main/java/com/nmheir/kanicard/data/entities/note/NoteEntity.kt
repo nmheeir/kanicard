@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 import com.nmheir.kanicard.data.dto.note.NoteDto
 import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
 import com.nmheir.kanicard.data.entities.deck.DeckEntity
+import com.nmheir.kanicard.ui.viewmodels.FieldValue
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -53,6 +54,15 @@ fun buildFieldJson(values: Map<String, String>): String {
     val jsonObject = buildJsonObject {
         for ((key, value) in values) {
             put(key, JsonPrimitive(value))
+        }
+    }
+    return Json.encodeToString(JsonObject.serializer(), jsonObject)
+}
+
+fun buildFieldJson(values: List<FieldValue>): String {
+    val jsonObject = buildJsonObject {
+        values.forEach {
+            put(it.fieldName, JsonPrimitive(it.value.text.toString()))
         }
     }
     return Json.encodeToString(JsonObject.serializer(), jsonObject)
