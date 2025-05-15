@@ -33,7 +33,8 @@ fun MarkdownEditorRow(
     canRedo: Boolean,
     onEdit: (String) -> Unit,
     onListButtonClick: () -> Unit,
-    onInsertFieldButtonClick: () -> Unit
+    onInsertFieldButtonClick: () -> Unit,
+    onLinkButtonClick: () -> Unit
 ) {
     var showHeadingLevel by remember { mutableStateOf(false) }
     Row(
@@ -168,6 +169,13 @@ fun MarkdownEditorRow(
             shortCutDescription = "Ctrl + Shift + L"
         ) {
             onListButtonClick()
+        }
+
+        IconButtonTooltip(
+            iconRes = R.drawable.ic_link,
+            shortCutDescription = "Ctrl + K"
+        ) {
+            onLinkButtonClick()
         }
 
         IconButtonTooltip(

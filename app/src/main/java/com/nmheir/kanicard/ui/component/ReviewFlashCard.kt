@@ -8,9 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
-import android.webkit.WebSettings
 import android.webkit.WebView
-import android.webkit.WebView.enableSlowWholeDocumentDraw
 import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material3.ColorScheme
@@ -34,7 +32,6 @@ import com.nmheir.kanicard.extensions.toHexColor
 import com.nmheir.kanicard.ui.theme.linkColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 
 data class MarkdownStyles(
     val hexTextColor: String,

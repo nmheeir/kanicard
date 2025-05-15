@@ -69,6 +69,7 @@ import com.nmheir.kanicard.core.presentation.components.Constants
 import com.nmheir.kanicard.ui.component.MarkdownEditorRow
 import com.nmheir.kanicard.ui.component.dialog.AlertDialog
 import com.nmheir.kanicard.ui.component.dialog.DefaultDialog
+import com.nmheir.kanicard.ui.component.dialog.LinkDialog
 import com.nmheir.kanicard.ui.component.dialog.TextFieldDialog
 import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
 import com.nmheir.kanicard.ui.viewmodels.NoteTemplateUiAction
@@ -396,6 +397,7 @@ private fun NoteTemplateContent(
         bottomBar = {
             Column {
                 var showInsertFieldDialog by remember { mutableStateOf(false) }
+                var showInsertLinkDialog by remember { mutableStateOf(false) }
                 MarkdownEditorRow(
                     canRedo = currentUndoState.canRedo,
                     canUndo = currentUndoState.canUndo,
@@ -403,7 +405,8 @@ private fun NoteTemplateContent(
                         action(selectedCardSide, key, "")
                     },
                     onListButtonClick = {},
-                    onInsertFieldButtonClick = { showInsertFieldDialog = true }
+                    onInsertFieldButtonClick = { showInsertFieldDialog = true },
+                    onLinkButtonClick = { showInsertLinkDialog = true }
                 )
                 NoteTemplateBottomBar(
                     selectedCardSide = selectedCardSide,
@@ -428,6 +431,15 @@ private fun NoteTemplateContent(
                             )
                         }
                     }
+                }
+                if (showInsertLinkDialog) {
+                    LinkDialog(
+                        onDismiss = { showInsertLinkDialog = false },
+                        onConfirm = { name, link ->
+                            val insertText = "[${name}](${link})"
+                            action(selectedCardSide, Constants.Editor.TEXT, insertText)
+                        }
+                    )
                 }
             }
         }

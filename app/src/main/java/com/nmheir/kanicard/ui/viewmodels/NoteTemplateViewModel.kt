@@ -11,6 +11,7 @@ import com.nmheir.kanicard.core.presentation.components.Constants
 import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
 import com.nmheir.kanicard.domain.repository.INoteRepo
 import com.nmheir.kanicard.domain.repository.ITemplateRepo
+import com.nmheir.kanicard.extensions.add
 import com.nmheir.kanicard.extensions.addHeader
 import com.nmheir.kanicard.extensions.addInNewLine
 import com.nmheir.kanicard.extensions.bold
@@ -137,6 +138,8 @@ class NoteTemplateViewModel @Inject constructor(
                     Constants.Editor.INSERT_FIELD -> contentState.edit {
                         append(" {{${action.value}}} ")
                     }
+
+                    Constants.Editor.TEXT -> contentState.edit { add(action.value) }
 
                     else -> {}
                 }
