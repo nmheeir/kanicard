@@ -141,4 +141,7 @@ dependencies {
     implementation(libs.commonmark.ext.heading.anchor)
     implementation(libs.commonmark.ext.image.attributes)
     implementation(libs.commonmark)
+
+    //Compose Webview
+    implementation("io.github.kevinnzou:compose-webview:0.33.6")
 }
