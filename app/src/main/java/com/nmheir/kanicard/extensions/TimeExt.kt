@@ -1,7 +1,9 @@
 package com.nmheir.kanicard.extensions
 
 import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.util.Locale
 
 fun OffsetDateTime.relativeTime(): String {
     val now = OffsetDateTime.now()
@@ -23,4 +25,10 @@ fun OffsetDateTime.relativeTime(): String {
         months < 1 -> "1 month ago"                  // đã qua 30–59 ngày
         else -> "$months month${if (months != 1L) "s" else ""} ago"
     }
+}
+
+private val format1 = DateTimeFormatter.ofPattern("MMM dd, yyyy h:mm a", Locale.ENGLISH)
+
+fun OffsetDateTime.format3(): String {
+    return this.format(format1)
 }
