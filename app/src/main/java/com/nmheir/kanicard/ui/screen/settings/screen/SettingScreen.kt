@@ -22,6 +22,7 @@ import androidx.navigation.NavController
 import com.nmheir.kanicard.R
 import com.nmheir.kanicard.ui.component.TopAppBar
 import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
+import com.nmheir.kanicard.ui.screen.Screens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,6 +30,7 @@ fun SettingScreen(
     topAppBarScrollBehavior: TopAppBarScrollBehavior,
     navController: NavController
 ) {
+    val screens = Screens.SettingsScreen.screens
     Scaffold(
         topBar = {
             TopAppBar(
@@ -43,7 +45,7 @@ fun SettingScreen(
             contentPadding = contentPadding
         ) {
             itemsIndexed(
-                items = items,
+                items = screens,
                 key = { _, item -> item.hashCode() }
             ) { _, item ->
                 val contentColor = LocalContentColor.current
@@ -51,48 +53,11 @@ fun SettingScreen(
                     TextPreferenceWidget(
                         modifier = Modifier,
                         title = stringResource(item.titleRes),
-                        subtitle = item.formatSubtitle(),
-                        icon = item.icon,
-                        onPreferenceClick = { navController.navigate(item.screen) },
+                        icon = item.iconRes,
+                        onPreferenceClick = { navController.navigate(item.route) },
                     )
                 }
             }
         }
     }
-
-
 }
-
-private data class Item(
-    @StringRes val titleRes: Int,
-    @StringRes val subtitleRes: Int? = null,
-    val formatSubtitle: @Composable () -> String? = { subtitleRes?.let { stringResource(it) } },
-    @DrawableRes val icon: Int,
-    val screen: String,
-)
-
-private val items = listOf(
-    Item(
-        titleRes = R.string.pref_category_appearance,
-        subtitleRes = R.string.pref_appearance_summary,
-        icon = R.drawable.ic_palette,
-        screen = "settings/appearance"
-    ),
-    Item(
-        titleRes = R.string.pref_category_security,
-        subtitleRes = R.string.pref_security_summary,
-        icon = R.drawable.ic_lock,
-        screen = "settings/security"
-    ),
-    Item(
-        titleRes = R.string.pref_category_advanced,
-        subtitleRes = R.string.pref_advanced_summary,
-        icon = R.drawable.ic_code,
-        screen = "settings/advanced"
-    ),
-    Item(
-        titleRes = R.string.pref_category_about,
-        icon = R.drawable.ic_info,
-        screen = "settings/about"
-    )
-)

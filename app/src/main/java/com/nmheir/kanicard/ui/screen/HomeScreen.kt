@@ -197,7 +197,7 @@ private fun HomeContent(
             CollectionWithDeck(
                 data = it,
                 onAdd = {
-                    navController.navigate("add_new_card?deckId=${it}")
+                    navController.navigate("${Screens.Base.NoteEditor.route}?deckId=${it}")
                 },
                 onLearn = { navController.navigate("learn/${it}") },
                 onView = { navController.navigate("deck/${it}") },
@@ -376,7 +376,7 @@ private fun OptionDialog(
                         .clickable {
                             when (item.title) {
                                 R.string.action_add_cards -> {
-                                    navController.navigate("add_new_card")
+                                    navController.navigate(Screens.Base.NoteEditor.route)
                                 }
 
                                 R.string.action_add_deck -> {

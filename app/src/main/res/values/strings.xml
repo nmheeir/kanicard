@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">KaniCard</string>
 
+    <!--Screen title-->
     <string name="home">Home</string>
     <string name="statistics">Statistics</string>
     <string name="setting">Setting</string>
@@ -15,6 +16,15 @@
     <string name="your_email">Your email</string>
     <string name="selected">Selected</string>
     <string name="more">More</string>
+    <string name="settings">Settings</string>
+    <string name="appearance">Appearance</string>
+    <string name="backup">Backup</string>
+    <string name="restore">Restore</string>
+    <string name="security_privacy">Security and Privacy</string>
+    <string name="advanced">Advanced</string>
+    <string name="about">About</string>
+    <string name="backup_restore">Backup and Restore</string>
+    <string name="help">Help</string>
 
     <string name="change_password">Change password</string>
     <string name="reset_password">Reset password</string>

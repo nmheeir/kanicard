@@ -79,24 +79,21 @@ import com.nmheir.kanicard.core.domain.ui.model.AppTheme
 import com.nmheir.kanicard.core.domain.ui.model.ThemeMode
 import com.nmheir.kanicard.data.entities.SearchHistoryEntity
 import com.nmheir.kanicard.data.local.KaniDatabase
-import com.nmheir.kanicard.ui.component.dialog.DefaultDialog
 import com.nmheir.kanicard.ui.component.Gap
 import com.nmheir.kanicard.ui.component.InputFieldHeight
 import com.nmheir.kanicard.ui.component.SearchBar
+import com.nmheir.kanicard.ui.component.dialog.DefaultDialog
 import com.nmheir.kanicard.ui.navigation.navigationBuilder
-import com.nmheir.kanicard.ui.screen.PermissionScreen
 import com.nmheir.kanicard.ui.screen.Screens
 import com.nmheir.kanicard.ui.theme.KaniTheme
 import com.nmheir.kanicard.ui.theme.NavigationBarAnimationSpec
 import com.nmheir.kanicard.utils.appBarScrollBehavior
 import com.nmheir.kanicard.utils.dataStore
-import com.nmheir.kanicard.utils.delete
 import com.nmheir.kanicard.utils.get
 import com.nmheir.kanicard.utils.rememberEnumPreference
 import com.nmheir.kanicard.utils.rememberPreference
 import com.nmheir.kanicard.utils.resetHeightOffset
 import dagger.hilt.android.AndroidEntryPoint
-import timber.log.Timber
 import javax.inject.Inject
 
 @Suppress("DEPRECATION")
@@ -144,11 +141,10 @@ class MainActivity : ComponentActivity() {
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.surface)
                 ) {
-                    val navigationItems = remember { Screens.MainScreens }
+                    val navigationItems = remember { Screens.MainScreen.Screens }
                     val topLevelScreens = listOf(
-                        Screens.Home.route,
-                        Screens.Statistics.route,
-                        Screens.More.route
+                        Screens.MainScreen.Home.route,
+                        Screens.MainScreen.Statistics.route,
                     )
 
                     val focusManager = LocalFocusManager.current
@@ -168,7 +164,7 @@ class MainActivity : ComponentActivity() {
                         active = newActive
                         if (!newActive) {
                             focusManager.clearFocus()
-                            if (backStackEntry?.destination?.route == Screens.Home.route) {
+                            if (backStackEntry?.destination?.route == Screens.MainScreen.Home.route) {
                                 onQueryChange(TextFieldValue())
                             }
                         }
@@ -183,7 +179,7 @@ class MainActivity : ComponentActivity() {
                     val onSearch: (String) -> Unit = {
                         if (it.isNotEmpty()) {
                             onActiveChange(false)
-                            navController.navigate("search/$it")
+                            navController.navigate("${Screens.Base.Search}/$it")
                             if (dataStore[PauseSearchHistoryKey] != true) {
                                 database.query {
                                     insert(SearchHistoryEntity(query = it))
@@ -205,7 +201,7 @@ class MainActivity : ComponentActivity() {
 
                     val shouldShowTopBar = remember(backStackEntry, active) {
                         backStackEntry?.destination?.route == null
-                                || backStackEntry?.destination?.route == Screens.Home.route
+                                || backStackEntry?.destination?.route == Screens.MainScreen.Home.route
                                 && !active
                     }
                     val topBarHeight by animateDpAsState(
@@ -216,20 +212,20 @@ class MainActivity : ComponentActivity() {
 
                     val shouldShowSearchBar = remember(backStackEntry, active) {
                         (active
-                                || backStackEntry?.destination?.route == Screens.Home.route
+                                || backStackEntry?.destination?.route == Screens.MainScreen.Home.route
                                 || backStackEntry?.destination?.route?.startsWith("/search") == true)
                     }
 
                     /*Scroll Behaviour*/
                     val topAppBarScrollBehavior = appBarScrollBehavior(
                         canScroll = {
-                            !(backStackEntry?.destination?.route == Screens.Home.route
-                                    || backStackEntry?.destination?.route == Screens.Statistics.route)
+                            !(backStackEntry?.destination?.route == Screens.MainScreen.Home.route
+                                    || backStackEntry?.destination?.route == Screens.MainScreen.Statistics.route)
                         }
                     )
                     val searchBarScrollBehavior = appBarScrollBehavior(
                         canScroll = {
-                            backStackEntry?.destination?.route?.startsWith("search/") == false
+                            backStackEntry?.destination?.route?.startsWith("${Screens.Base.Search}/") == false
                         }
                     )
 
@@ -256,7 +252,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         NavHost(
                             navController = navController,
-                            startDestination = if (!onboardingComplete) "onboarding" else Screens.Home.route,
+                            startDestination = if (!onboardingComplete) Screens.Base.Onboarding.route else Screens.MainScreen.Home.route,
                             enterTransition = {
                                 if (initialState.destination.route in topLevelScreens
                                     && targetState.destination.route in topLevelScreens
@@ -277,7 +273,7 @@ class MainActivity : ComponentActivity() {
                             },
                             popEnterTransition = {
                                 if ((initialState.destination.route in topLevelScreens
-                                            || initialState.destination.route?.startsWith("search/") == true)
+                                            || initialState.destination.route?.startsWith("${Screens.Base.Search}/") == true)
                                     && targetState.destination.route in topLevelScreens
                                 ) {
                                     fadeIn(tween(250))
@@ -287,7 +283,7 @@ class MainActivity : ComponentActivity() {
                             },
                             popExitTransition = {
                                 if ((initialState.destination.route in topLevelScreens
-                                            || initialState.destination.route?.startsWith("search/") == true)
+                                            || initialState.destination.route?.startsWith("${Screens.Base.Search}/") == true)
                                     && targetState.destination.route in topLevelScreens
                                 ) {
                                     fadeOut(tween(200))
@@ -298,7 +294,7 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier
                                 .nestedScroll(
                                     if (navigationItems.fastAny { it.route == backStackEntry?.destination?.route } ||
-                                        backStackEntry?.destination?.route?.startsWith("search/") == true) {
+                                        backStackEntry?.destination?.route?.startsWith("${Screens.Base.Search}/") == true) {
                                         searchBarScrollBehavior.nestedScrollConnection
                                     } else {
                                         topAppBarScrollBehavior.nestedScrollConnection
@@ -333,13 +329,13 @@ class MainActivity : ComponentActivity() {
                                         selected = backStackEntry?.destination?.hierarchy?.any { it.route == screens.route } == true,
                                         icon = {
                                             Icon(
-                                                painter = painterResource(screens.iconId),
+                                                painter = painterResource(screens.iconRes),
                                                 contentDescription = null
                                             )
                                         },
                                         label = {
                                             Text(
-                                                text = stringResource(screens.titleId),
+                                                text = stringResource(screens.titleRes),
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 maxLines = 1,
                                                 overflow = TextOverflow.Ellipsis
@@ -414,7 +410,7 @@ class MainActivity : ComponentActivity() {
 
                                         IconButton(
                                             onClick = {
-                                                navController.navigate(Screens.Setting.route)
+                                                navController.navigate(Screens.SettingsScreen.Setting.route)
                                             }
                                         ) {
                                             Icon(
@@ -498,7 +494,7 @@ class MainActivity : ComponentActivity() {
                                             onClick = {
                                                 when {
                                                     active -> onActiveChange(false)
-                                                    backStackEntry?.destination?.route != Screens.Home.route -> {
+                                                    backStackEntry?.destination?.route != Screens.MainScreen.Home.route -> {
                                                         navController.navigateUp()
                                                     }
 
