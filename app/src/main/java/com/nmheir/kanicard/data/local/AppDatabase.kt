@@ -8,13 +8,13 @@ import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import com.nmheir.kanicard.data.converters.Converters
 import com.nmheir.kanicard.data.entities.SearchHistoryEntity
-import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
+import com.nmheir.kanicard.data.entities.card.TemplateEntity
 import com.nmheir.kanicard.data.entities.deck.CollectionEntity
 import com.nmheir.kanicard.data.entities.deck.DeckConfigEntity
 import com.nmheir.kanicard.data.entities.deck.DeckEntity
 import com.nmheir.kanicard.data.entities.fsrs.FsrsCardEntity
 import com.nmheir.kanicard.data.entities.fsrs.ReviewLogEntity
-import com.nmheir.kanicard.data.entities.note.FieldDefEntity
+import com.nmheir.kanicard.data.entities.note.FieldEntity
 import com.nmheir.kanicard.data.entities.note.NoteEntity
 import com.nmheir.kanicard.data.entities.note.NoteTypeEntity
 
@@ -50,12 +50,12 @@ class KaniDatabase(
         DeckEntity::class,
         NoteEntity::class,
         NoteTypeEntity::class,
-        CardTemplateEntity::class,
-        FieldDefEntity::class,
+        TemplateEntity::class,
+        FieldEntity::class,
         DeckConfigEntity::class,
         CollectionEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
     autoMigrations = [
     ]

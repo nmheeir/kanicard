@@ -8,7 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nmheir.kanicard.core.presentation.components.Constants
-import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
+import com.nmheir.kanicard.data.entities.card.TemplateEntity
 import com.nmheir.kanicard.domain.repository.INoteRepo
 import com.nmheir.kanicard.domain.repository.ITemplateRepo
 import com.nmheir.kanicard.extensions.add
@@ -153,8 +153,8 @@ class NoteTemplateViewModel @Inject constructor(
 
                     // When you add a new template, its id will be written as a negative number to distinguish it.
                     val newTemplateEntity = newTemplates.map {
-                        CardTemplateEntity(
-                            noteTypeId = noteTypeId,
+                        TemplateEntity(
+                            ntId = noteTypeId,
                             name = it.name,
                             qstFt = it.qstState.text.toString(),
                             ansFt = it.ansState.text.toString()
@@ -163,9 +163,9 @@ class NoteTemplateViewModel @Inject constructor(
 
                     // I think it would be more optimal to check which components changed but I find it too complicated
                     val oldTemplateEntity = oldTemplates.map {
-                        CardTemplateEntity(
+                        TemplateEntity(
                             id = it.id,
-                            noteTypeId = noteTypeId,
+                            ntId = noteTypeId,
                             name = it.name,
                             qstFt = it.qstState.text.toString(),
                             ansFt = it.ansState.text.toString()
@@ -218,7 +218,7 @@ data class TemplatePreview(
     val ansHtml: String
 )
 
-fun CardTemplateEntity.toTemplateState(): TemplateState {
+fun TemplateEntity.toTemplateState(): TemplateState {
     return TemplateState(
         id = this.id,
         name = this.name,

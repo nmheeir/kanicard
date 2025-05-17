@@ -1,6 +1,6 @@
 package com.nmheir.kanicard.data.repository
 
-import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
+import com.nmheir.kanicard.data.entities.card.TemplateEntity
 import com.nmheir.kanicard.data.local.KaniDatabase
 import com.nmheir.kanicard.domain.repository.ITemplateRepo
 import kotlinx.coroutines.flow.Flow
@@ -9,11 +9,11 @@ import javax.inject.Inject
 class TemplateRepo @Inject constructor(
     private val database: KaniDatabase
 ) : ITemplateRepo {
-    override suspend fun insert(template: CardTemplateEntity) {
+    override suspend fun insert(template: TemplateEntity) {
         database.insert(template)
     }
 
-    override suspend fun inserts(templates: List<CardTemplateEntity>) {
+    override suspend fun inserts(templates: List<TemplateEntity>) {
         database.insertTemplates(templates)
     }
 
@@ -21,7 +21,7 @@ class TemplateRepo @Inject constructor(
         database.deleteTemplate(id)
     }
 
-    override fun getTemplatesByNoteTypeId(noteTypeId: Long): Flow<List<CardTemplateEntity>?> {
+    override fun getTemplatesByNoteTypeId(noteTypeId: Long): Flow<List<TemplateEntity>?> {
         return database.getCardTemplateByNoteTypeId(noteTypeId)
     }
 }

@@ -4,8 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.nmheir.kanicard.data.dto.note.NoteDto
-import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
+import com.nmheir.kanicard.data.entities.card.TemplateEntity
 import com.nmheir.kanicard.data.entities.deck.DeckEntity
 import com.nmheir.kanicard.ui.viewmodels.FieldValue
 import kotlinx.serialization.json.Json
@@ -19,7 +18,7 @@ import java.time.OffsetDateTime
     tableName = "notes",
     foreignKeys = [
         ForeignKey(
-            entity = CardTemplateEntity::class,
+            entity = TemplateEntity::class,
             parentColumns = ["id"],
             childColumns = ["templateId"],
             onDelete = ForeignKey.NO_ACTION
@@ -27,7 +26,7 @@ import java.time.OffsetDateTime
         ForeignKey(
             entity = DeckEntity::class,
             parentColumns = ["id"],
-            childColumns = ["deckId"],
+            childColumns = ["dId"],
             onDelete = ForeignKey.CASCADE   // Nếu xoá deck thì xoá luôn note
         )
     ],
@@ -36,8 +35,8 @@ import java.time.OffsetDateTime
     ]
 )
 data class NoteEntity(
-    @PrimaryKey(autoGenerate = true) val noteId: Long = 0,
-    val deckId: Long,
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val dId: Long,
     val templateId: Long,
     val fieldJson: String,
     val createdTime: OffsetDateTime,

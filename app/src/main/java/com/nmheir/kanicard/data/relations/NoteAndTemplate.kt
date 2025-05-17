@@ -2,7 +2,7 @@ package com.nmheir.kanicard.data.relations
 
 import androidx.room.Embedded
 import androidx.room.Relation
-import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
+import com.nmheir.kanicard.data.entities.card.TemplateEntity
 import com.nmheir.kanicard.data.entities.note.NoteEntity
 
 data class NoteAndTemplate(
@@ -11,5 +11,5 @@ data class NoteAndTemplate(
         parentColumn = "templateId",
         entityColumn = "id"
     )
-    val template: CardTemplateEntity
+    val template: TemplateEntity
 )

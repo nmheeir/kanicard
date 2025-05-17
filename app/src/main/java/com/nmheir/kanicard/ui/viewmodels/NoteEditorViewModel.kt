@@ -11,9 +11,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nmheir.kanicard.data.dto.deck.SelectableDeck
 import com.nmheir.kanicard.data.dto.note.SelectableNoteType
-import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
+import com.nmheir.kanicard.data.entities.card.TemplateEntity
 import com.nmheir.kanicard.data.entities.fsrs.FsrsCardEntity
-import com.nmheir.kanicard.data.entities.note.FieldDefEntity
+import com.nmheir.kanicard.data.entities.note.FieldEntity
 import com.nmheir.kanicard.data.entities.note.NoteEntity
 import com.nmheir.kanicard.data.entities.note.NoteTypeEntity
 import com.nmheir.kanicard.data.entities.note.buildFieldJson
@@ -24,7 +24,6 @@ import com.nmheir.kanicard.domain.repository.INoteRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -164,8 +163,8 @@ class NoteEditorViewModel @Inject constructor(
                         )
                     )
                     val fields = action.fieldNames.mapIndexed { index, name ->
-                        FieldDefEntity(
-                            noteTypeId = newTypeId,
+                        FieldEntity(
+                            ntId = newTypeId,
                             name = name,
                             ord = index,
                             createdTime = OffsetDateTime.now(),
@@ -236,7 +235,7 @@ class NoteEditorViewModel @Inject constructor(
 
             templates.forEachIndexed { index, template ->
                 val note = NoteEntity(
-                    deckId = deckId,
+                    dId = deckId,
                     templateId = template.id,
                     fieldJson = fieldJson,
                     createdTime = OffsetDateTime.now(),
@@ -287,9 +286,9 @@ sealed interface FileDataEvent {
     ) : FileDataEvent
 }
 
-private val sampleTemplate = CardTemplateEntity(
+private val sampleTemplate = TemplateEntity(
     id = 0L,
-    noteTypeId = 0,
+    ntId = 0,
     name = "Template",
     qstFt = "",
     ansFt = ""

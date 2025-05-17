@@ -10,7 +10,7 @@ import com.nmheir.kanicard.data.enums.State
 import java.time.OffsetDateTime
 
 @Entity(
-    tableName = "review_log",
+    tableName = "review_logs",
     foreignKeys = [ForeignKey(
         entity = FsrsCardEntity::class,
         parentColumns = ["id"],

@@ -6,8 +6,8 @@ import com.nmheir.kanicard.data.dto.card.CardBrowseData
 import com.nmheir.kanicard.data.dto.card.CardBrowseDto
 import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
 import com.nmheir.kanicard.data.dto.note.NoteData
-import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
-import com.nmheir.kanicard.data.entities.note.FieldDefEntity
+import com.nmheir.kanicard.data.entities.card.TemplateEntity
+import com.nmheir.kanicard.data.entities.note.FieldEntity
 import com.nmheir.kanicard.data.enums.State
 import com.nmheir.kanicard.ui.viewmodels.TemplatePreview
 import java.time.OffsetDateTime
@@ -122,10 +122,10 @@ val fakeProfileDto = ProfileDto(
 )
 
 val fakeFields = List(5) {
-    FieldDefEntity(
+    FieldEntity(
         id = it.toLong(),
         name = "Field $it",
-        noteTypeId = 3,
+        ntId = 3,
         ord = it,
         createdTime = OffsetDateTime.now(),
         modifiedTime = OffsetDateTime.now()
@@ -133,9 +133,9 @@ val fakeFields = List(5) {
 }
 
 val fakeTemplates = List(5) {
-    CardTemplateEntity(
+    TemplateEntity(
         id = it.toLong(),
-        noteTypeId = 3,
+        ntId = 3,
         name = "Template $it",
         qstFt = "Question $it",
         ansFt = "Answer $it",

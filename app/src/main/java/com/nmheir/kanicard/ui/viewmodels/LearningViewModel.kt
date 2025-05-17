@@ -126,7 +126,7 @@ class LearningViewModel @Inject constructor(
 
             val fsrsCardEntity = FsrsCardEntity(
                 id = cardId,
-                deckId = deckId,
+                dId = deckId,
                 due = fsrsCard.due,
                 stability = fsrsCard.stability,
                 difficulty = fsrsCard.difficulty,

@@ -12,7 +12,6 @@ import com.nmheir.kanicard.data.relations.NoteTypeWithTemplates
 import com.nmheir.kanicard.domain.repository.INoteRepo
 import com.nmheir.kanicard.extensions.md.MarkdownWithParametersParser
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.lastOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -25,7 +24,7 @@ class NoteRepo(
             .mapNotNull {
                 it?.let { note ->
                     NoteDto(
-                        id = note.noteId,
+                        id = note.id,
                         field = parseFieldJson(note.fieldJson),
                         createdTime = note.createdTime,
                         modifiedTime = note.modifiedTime
@@ -69,7 +68,7 @@ class NoteRepo(
                     }
 
                     NoteData(
-                        id = note.noteId,
+                        id = note.id,
                         dId = deckId,
                         qFmt = qFmt,
                         aFmt = aFmt
