@@ -16,6 +16,7 @@ import com.nmheir.kanicard.ui.screen.Screens
 import com.nmheir.kanicard.ui.screen.note.NoteEditorScreen
 import com.nmheir.kanicard.ui.screen.note.NoteTemplateScreen
 import com.nmheir.kanicard.ui.screen.onboarding.OnboardingScreen
+import com.nmheir.kanicard.ui.screen.settings.BackupRestoreScreen
 import com.nmheir.kanicard.ui.screen.settings.screen.SettingAppearanceScreen
 import com.nmheir.kanicard.ui.screen.settings.screen.SettingScreen
 import com.nmheir.kanicard.ui.screen.settings.screen.SettingsAdvancedScreen
@@ -155,6 +156,6 @@ fun NavGraphBuilder.navigationBuilder(
     composable(
         route = Screens.SettingsScreen.BackupRestore.route
     ) {
-
+        BackupRestoreScreen(navController)
     }
 }

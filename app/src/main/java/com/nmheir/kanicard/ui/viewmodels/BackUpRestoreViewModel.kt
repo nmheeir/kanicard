@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.nmheir.kanicard.data.local.InternalDatabase
 import com.nmheir.kanicard.data.local.KaniDatabase
 import com.nmheir.kanicard.extensions.tryOrNull
@@ -13,6 +14,7 @@ import com.nmheir.kanicard.ui.activities.MainActivity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 import java.io.FileInputStream
@@ -87,6 +89,12 @@ class BackUpRestoreViewModel @Inject constructor(
             Timber.d("Restore success")
         }.onFailure {
             Timber.e(it, "Restore failed")
+        }
+    }
+
+    fun importFileViaCsv() {
+        viewModelScope.launch {
+
         }
     }
 }
