@@ -13,6 +13,7 @@ import com.nmheir.kanicard.ui.screen.BrowseCardScreen
 import com.nmheir.kanicard.ui.screen.DeckDetailScreen
 import com.nmheir.kanicard.ui.screen.HomeScreen
 import com.nmheir.kanicard.ui.screen.Screens
+import com.nmheir.kanicard.ui.screen.learn.LearningScreen
 import com.nmheir.kanicard.ui.screen.note.NoteEditorScreen
 import com.nmheir.kanicard.ui.screen.note.NoteTemplateScreen
 import com.nmheir.kanicard.ui.screen.onboarding.OnboardingScreen
@@ -114,7 +115,7 @@ fun NavGraphBuilder.navigationBuilder(
             }
         )
     ) {
-        Text(text = "Learn Screen")
+        LearningScreen(navController, topAppBarScrollBehavior)
     }
 
 

@@ -13,15 +13,15 @@ import java.time.OffsetDateTime
     tableName = "review_logs",
     foreignKeys = [ForeignKey(
         entity = FsrsCardEntity::class,
-        parentColumns = ["id"],
-        childColumns = ["fsrsCardId"],
+        parentColumns = ["nId"],
+        childColumns = ["nId"],
         onDelete = CASCADE
     )],
-    indices = [Index("fsrsCardId")]
+    indices = [Index("nId")]
 )
 data class ReviewLogEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val fsrsCardId: Long,
+    val nId: Long,
     val rating: Rating,
     val state: State,
     val due: OffsetDateTime,

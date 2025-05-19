@@ -3,6 +3,7 @@ package com.nmheir.kanicard.ui.activities
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
+import android.os.StrictMode
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
@@ -65,6 +66,7 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.nmheir.kanicard.BuildConfig
 import com.nmheir.kanicard.R
 import com.nmheir.kanicard.constants.AppBarHeight
 import com.nmheir.kanicard.constants.AppThemeKey
@@ -115,6 +117,21 @@ class MainActivity : ComponentActivity() {
                     finish()
                     return
                 }*/
+
+        if (BuildConfig.DEBUG) {
+            StrictMode.setThreadPolicy(
+                StrictMode.ThreadPolicy.Builder()
+                    .detectAll()
+                    .penaltyLog()
+                    .build()
+            )
+            StrictMode.setVmPolicy(
+                StrictMode.VmPolicy.Builder()
+                    .detectAll()
+                    .penaltyLog()
+                    .build()
+            )
+        }
 
         setContent {
             val (storagePath, onStoragePathChange) = rememberPreference(StoragePathKey, "")

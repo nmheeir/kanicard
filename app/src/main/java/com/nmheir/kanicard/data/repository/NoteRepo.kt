@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.lastOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import timber.log.Timber
 
 class NoteRepo(
     private val database: KaniDatabase
@@ -70,6 +71,28 @@ class NoteRepo(
                     NoteData(
                         id = note.id,
                         dId = deckId,
+                        qFmt = qFmt,
+                        aFmt = aFmt
+                    )
+                }
+            }
+    }
+
+    override fun getNoteDataByNoteIds(nIds: List<Long>): Flow<List<NoteData>?> {
+        return database.getNoteAndTemplateByNoteIds(nIds)
+            .map { list ->
+                list.map {
+                    val template = it.template
+                    val note = it.note
+                    val fieldJson = parseFieldJson(note.fieldJson)
+                    val (qFmt, aFmt) = MarkdownWithParametersParser.parseToHtml(
+                        template.qstFt,
+                        fieldJson
+                    ) to MarkdownWithParametersParser.parseToHtml(template.ansFt, fieldJson)
+
+                    NoteData(
+                        id = note.id,
+                        dId = note.dId,
                         qFmt = qFmt,
                         aFmt = aFmt
                     )

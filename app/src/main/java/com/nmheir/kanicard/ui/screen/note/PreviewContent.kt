@@ -69,10 +69,7 @@ fun PreviewContent(
                             elevation = 8.dp,
                             shape = MaterialTheme.shapes.medium
                         ),
-                    html = template.qstHtml,
-                    onLoadingChanged = {
-
-                    }
+                    html = template.qstHtml
                 )
             },
             backSide = {
@@ -83,10 +80,7 @@ fun PreviewContent(
                             elevation = 8.dp,
                             shape = MaterialTheme.shapes.medium
                         ),
-                    html = template.ansHtml,
-                    onLoadingChanged = {
-
-                    }
+                    html = template.ansHtml
                 )
             },
             flipOnTouch = false,

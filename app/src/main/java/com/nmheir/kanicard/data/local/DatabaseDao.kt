@@ -171,7 +171,7 @@ interface DatabaseDao {
         """
     SELECT * FROM fsrs_card 
     WHERE dId = :deckId 
-      AND date(due) = date('now', 'localtime')
+      AND date(due) <= date('now', 'localtime')
     ORDER BY due ASC 
     """
     )
@@ -217,7 +217,7 @@ interface DatabaseDao {
           SUM(CASE WHEN c.state = 'Review' THEN 1 ELSE 0 END)   AS reviewCount,
           
           -- Tổng số thẻ đang học (LEARNING)
-          SUM(CASE WHEN c.state = 'Learing' THEN 1 ELSE 0 END) AS learnCount,
+          SUM(CASE WHEN c.state = 'Learning' THEN 1 ELSE 0 END) AS learnCount,
           
           -- Tổng số thẻ mới (NEW)
           SUM(CASE WHEN c.state = 'New' THEN 1 ELSE 0 END)      AS newCount,
@@ -225,7 +225,7 @@ interface DatabaseDao {
           -- Tổng số thẻ đến hạn trong ngày hôm nay (00:00 → 23:59)
           SUM(
             CASE
-              WHEN date(c.due) = date('now', 'localtime')
+              WHEN date(c.due) <= date('now', 'localtime')
               THEN 1
               ELSE 0
             END
@@ -300,6 +300,10 @@ interface DatabaseDao {
     @Query("SELECT * FROM notes WHERE dId = :dId LIMIT :limit")
     fun getNoteAndTemplateByDeckId(dId: Long, limit: Int = 100): Flow<List<NoteAndTemplate>>
 
+    @Transaction
+    @Query("SELECT * FROM notes WHERE id IN (:nIds)")
+    fun getNoteAndTemplateByNoteIds(nIds: List<Long>) : Flow<List<NoteAndTemplate>>
+
     /*End Note*/
     /*-------------------------------------------------------------------------*/
 
@@ -335,12 +339,12 @@ interface DatabaseDao {
             LEFT JOIN (
               /* Đếm số lần review cho mỗi card */
               SELECT
-                fsrsCardId,
+                nId,
                 COUNT(*) AS review_count
               FROM review_logs
-              GROUP BY fsrsCardId
+              GROUP BY nId
             ) AS r
-              ON r.fsrsCardId = f.id
+              ON r.nId = f.nId
             WHERE d.id = :dId
             ;
         """

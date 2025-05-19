@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.nmheir.kanicard.core.domain.fsrs.model.FsrsCard
 import com.nmheir.kanicard.data.entities.deck.DeckEntity
 import com.nmheir.kanicard.data.entities.note.NoteEntity
 import com.nmheir.kanicard.data.enums.State
@@ -31,9 +32,8 @@ import java.time.OffsetDateTime
     ]
 )
 data class FsrsCardEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @PrimaryKey val nId: Long,
     val dId: Long,
-    val nId: Long,
     val due: OffsetDateTime,
     val stability: Double,
     val difficulty: Double,
@@ -60,5 +60,19 @@ data class FsrsCardEntity(
                 lastReview = null
             )
         }
+    }
+
+    fun toFsrsCard(): FsrsCard {
+        return FsrsCard(
+            due = this.due,
+            stability = this.stability,
+            difficulty = this.difficulty,
+            elapsedDays = this.elapsedDays,
+            scheduledDays = this.scheduledDays,
+            reps = this.reps,
+            lapses = this.lapses,
+            state = this.state,
+            lastReview = this.lastReview
+        )
     }
 }

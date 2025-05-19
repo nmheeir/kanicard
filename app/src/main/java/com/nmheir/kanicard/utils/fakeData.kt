@@ -555,3 +555,10 @@ val fakeCardBrowseDtos = listOf(
         modifiedTime = OffsetDateTime.parse("2025-05-15T18:00:00+07:00")
     )
 )
+
+val fakeStateCount = mapOf(
+    State.New to 100,
+    State.Learning to 1,
+    State.Relearning to 5,
+    State.Review to 20
+)

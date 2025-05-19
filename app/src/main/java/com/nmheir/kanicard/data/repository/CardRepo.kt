@@ -8,6 +8,7 @@ import com.nmheir.kanicard.data.local.KaniDatabase
 import com.nmheir.kanicard.domain.repository.ICardRepo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import timber.log.Timber
 import javax.inject.Inject
 
 class CardRepo @Inject constructor(
@@ -20,7 +21,7 @@ class CardRepo @Inject constructor(
         return emptyList()
     }
 
-    override suspend fun getDueCardsToday(deckId: Long): Flow<List<FsrsCardEntity>?> {
+    override fun getDueCardsToday(deckId: Long): Flow<List<FsrsCardEntity>?> {
         return database.getDueCardsToday(deckId)
     }
 
@@ -32,6 +33,10 @@ class CardRepo @Inject constructor(
 
     override suspend fun insert(fsrsCard: FsrsCardEntity) {
         database.insert(fsrsCard)
+    }
+
+    override suspend fun update(fsrsCard: FsrsCardEntity) {
+        database.update(fsrsCard)
     }
 
 }
