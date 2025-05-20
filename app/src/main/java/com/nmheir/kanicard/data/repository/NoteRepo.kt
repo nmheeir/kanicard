@@ -20,19 +20,19 @@ import timber.log.Timber
 class NoteRepo(
     private val database: KaniDatabase
 ) : INoteRepo {
-    override suspend fun getNoteByNoteId(noteId: Long): NoteDto? {
-        val noteEntity = database.getNoteByNoteId(noteId)
+    override fun getNoteByNoteId(noteId: Long): Flow<NoteDto?> {
+        return database.getNoteByNoteId(noteId)
             .mapNotNull {
                 it?.let { note ->
                     NoteDto(
                         id = note.id,
+                        tId = note.templateId,
                         field = parseFieldJson(note.fieldJson),
                         createdTime = note.createdTime,
                         modifiedTime = note.modifiedTime
                     )
                 }
             }
-        return noteEntity.lastOrNull()
     }
 
     override fun getAllNoteTypes(): Flow<List<NoteTypeEntity>?> {

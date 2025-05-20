@@ -13,6 +13,7 @@ import com.nmheir.kanicard.data.enums.State
 import com.nmheir.kanicard.domain.repository.ICardRepo
 import com.nmheir.kanicard.domain.repository.IDeckRepo
 import com.nmheir.kanicard.domain.repository.INoteRepo
+import com.nmheir.kanicard.domain.repository.IReviewRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +37,7 @@ class LearningViewModel @Inject constructor(
     private val cardRepo: ICardRepo,
     private val noteRepo: INoteRepo,
     private val deckRepo: IDeckRepo,
+    private val reviewRepo: IReviewRepo,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -69,11 +71,17 @@ class LearningViewModel @Inject constructor(
     val deck = deckRepo.getDeckDataById(deckId)
         .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    private val currentRatingCard = dueCards.map { cards ->
-        if (cards.isEmpty()) emptyMap()
+    private val currentRecordLog = dueCards.map { cards ->
+        if (cards.isEmpty()) null
         else {
-            val log = fsrs.repeat(cards.first().toFsrsCard(), OffsetDateTime.now())
-            Rating.entries.associateWith { r -> log[r]!!.card }
+            fsrs.repeat(cards.first().toFsrsCard(), OffsetDateTime.now())
+        }
+    }.stateIn(viewModelScope, SharingStarted.Lazily, null)
+
+    private val currentRatingCard = currentRecordLog.map { cards ->
+        if (cards == null) emptyMap()
+        else {
+            Rating.entries.associateWith { r -> cards[r]!!.card }
         }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
 
@@ -130,7 +138,6 @@ class LearningViewModel @Inject constructor(
             val abc = dueCards.value.firstOrNull {
                 it.nId == nId
             }
-            Timber.d(abc.toString())
             if (abc == null) {
                 return@launch
             }
@@ -148,6 +155,7 @@ class LearningViewModel @Inject constructor(
             )
 
             cardRepo.update(b)
+            reviewRepo.insert(nId, currentRecordLog.value!![rating]!!.log)
         }
     }
 }

@@ -180,4 +180,8 @@
     <string name="sub_title_backup">Back up all data and application settings</string>
     <string name="sub_title_restore">Restore all data and application settings from a backup</string>
     <string name="sub_title_csv_import_export">Import or export database data in CSV format</string>
+    
+    <plurals name="n_selected">
+        <item quantity="other">%d selected</item>
+    </plurals>
 </resources>

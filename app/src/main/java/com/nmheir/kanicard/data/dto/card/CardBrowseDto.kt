@@ -2,6 +2,7 @@ package com.nmheir.kanicard.data.dto.card
 
 import com.nmheir.kanicard.data.entities.note.parseFieldJson
 import com.nmheir.kanicard.data.enums.State
+import timber.log.Timber
 import java.time.OffsetDateTime
 
 data class CardBrowseDto(
@@ -23,7 +24,8 @@ data class CardBrowseDto(
 
 fun extractPlaceholder(format: String): List<String> {
     // Regex: tìm các cặp {{ key }}
-    val regex = "\\{\\{\\s*(\\w+)\\s*\\}\\}".toRegex()
+    val regex = "\\{\\{\\s*([^}]+?)\\s*\\}\\}".toRegex()
+
     return regex.findAll(format)
         .map { it.groupValues[1] }  // lấy phần trong dấu {{…}}
         .toList()

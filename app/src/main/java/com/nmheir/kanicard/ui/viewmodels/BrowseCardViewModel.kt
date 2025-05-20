@@ -1,5 +1,6 @@
 package com.nmheir.kanicard.ui.viewmodels
 
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,16 +8,23 @@ import com.nmheir.kanicard.data.dto.card.CardBrowseData
 import com.nmheir.kanicard.data.dto.card.toCardBrowseData
 import com.nmheir.kanicard.data.dto.deck.DeckDto
 import com.nmheir.kanicard.domain.repository.ICardRepo
+import com.nmheir.kanicard.domain.repository.IDeckRepo
 import com.nmheir.kanicard.domain.repository.INoteRepo
 import com.nmheir.kanicard.extensions.format3
 import com.nmheir.kanicard.utils.fakeCardBrowseDatas
 import com.nmheir.kanicard.utils.fakeCardBrowseDtos
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import timber.log.Timber
 import javax.inject.Inject
@@ -25,45 +33,65 @@ import javax.inject.Inject
 class BrowseCardViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val noteRepo: INoteRepo,
-    private val cardRepo: ICardRepo
+    private val cardRepo: ICardRepo,
+    private val deckRepo: IDeckRepo
 ) : ViewModel() {
     private val dId = savedStateHandle.get<Long>("deckId") ?: error("No DeckId")
 
-    val deck = MutableStateFlow<DeckDto?>(null)
+    val deck = deckRepo.queryDeck(dId)
+        .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    val isLoading = MutableStateFlow(false)
-
-    private val cardBrowseData = MutableStateFlow<List<CardBrowseData>>(fakeCardBrowseDatas)
+    private val cardBrowseData = cardRepo.getBrowseCard(dId)
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val sortType = MutableStateFlow<SortType>(SortType.Ascending)
     val headerOption =
         MutableStateFlow<Pair<String, BrowseOption>>(Pair("Question", BrowseOption.Answer))
     val data = MutableStateFlow<List<BrowseCardUiData>>(emptyList())
 
-    init {
-        cardRepo.getBrowseCard(dId)
-            .distinctUntilChanged()
-            .onEach {
-                Timber.d("cardBrowseData: $it")
-//                cardBrowseData.value = it ?: fakeCardBrowseDatas
-                cardBrowseData.value = fakeCardBrowseDtos.map {
-                    it.toCardBrowseData()
-                }
-            }
-            .launchIn(viewModelScope)
+    private val query = MutableStateFlow(TextFieldValue())
 
+    @OptIn(FlowPreview::class)
+    val filterData = combine(
+        cardBrowseData,
+        headerOption,
+        sortType,
+        query.debounce(300).distinctUntilChanged()
+    ) { datas, option, sort, query ->
+        datas?.filter {
+            it.qst.contains(query.text)
+        }?.toQstValuePairs(option.second, sort) ?: emptyList()
+    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    val isLoading = data
+        .map {
+            it.isEmpty()
+        }
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.Lazily, false)
+
+    val selectedNote = data.map {
+        it.filter { it.isSelect }
+    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    init {
         combine(
             cardBrowseData,
             headerOption,
             sortType,
         ) { list, option, order ->
-            cardBrowseData.value.toQstValuePairs(option.second, order)
+            list?.toQstValuePairs(option.second, order) ?: emptyList()
         }
             .distinctUntilChanged()
             .onEach {
                 data.value = it
             }
             .launchIn(viewModelScope)
+    }
+
+    fun onQueryChange(newQuery: TextFieldValue) {
+        query.value = newQuery
     }
 
     fun onAction(action: BrowseCardUiAction) {
