@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -31,11 +30,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -53,7 +50,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
-import androidx.compose.ui.window.PopupProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -66,12 +62,9 @@ import com.nmheir.kanicard.data.dto.note.NoteData
 import com.nmheir.kanicard.ui.component.card.FlashCardLite
 import com.nmheir.kanicard.ui.component.dialog.AlertDialog
 import com.nmheir.kanicard.ui.component.widget.PreferenceEntry
-import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
 import com.nmheir.kanicard.ui.screen.note.CardSide
-import com.nmheir.kanicard.ui.theme.KaniTheme
 import com.nmheir.kanicard.ui.viewmodels.DeckDetailUiAction
 import com.nmheir.kanicard.ui.viewmodels.DeckDetailViewModel
-import com.nmheir.kanicard.utils.fakeNoteData
 
 @Composable
 fun DeckDetailScreen(
@@ -274,7 +267,7 @@ private fun SampleNoteSection(
             Flippable(
                 frontSide = {
                     FlashCardLite(
-                        text = it.qFmt,
+                        text = it.qHtml,
                         side = CardSide.Front,
                         modifier = Modifier,
                         onClick = {
@@ -284,7 +277,7 @@ private fun SampleNoteSection(
                 },
                 backSide = {
                     FlashCardLite(
-                        text = it.aFmt,
+                        text = it.aHtml,
                         side = CardSide.Back,
                         modifier = Modifier,
                         onClick = {

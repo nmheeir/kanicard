@@ -57,6 +57,8 @@ import com.nmheir.kanicard.core.presentation.screens.LoadingScreen
 import com.nmheir.kanicard.core.presentation.utils.extractMembers
 import com.nmheir.kanicard.core.presentation.utils.hozPadding
 import com.nmheir.kanicard.ui.component.button.IconButtonDropdownMenu
+import com.nmheir.kanicard.ui.component.dialog.DefaultDialog
+import com.nmheir.kanicard.ui.component.dialog.ListDialog
 import com.nmheir.kanicard.ui.component.dialog.ListOptionDialog
 import com.nmheir.kanicard.ui.theme.KaniTheme
 import com.nmheir.kanicard.ui.viewmodels.BrowseCardUiAction
@@ -185,7 +187,7 @@ fun BrowseCardScreen(
                                 }
 
                                 BrowseCardMenuOption.PREVIEW -> {
-
+                                    navController.navigate("${deck!!.id}/${Screens.Base.PreviewNote}")
                                 }
                             }
                         }
@@ -252,25 +254,27 @@ private fun HeaderSection(
             .fillMaxWidth()
     ) {
         if (inSelectMode) {
-            Row(
-                modifier = Modifier.weight(1f)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(2f)
             ) {
+                Text(
+                    text = "Select all",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+
                 IconButton(
                     onClick = {}
                 ) {
                     Icon(painterResource(R.drawable.ic_check), null)
                 }
-                Text(
-                    text = "Select all",
-                    style = MaterialTheme.typography.bodyLarge
-                )
             }
         }
         Text(
             text = headerOption.first,
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier
-                .weight(1f)
+                .weight(4f)
                 .padding(12.dp)
         )
 
@@ -278,7 +282,7 @@ private fun HeaderSection(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
-                .weight(1f)
+                .weight(4f)
                 .padding(12.dp)
                 .clickable {
                     showOption = true
@@ -413,6 +417,20 @@ private fun RowData(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun CardOptionDialog(
+    onDismiss: () -> Unit
+) {
+    ListDialog(
+        onDismiss = onDismiss,
+        modifier = Modifier
+            .fillMaxWidth()
+            .hozPadding()
+    ) {
+
     }
 }
 

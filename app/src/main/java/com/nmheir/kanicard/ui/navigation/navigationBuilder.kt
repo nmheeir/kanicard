@@ -16,6 +16,7 @@ import com.nmheir.kanicard.ui.screen.Screens
 import com.nmheir.kanicard.ui.screen.learn.LearningScreen
 import com.nmheir.kanicard.ui.screen.note.NoteEditorScreen
 import com.nmheir.kanicard.ui.screen.note.NoteTemplateScreen
+import com.nmheir.kanicard.ui.screen.note.PreviewNoteScreen
 import com.nmheir.kanicard.ui.screen.onboarding.OnboardingScreen
 import com.nmheir.kanicard.ui.screen.settings.BackupRestoreScreen
 import com.nmheir.kanicard.ui.screen.settings.screen.SettingAppearanceScreen
@@ -106,6 +107,17 @@ fun NavGraphBuilder.navigationBuilder(
         )
     ) {
         BrowseCardScreen(navController)
+    }
+
+    composable(
+        route = "{deckId}/${Screens.Base.PreviewNote}",
+        arguments = listOf(
+            navArgument("deckId") {
+                type = NavType.LongType
+            }
+        )
+    ) {
+        PreviewNoteScreen(navController)
     }
 
     composable(

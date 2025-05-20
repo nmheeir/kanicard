@@ -5,7 +5,6 @@ package com.nmheir.kanicard.ui.screen.learn
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,35 +27,29 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
-import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.nmheir.kanicard.core.presentation.components.flip.FlipState
 import com.nmheir.kanicard.core.presentation.components.flip.Flippable
 import com.nmheir.kanicard.core.presentation.components.flip.rememberFlipController
-import com.nmheir.kanicard.core.presentation.components.swipe.SwipeDirection
 import com.nmheir.kanicard.core.presentation.components.swipe.rememberSwipeableCardState
 import com.nmheir.kanicard.core.presentation.components.swipe.swipeableCard
 import com.nmheir.kanicard.core.presentation.utils.ExperimentalSwipeableCardApi
 import com.nmheir.kanicard.core.presentation.utils.hozPadding
-import com.nmheir.kanicard.core.presentation.utils.visible
 import com.nmheir.kanicard.data.enums.Rating
 import com.nmheir.kanicard.data.enums.State
 import com.nmheir.kanicard.extensions.timeUntilDue
 import com.nmheir.kanicard.ui.component.TopAppBar
-import com.nmheir.kanicard.ui.component.card.ReviewFlashCard
+import com.nmheir.kanicard.ui.component.card.InteractiveFlashcard
 import com.nmheir.kanicard.ui.screen.Screens
 import com.nmheir.kanicard.ui.viewmodels.LearningAction
 import com.nmheir.kanicard.ui.viewmodels.LearningData
 import com.nmheir.kanicard.ui.viewmodels.LearningViewModel
-import kotlinx.coroutines.delay
 import timber.log.Timber
 import java.time.OffsetDateTime
 
@@ -239,50 +232,17 @@ private fun LearnFlashcard(
         }
     }*/
 
-    Box(
-        modifier = modifier
+    InteractiveFlashcard(
+        modifier = Modifier
             .swipeableCard(
                 state = swipeState,
                 onSwiped = {},
                 blockedDirections = emptyList()
-            )
-    ) {
-        Flippable(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .zIndex(-1f),
-            frontSide = {
-                ReviewFlashCard(
-                    html = data.noteData.qFmt,
-                    modifier = Modifier
-                        .shadow(elevation = 8.dp, shape = MaterialTheme.shapes.medium)
-                )
-            },
-            backSide = {
-                ReviewFlashCard(
-                    html = data.noteData.aFmt,
-                    modifier = Modifier
-                        .shadow(elevation = 8.dp, shape = MaterialTheme.shapes.medium)
-                )
-            },
-            flipOnTouch = false,
-            flipController = flipController
-        )
-
-        Box(
-            modifier = Modifier
-                .zIndex(1f)
-                .background(Color.Transparent)
-                .matchParentSize()
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    enabled = showRating
-                ) {
-                    flipController.flip()
-                }
-        )
-    }
+            ),
+        flipController = flipController,
+        qHtml = data.noteData.qHtml,
+        aHtml = data.noteData.aHtml
+    )
 }
 
 @Composable

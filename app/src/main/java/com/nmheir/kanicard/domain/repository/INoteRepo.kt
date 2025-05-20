@@ -14,7 +14,7 @@ interface INoteRepo {
     fun getAllNoteTypes(): Flow<List<NoteTypeEntity>?>
     fun getNoteTypeWithTemplates(noteTypeId: Long): Flow<NoteTypeWithTemplates?>
     fun getNoteTypeWithFieldDefs(noteTypeId: Long): Flow<NoteTypeWithFieldDefs?>
-    fun getNoteDataByDeckId(deckId: Long, parseDataToHtml: Boolean = true): Flow<List<NoteData>?>
+    fun getNoteDataByDeckId(deckId: Long, parseDataToHtml: Boolean = true, limit: Int = 100): Flow<List<NoteData>?>
     fun getNoteDataByNoteIds(nIds: List<Long>): Flow<List<NoteData>?>
 
     suspend fun insert(note: NoteEditDto)

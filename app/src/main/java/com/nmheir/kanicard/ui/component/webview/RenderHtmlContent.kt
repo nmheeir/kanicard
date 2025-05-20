@@ -1,12 +1,11 @@
 @file:Suppress("DEPRECATION")
 
-package com.nmheir.kanicard.ui.component.card
+package com.nmheir.kanicard.ui.component.webview
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -60,7 +59,7 @@ data class MarkdownStyles(
 // TODO: Need implement audio, video, image
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun ReviewFlashCard(
+fun RenderHtmlContent(
     modifier: Modifier = Modifier,
     html: String,
 ) {
