@@ -7,20 +7,20 @@ import androidx.room.PrimaryKey
 import java.time.OffsetDateTime
 
 @Entity(
-    tableName = "field_defs",
+    tableName = "fields",
     foreignKeys = [
         ForeignKey(
             entity = NoteTypeEntity::class,
             parentColumns = ["id"],
-            childColumns = ["noteTypeId"],
+            childColumns = ["ntId"],
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index("noteTypeId")]
+    indices = [Index("ntId")]
 )
-data class FieldDefEntity(
+data class FieldEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val noteTypeId: Long,
+    val ntId: Long,
     val name: String,
     val ord: Int,
     val createdTime: OffsetDateTime,

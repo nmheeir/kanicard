@@ -1,14 +1,16 @@
 package com.nmheir.kanicard.utils
 
+import com.nmheir.kanicard.core.domain.fsrs.model.FsrsCard
 import com.nmheir.kanicard.data.dto.CardDto
 import com.nmheir.kanicard.data.dto.ProfileDto
 import com.nmheir.kanicard.data.dto.card.CardBrowseData
 import com.nmheir.kanicard.data.dto.card.CardBrowseDto
 import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
 import com.nmheir.kanicard.data.dto.note.NoteData
-import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
-import com.nmheir.kanicard.data.entities.note.FieldDefEntity
+import com.nmheir.kanicard.data.entities.card.TemplateEntity
+import com.nmheir.kanicard.data.entities.note.FieldEntity
 import com.nmheir.kanicard.data.enums.State
+import com.nmheir.kanicard.ui.viewmodels.LearningData
 import com.nmheir.kanicard.ui.viewmodels.TemplatePreview
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
@@ -122,10 +124,10 @@ val fakeProfileDto = ProfileDto(
 )
 
 val fakeFields = List(5) {
-    FieldDefEntity(
+    FieldEntity(
         id = it.toLong(),
         name = "Field $it",
-        noteTypeId = 3,
+        ntId = 3,
         ord = it,
         createdTime = OffsetDateTime.now(),
         modifiedTime = OffsetDateTime.now()
@@ -133,9 +135,9 @@ val fakeFields = List(5) {
 }
 
 val fakeTemplates = List(5) {
-    CardTemplateEntity(
+    TemplateEntity(
         id = it.toLong(),
-        noteTypeId = 3,
+        ntId = 3,
         name = "Template $it",
         qstFt = "Question $it",
         ansFt = "Answer $it",
@@ -555,3 +557,45 @@ val fakeCardBrowseDtos = listOf(
         modifiedTime = OffsetDateTime.parse("2025-05-15T18:00:00+07:00")
     )
 )
+
+val fakeStateCount = mapOf(
+    State.New to 100,
+    State.Learning to 1,
+    State.Relearning to 5,
+    State.Review to 20
+)
+
+val fakeFsrsCards = List(10) {
+    FsrsCard(
+        due = OffsetDateTime.now(ZoneOffset.UTC).plusDays(Random.nextLong(-3, 5)),
+        stability = Random.nextDouble(0.1, 10.0),
+        difficulty = Random.nextDouble(1.0, 10.0),
+        elapsedDays = Random.nextLong(0, 100),
+        scheduledDays = Random.nextLong(1, 30),
+        reps = Random.nextLong(0, 50),
+        lapses = Random.nextLong(0, 5),
+        state = State.entries.random(),
+        lastReview = if (Random.nextBoolean()) {
+            OffsetDateTime.now(ZoneOffset.UTC).minusDays(Random.nextLong(1, 60))
+        } else {
+            null
+        }
+    )
+}
+
+val fakeNoteDatas = List(10) { index ->
+    NoteData(
+        id = index + 1L,
+        dId = (index % 3 + 1).toLong(), // Giả định có 3 deck khác nhau
+        qFmt = "<p><b>Question ${index + 1}:</b> What is ${index + 1} + ${index + 2}?</p>",
+        aFmt = "<p><i>Answer:</i> ${index + 1 + index + 2}</p>"
+    )
+}
+
+val fakeLearningDataList = List(10) { index ->
+    LearningData(
+        id = fakeNoteDatas[index].id,
+        fsrs = fakeFsrsCards[index],
+        noteData = fakeNoteDatas[index]
+    )
+}

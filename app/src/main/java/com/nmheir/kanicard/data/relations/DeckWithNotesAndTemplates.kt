@@ -14,10 +14,10 @@ data class DeckWithNotesAndTemplates(
     @Relation(
         entity = NoteEntity::class,
         parentColumn = "id",      // khóa chính trên DeckEntity
-        entityColumn = "noteId",  // khóa chính trên NoteEntity
+        entityColumn = "id",  // khóa chính trên NoteEntity
         associateBy = Junction(
             value = FsrsCardEntity::class,
-            parentColumn = "deckId",  // khoá ngoại trong fsrs_card trỏ về deck
+            parentColumn = "dId",  // khoá ngoại trong fsrs_card trỏ về deck
             entityColumn = "nId"      // khoá ngoại trong fsrs_card trỏ về note
         )
     )

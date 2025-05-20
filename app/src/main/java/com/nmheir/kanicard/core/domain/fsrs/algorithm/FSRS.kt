@@ -30,9 +30,9 @@ class FSRS(
 
         if (card.state == State.New) {
             this.initDifficultiesAndStabilities(s)
-            s.again.due = now.plusDays(1)
-            s.hard.due = now.plusDays(5)
-            s.good.due = now.plusDays(10)
+            s.again.due = now.plusDays(0)
+            s.hard.due = now.plusDays(1)
+            s.good.due = now.plusDays(3)
             easyInterval = nextInterval(s.easy.stability)
             s.easy.scheduledDays = easyInterval
             s.easy.due = now.plusDays(easyInterval)

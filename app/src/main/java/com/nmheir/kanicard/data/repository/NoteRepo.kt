@@ -12,10 +12,10 @@ import com.nmheir.kanicard.data.relations.NoteTypeWithTemplates
 import com.nmheir.kanicard.domain.repository.INoteRepo
 import com.nmheir.kanicard.extensions.md.MarkdownWithParametersParser
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.lastOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import timber.log.Timber
 
 class NoteRepo(
     private val database: KaniDatabase
@@ -25,7 +25,7 @@ class NoteRepo(
             .mapNotNull {
                 it?.let { note ->
                     NoteDto(
-                        id = note.noteId,
+                        id = note.id,
                         field = parseFieldJson(note.fieldJson),
                         createdTime = note.createdTime,
                         modifiedTime = note.modifiedTime
@@ -69,8 +69,30 @@ class NoteRepo(
                     }
 
                     NoteData(
-                        id = note.noteId,
+                        id = note.id,
                         dId = deckId,
+                        qFmt = qFmt,
+                        aFmt = aFmt
+                    )
+                }
+            }
+    }
+
+    override fun getNoteDataByNoteIds(nIds: List<Long>): Flow<List<NoteData>?> {
+        return database.getNoteAndTemplateByNoteIds(nIds)
+            .map { list ->
+                list.map {
+                    val template = it.template
+                    val note = it.note
+                    val fieldJson = parseFieldJson(note.fieldJson)
+                    val (qFmt, aFmt) = MarkdownWithParametersParser.parseToHtml(
+                        template.qstFt,
+                        fieldJson
+                    ) to MarkdownWithParametersParser.parseToHtml(template.ansFt, fieldJson)
+
+                    NoteData(
+                        id = note.id,
+                        dId = note.dId,
                         qFmt = qFmt,
                         aFmt = aFmt
                     )

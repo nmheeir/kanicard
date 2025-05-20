@@ -14,7 +14,7 @@ val roomTrigger = object : RoomDatabase.Callback() {
               AFTER DELETE ON fsrs_card
               FOR EACH ROW
               BEGIN
-                DELETE FROM notes WHERE noteId = OLD.nId;
+                DELETE FROM notes WHERE id = OLD.nId;
               END;
             """.trimIndent()
         )

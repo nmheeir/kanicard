@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.nmheir.kanicard.ui.viewmodels
 
 import androidx.lifecycle.SavedStateHandle
@@ -5,18 +7,25 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nmheir.kanicard.core.domain.fsrs.algorithm.FSRS
 import com.nmheir.kanicard.core.domain.fsrs.model.FsrsCard
+import com.nmheir.kanicard.data.dto.note.NoteData
 import com.nmheir.kanicard.data.enums.Rating
-import com.nmheir.kanicard.data.entities.fsrs.FsrsCardEntity
-import com.nmheir.kanicard.data.local.KaniDatabase
+import com.nmheir.kanicard.data.enums.State
+import com.nmheir.kanicard.domain.repository.ICardRepo
+import com.nmheir.kanicard.domain.repository.IDeckRepo
+import com.nmheir.kanicard.domain.repository.INoteRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.WhileSubscribed
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.time.OffsetDateTime
 import javax.inject.Inject
 
@@ -24,135 +33,131 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LearningViewModel @Inject constructor(
-    private val database: KaniDatabase,
-    private val savedStatedHandle: SavedStateHandle
+    private val cardRepo: ICardRepo,
+    private val noteRepo: INoteRepo,
+    private val deckRepo: IDeckRepo,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    val deckId = savedStatedHandle.get<Long>("deckId")
+    private val deckId: Long = savedStateHandle["deckId"]
+        ?: error("Missing deckId")
 
-    private val _channel = Channel<LearningEvent>()
-    val channel = _channel.receiveAsFlow()
+    private val fsrs = FSRS()
 
-    val isLoading = MutableStateFlow(false)
+    val startLearning = MutableStateFlow(false)
 
-    //danh sách thẻ trong deck
-//    private val cards = MutableStateFlow<List<DownloadedCardEntity>?>(null)
+    // 1) Pure, declarative flows
+    private val dueCards =
+        cardRepo.getDueCardsToday(deckId)
+            .distinctUntilChanged()
+            .map { it.orEmpty() }
+            .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    //danh sách thẻ cần học
-    private val fsrsCards = MutableStateFlow<List<FsrsCardEntity>?>(null)
+    private val nIds =
+        dueCards
+            .map { list -> list.map { it.nId } }
+            .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    //Danh sách thẻ đã đến hạn học
-    private val dueFsrsCards = MutableStateFlow<List<FsrsCardEntity>?>(null)
+    private val noteDatas: StateFlow<List<NoteData>> =
+        nIds.flatMapLatest { ids ->
+            noteRepo.getNoteDataByNoteIds(ids).map { it.orEmpty() }
+        }
+            .distinctUntilChanged()
+            .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-//    fun onAction(action: LearningAction) {
-//        when (action) {
-//            is LearningAction.SubmitReview -> submitReview(action.fsrsCard, action.rating)
-//        }
-//    }
+    // 2) Deck info
+    val deck = deckRepo.getDeckDataById(deckId)
+        .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    init {
-        isLoading.value = true
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                when {
-                    deckId == null -> return@withContext
-                    else -> {
-                        //Lấy danh sách thẻ trong deck
-//                        cards.value = database.getDownloadedCardByDeckId(deckId).first()
-                        //Lấy danh sách thẻ cần học
-                        fsrsCards.value = database.getFsrsCardByDeckId(deckId).first()
+    private val currentRatingCard = dueCards.map { cards ->
+        if (cards.isEmpty()) emptyMap()
+        else {
+            val log = fsrs.repeat(cards.first().toFsrsCard(), OffsetDateTime.now())
+            Rating.entries.associateWith { r -> log[r]!!.card }
+        }
+    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
 
-                        //If user never learn this deck before
-                        if (fsrsCards.value.isNullOrEmpty()) {
-                            initialCardIntoFsrs()
-                        }
-                        //fetch fsrsCard need to learn
-                        filterFsrsCardToLearn()
-                    }
-                }
+    val ratingDueInfo: StateFlow<Map<Rating, OffsetDateTime>> =
+        currentRatingCard
+            .map { m -> m.mapValues { it.value.due } }
+            .stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
+
+    // 4) Combined LearningData list
+    val datas = combine(noteDatas, dueCards) { notes, cards ->
+        Timber.d("Note Data: %s", notes.toString())
+        notes.mapNotNull { note ->
+            cards.firstOrNull { it.nId == note.id }?.toFsrsCard()?.let { fsrs ->
+                LearningData(note.id, fsrs, note)
             }
-            isLoading.value = false
+        }.sortedBy { it.fsrs.due }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    // 5) State counts
+    val stateCount =
+        datas.map { list ->
+            val grouped = list.groupingBy { it.fsrs.state }.eachCount()
+            State.entries.associateWith { grouped[it] ?: 0 }
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.Lazily,
+            initialValue = State.entries.associateWith { 0 }
+        )
+
+    val isCompleteLearning = combine(
+        startLearning, datas
+    ) { isStart, datas ->
+        isStart && datas.isEmpty()
+    }
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(1000), false)
+
+    val haveData = dueCards.map {
+        it.isNotEmpty()
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(500), null)
+
+    // 6) Handle actions
+    fun onAction(action: LearningAction) {
+        when (action) {
+            is LearningAction.SubmitReview -> {
+                startLearning.value = true
+                submitReview(action.nId, action.rating)
+            }
         }
     }
 
-    /** Lọc thẻ cần học theo biến due trong fsrsCardEntity.
-     *
-     * Nếu due <= now -> Thẻ cần học.
-     *
-     * due > now -> Thẻ chưa cần học.
-     * */
-    private suspend fun filterFsrsCardToLearn() {
-        //Lọc
-        val now = OffsetDateTime.now()
-        dueFsrsCards.value = fsrsCards.value?.filter {
-            it.due.isBefore(now)
-        }
-
-        //Case 1: Nếu không có thẻ cần học
-        if (dueFsrsCards.value.isNullOrEmpty()) {
-            _channel.send(LearningEvent.NoCardToLearn)
-            return
-        }
-
-        //Case 2: Nếu có thẻ cần học
-        _channel.send(LearningEvent.HaveCardToLearn)
-    }
-
-    /**
-     *If in table fsrs_card doesn't have any card -> That means user never learn this deck before
-     **/
-    private suspend fun initialCardIntoFsrs() {
-        coroutineScope {
-//            cards.value?.fastForEach {
-//                val fsrsCardEntity = FsrsCardEntity.createEmpty(
-//                    cardId = it.id,
-//                    deckId = it.deckId,
-//                    now = OffsetDateTime.now()
-//                )
-//
-//                withContext(Dispatchers.IO) {
-//                    database.insert(fsrsCardEntity)
-//                    Timber.d("Initial card into fsrs: ${fsrsCardEntity.cardId}")
-//                }
-//            }
-        }
-    }
-
-    private fun submitReview(fsrsCard: FsrsCard, rating: Rating, cardId: Long, deckId: Long) {
+    private fun submitReview(nId: Long, rating: Rating) {
         viewModelScope.launch {
-            val recordLog = FSRS().repeat(fsrsCard, OffsetDateTime.now())
-            val fsrsCard = recordLog[rating]?.card!!
-            val reviewLog = recordLog[rating]?.log!!
-
-            val fsrsCardEntity = FsrsCardEntity(
-                id = cardId,
-                deckId = deckId,
-                due = fsrsCard.due,
-                stability = fsrsCard.stability,
-                difficulty = fsrsCard.difficulty,
-                elapsedDays = fsrsCard.elapsedDays,
-                scheduledDays = fsrsCard.scheduledDays,
-                reps = fsrsCard.reps,
-                lapses = fsrsCard.lapses,
-                state = fsrsCard.state,
-                lastReview = reviewLog.review,
-                nId = 0
+            val abc = dueCards.value.firstOrNull {
+                it.nId == nId
+            }
+            Timber.d(abc.toString())
+            if (abc == null) {
+                return@launch
+            }
+            val a = currentRatingCard.value[rating]!!
+            val b = abc.copy(
+                state = a.state,
+                difficulty = a.difficulty,
+                due = a.due,
+                stability = a.stability,
+                elapsedDays = a.elapsedDays,
+                scheduledDays = a.scheduledDays,
+                reps = a.reps,
+                lapses = a.lapses,
+                lastReview = a.lastReview
             )
 
-            //thêm vào db
-            withContext(Dispatchers.IO) {
-                database.insert(fsrsCardEntity)
-            }
+            cardRepo.update(b)
         }
     }
-}
-
-sealed interface LearningEvent {
-    data object UserNeverLearnBefore : LearningEvent
-    data object NoCardToLearn : LearningEvent
-    data object HaveCardToLearn : LearningEvent
 }
 
 sealed interface LearningAction {
-    data class SubmitReview(val fsrsCard: FsrsCard, val rating: Rating) : LearningAction
+    data class SubmitReview(val nId: Long, val rating: Rating) : LearningAction
 }
+
+data class LearningData(
+    val id: Long,           //note id
+    val fsrs: FsrsCard,
+    val noteData: NoteData
+)

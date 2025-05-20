@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.nmheir.kanicard.R
 import com.nmheir.kanicard.constants.OnboardingCompleteKey
 import com.nmheir.kanicard.core.presentation.components.padding
@@ -25,7 +24,6 @@ import com.nmheir.kanicard.ui.screen.Screens
 import com.nmheir.kanicard.utils.rememberPreference
 import soup.compose.material.motion.animation.materialSharedAxisX
 import soup.compose.material.motion.animation.rememberSlideDistance
-import timber.log.Timber
 
 @Composable
 fun OnboardingScreen(
@@ -38,7 +36,7 @@ fun OnboardingScreen(
 
     val finishOnboarding = {
         if (navController.previousBackStackEntry == null) {
-            navController.navigate(Screens.Home.route)
+            navController.navigate(Screens.MainScreen.Home.route)
         } else navController.popBackStack()
         onboardingCompleteChange(true)
     }

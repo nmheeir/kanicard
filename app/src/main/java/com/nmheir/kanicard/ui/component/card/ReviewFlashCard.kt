@@ -10,6 +10,7 @@ import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +33,7 @@ import com.nmheir.kanicard.extensions.toHexColor
 import com.nmheir.kanicard.ui.theme.linkColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 data class MarkdownStyles(
     val hexTextColor: String,
@@ -61,7 +63,6 @@ data class MarkdownStyles(
 fun ReviewFlashCard(
     modifier: Modifier = Modifier,
     html: String,
-    onLoadingChanged: (Boolean) -> Unit
 ) {
     var template by remember { mutableStateOf("") }
     val colorScheme = MaterialTheme.colorScheme
@@ -84,7 +85,7 @@ fun ReviewFlashCard(
         }
     }
 
-    val data by remember(template) {
+    val data by remember(template, html) {
         mutableStateOf(
             processHtml(
                 html = html,
@@ -98,7 +99,10 @@ fun ReviewFlashCard(
 
     AndroidView(
         modifier = modifier
-            .fillMaxHeight(0.5f),
+            .clickable {
+                Timber.d("Android view clicked !")
+            }
+            .fillMaxHeight(),
         factory = {
             WebView(it).also { webView = it }.apply {
                 layoutParams = ViewGroup.LayoutParams(
@@ -108,12 +112,10 @@ fun ReviewFlashCard(
                 webViewClient = object : WebViewClient() {
                     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                         super.onPageStarted(view, url, favicon)
-                        onLoadingChanged(true)
                     }
 
                     override fun onPageFinished(view: WebView?, url: String?) {
                         super.onPageFinished(view, url)
-                        onLoadingChanged(false)
                     }
 
                     override fun shouldOverrideUrlLoading(
@@ -125,16 +127,6 @@ fun ReviewFlashCard(
                             customTabsIntent.launchUrl(it, url.toUri())
                         }
                         return true
-                    }
-                }
-                webChromeClient = object : WebChromeClient() {
-                    override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                        // newProgress: Int từ 0 -> 100
-                        if (newProgress < 100) {
-                            onLoadingChanged(true)
-                        } else {
-                            onLoadingChanged(false)
-                        }
                     }
                 }
                 settings.allowFileAccess = true

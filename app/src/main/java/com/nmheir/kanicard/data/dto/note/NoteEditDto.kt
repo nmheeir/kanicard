@@ -13,7 +13,7 @@ data class NoteEditDto(
     val modifiedTime: OffsetDateTime = OffsetDateTime.now()
 ) {
     fun toNoteEntity() = NoteEntity(
-        deckId = deckId,
+        dId = deckId,
         templateId = templateId,
         fieldJson = buildFieldJson(field),
         createdTime = createdTime,

@@ -12,15 +12,16 @@ import androidx.navigation.navArgument
 import com.nmheir.kanicard.ui.screen.BrowseCardScreen
 import com.nmheir.kanicard.ui.screen.DeckDetailScreen
 import com.nmheir.kanicard.ui.screen.HomeScreen
-import com.nmheir.kanicard.ui.screen.note.NoteEditorScreen
-import com.nmheir.kanicard.ui.screen.ProfileScreen
 import com.nmheir.kanicard.ui.screen.Screens
-import com.nmheir.kanicard.ui.screen.more.MoreScreen
+import com.nmheir.kanicard.ui.screen.learn.LearningScreen
+import com.nmheir.kanicard.ui.screen.note.NoteEditorScreen
 import com.nmheir.kanicard.ui.screen.note.NoteTemplateScreen
 import com.nmheir.kanicard.ui.screen.onboarding.OnboardingScreen
+import com.nmheir.kanicard.ui.screen.settings.BackupRestoreScreen
 import com.nmheir.kanicard.ui.screen.settings.screen.SettingAppearanceScreen
 import com.nmheir.kanicard.ui.screen.settings.screen.SettingScreen
 import com.nmheir.kanicard.ui.screen.settings.screen.SettingsAdvancedScreen
+import com.nmheir.kanicard.ui.screen.state.LearningCompleteScreen
 import com.nmheir.kanicard.ui.screen.statistics.StatisticsScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,21 +30,17 @@ fun NavGraphBuilder.navigationBuilder(
     topAppBarScrollBehavior: TopAppBarScrollBehavior
 ) {
 
-    composable(Screens.Home.route) {
+    composable(Screens.MainScreen.Home.route) {
 //        TestScreen()
         HomeScreen(navController = navController)
     }
 
-    composable(Screens.Statistics.route) {
+    composable(Screens.MainScreen.Statistics.route) {
         StatisticsScreen()
     }
 
-    composable(Screens.Profile.route) {
-        ProfileScreen(navController = navController, scrollBehavior = topAppBarScrollBehavior)
-    }
-
     composable(
-        route = "search/{query}",
+        route = "${Screens.Base.Search}/{query}",
         arguments = listOf(
             navArgument("query") {
                 type = NavType.StringType
@@ -58,22 +55,16 @@ fun NavGraphBuilder.navigationBuilder(
         )
     }
 
-    composable(
-        route = Screens.More.route
-    ) {
-        MoreScreen(navController)
-    }
-
     //After sign in
     composable(
-        route = "onboarding"
+        route = Screens.Base.Onboarding.route
     ) {
         OnboardingScreen(navController)
     }
 
     /*Card*/
     composable(
-        route = "add_new_card?deckId={deckId}",
+        route = "${Screens.Base.NoteEditor.route}?deckId={deckId}",
         arguments = listOf(
             navArgument("deckId") {
                 type = NavType.LongType
@@ -85,7 +76,7 @@ fun NavGraphBuilder.navigationBuilder(
     }
 
     composable(
-        route = "{type}/templates",
+        route = "{type}/${Screens.Base.Templates.route}",
         arguments = listOf(
             navArgument("type") {
                 type = NavType.LongType
@@ -96,7 +87,7 @@ fun NavGraphBuilder.navigationBuilder(
     }
 
     composable(
-        route = "deck/{deckId}",
+        route = "${Screens.Base.Deck.route}/{deckId}",
         arguments = listOf(
             navArgument("deckId") {
                 type = NavType.LongType
@@ -107,7 +98,7 @@ fun NavGraphBuilder.navigationBuilder(
     }
 
     composable(
-        route = "{deckId}/browse_card",
+        route = "{deckId}/${Screens.Base.BrowseCard.route}",
         arguments = listOf(
             navArgument("deckId") {
                 type = NavType.LongType
@@ -118,49 +109,61 @@ fun NavGraphBuilder.navigationBuilder(
     }
 
     composable(
-        route = "learn/{deckId}",
+        route = "${Screens.Base.Learn.route}/{deckId}",
         arguments = listOf(
             navArgument("deckId") {
                 type = NavType.LongType
             }
         )
     ) {
-        Text(text = "Learn Screen")
+        LearningScreen(navController, topAppBarScrollBehavior)
     }
 
 
     /*Setting*/
-    composable(Screens.Setting.route) {
+    composable(Screens.SettingsScreen.Setting.route) {
         SettingScreen(topAppBarScrollBehavior, navController)
     }
 
     composable(
-        route = "settings/appearance"
+        route = Screens.SettingsScreen.Appearance.route
     ) {
         SettingAppearanceScreen(topAppBarScrollBehavior, navController)
     }
 
     composable(
-        route = "settings/security"
+        route = Screens.SettingsScreen.SecurityPrivacy.route
     ) {
         Text("Security")
     }
 
     composable(
-        route = "settings/advanced"
+        route = Screens.SettingsScreen.Advanced.route
     ) {
         SettingsAdvancedScreen(navController, topAppBarScrollBehavior)
     }
 
     composable(
-        route = "settings/about"
+        route = Screens.SettingsScreen.About.route
     ) {
         Text("about")
     }
 
     composable(
-        route = "help"
+        route = Screens.SettingsScreen.Help.route
     ) {
         Text("Help")
+    }
+
+    composable(
+        route = Screens.SettingsScreen.BackupRestore.route
+    ) {
+        BackupRestoreScreen(navController)
+    }
+
+    composable(
+        route = Screens.Base.CompleteLearn.route
+    ) {
+        LearningCompleteScreen(navController)
     }
 }

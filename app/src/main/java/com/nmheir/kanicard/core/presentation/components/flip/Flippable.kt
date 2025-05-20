@@ -1,22 +1,22 @@
 package com.nmheir.kanicard.core.presentation.components.flip
 
-import androidx.compose.animation.core.updateTransition
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.zIndex
@@ -217,7 +217,7 @@ fun Flippable(
         },
         label = "Back Opacity"
     ) { state ->
-        when(state) {
+        when (state) {
             FlipState.INITIALIZED, FlipState.FRONT -> 0f
             FlipState.BACK -> 1f
         }
@@ -236,34 +236,36 @@ fun Flippable(
         contentAlignment = contentAlignment
     ) {
 
-        Box(modifier = Modifier
-            .graphicsLayer {
-                this.cameraDistance = cameraDistance
-                when (flipAnimationType) {
-                    FlipAnimType.HORIZONTAL_CLOCKWISE -> rotationY = backRotation
-                    FlipAnimType.HORIZONTAL_ANTI_CLOCKWISE -> rotationY = -backRotation
-                    FlipAnimType.VERTICAL_CLOCKWISE -> rotationX = backRotation
-                    FlipAnimType.VERTICAL_ANTI_CLOCKWISE -> rotationX = -backRotation
+        Box(
+            modifier = Modifier
+                .graphicsLayer {
+                    this.cameraDistance = cameraDistance
+                    when (flipAnimationType) {
+                        FlipAnimType.HORIZONTAL_CLOCKWISE -> rotationY = backRotation
+                        FlipAnimType.HORIZONTAL_ANTI_CLOCKWISE -> rotationY = -backRotation
+                        FlipAnimType.VERTICAL_CLOCKWISE -> rotationX = backRotation
+                        FlipAnimType.VERTICAL_ANTI_CLOCKWISE -> rotationX = -backRotation
+                    }
                 }
-            }
-            .alpha(backOpacity)
-            .zIndex(1F - backOpacity)
+                .alpha(backOpacity)
+                .zIndex(1F - backOpacity)
         ) {
             backSide()
         }
 
-        Box(modifier = Modifier
-            .graphicsLayer {
-                this.cameraDistance = cameraDistance
-                when (flipAnimationType) {
-                    FlipAnimType.HORIZONTAL_CLOCKWISE -> rotationY = frontRotation
-                    FlipAnimType.HORIZONTAL_ANTI_CLOCKWISE -> rotationY = -frontRotation
-                    FlipAnimType.VERTICAL_CLOCKWISE -> rotationX = frontRotation
-                    FlipAnimType.VERTICAL_ANTI_CLOCKWISE -> rotationX = -frontRotation
+        Box(
+            modifier = Modifier
+                .graphicsLayer {
+                    this.cameraDistance = cameraDistance
+                    when (flipAnimationType) {
+                        FlipAnimType.HORIZONTAL_CLOCKWISE -> rotationY = frontRotation
+                        FlipAnimType.HORIZONTAL_ANTI_CLOCKWISE -> rotationY = -frontRotation
+                        FlipAnimType.VERTICAL_CLOCKWISE -> rotationX = frontRotation
+                        FlipAnimType.VERTICAL_ANTI_CLOCKWISE -> rotationX = -frontRotation
+                    }
                 }
-            }
-            .alpha(frontOpacity)
-            .zIndex(1F - frontRotation)
+                .alpha(frontOpacity)
+                .zIndex(1F - frontRotation)
         ) {
             frontSide()
         }

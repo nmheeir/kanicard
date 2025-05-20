@@ -16,25 +16,24 @@ import java.time.OffsetDateTime
         ForeignKey(
             entity = DeckEntity::class,
             parentColumns = ["id"],
-            childColumns = ["deckId"],
+            childColumns = ["dId"],
             onDelete = ForeignKey.NO_ACTION
         ),
         ForeignKey(
             entity = NoteEntity::class,
-            parentColumns = ["noteId"],
+            parentColumns = ["id"],
             childColumns = ["nId"],
             onDelete = ForeignKey.CASCADE
         )
     ],
     indices = [
-        Index("deckId"),
+        Index("dId"),
         Index("nId")
     ]
 )
 data class FsrsCardEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val deckId: Long,
-    val nId: Long,
+    @PrimaryKey val nId: Long,
+    val dId: Long,
     val due: OffsetDateTime,
     val stability: Double,
     val difficulty: Double,
@@ -48,7 +47,7 @@ data class FsrsCardEntity(
     companion object {
         fun createNew(dId: Long, nId: Long): FsrsCardEntity {
             return FsrsCardEntity(
-                deckId = dId,
+                dId = dId,
                 nId = nId,
                 due = OffsetDateTime.now(),
                 stability = 0.0,
@@ -61,5 +60,19 @@ data class FsrsCardEntity(
                 lastReview = null
             )
         }
+    }
+
+    fun toFsrsCard(): FsrsCard {
+        return FsrsCard(
+            due = this.due,
+            stability = this.stability,
+            difficulty = this.difficulty,
+            elapsedDays = this.elapsedDays,
+            scheduledDays = this.scheduledDays,
+            reps = this.reps,
+            lapses = this.lapses,
+            state = this.state,
+            lastReview = this.lastReview
+        )
     }
 }

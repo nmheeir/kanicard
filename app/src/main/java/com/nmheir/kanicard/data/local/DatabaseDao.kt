@@ -13,12 +13,12 @@ import com.nmheir.kanicard.data.dto.card.CardBrowseDto
 import com.nmheir.kanicard.data.dto.deck.DeckData
 import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
 import com.nmheir.kanicard.data.entities.SearchHistoryEntity
-import com.nmheir.kanicard.data.entities.card.CardTemplateEntity
+import com.nmheir.kanicard.data.entities.card.TemplateEntity
 import com.nmheir.kanicard.data.entities.deck.CollectionEntity
 import com.nmheir.kanicard.data.entities.deck.DeckEntity
 import com.nmheir.kanicard.data.entities.fsrs.FsrsCardEntity
 import com.nmheir.kanicard.data.entities.fsrs.ReviewLogEntity
-import com.nmheir.kanicard.data.entities.note.FieldDefEntity
+import com.nmheir.kanicard.data.entities.note.FieldEntity
 import com.nmheir.kanicard.data.entities.note.NoteEntity
 import com.nmheir.kanicard.data.entities.note.NoteTypeEntity
 import com.nmheir.kanicard.data.relations.CollectionWithDecks
@@ -47,7 +47,7 @@ interface DatabaseDao {
     suspend fun insert(note: NoteEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(cardTemplate: CardTemplateEntity)
+    suspend fun insert(cardTemplate: TemplateEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(reviewLog: ReviewLogEntity)
@@ -56,7 +56,7 @@ interface DatabaseDao {
     suspend fun insert(noteType: NoteTypeEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(fieldDef: FieldDefEntity)
+    suspend fun insert(fieldDef: FieldEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(collection: CollectionEntity)
@@ -67,10 +67,10 @@ interface DatabaseDao {
     suspend fun insertCards(fsrsCards: List<FsrsCardEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertFields(fields: List<FieldDefEntity>)
+    suspend fun insertFields(fields: List<FieldEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTemplates(templates: List<CardTemplateEntity>)
+    suspend fun insertTemplates(templates: List<TemplateEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNotes(notes: List<NoteEntity>)
@@ -87,7 +87,7 @@ interface DatabaseDao {
     suspend fun update(note: NoteEntity)
 
     @Update
-    suspend fun update(cardTemplate: CardTemplateEntity)
+    suspend fun update(cardTemplate: TemplateEntity)
 
     @Update
     suspend fun update(reviewLog: ReviewLogEntity)
@@ -122,7 +122,7 @@ interface DatabaseDao {
     fun delete(note: NoteEntity)
 
     @Delete
-    fun delete(cardTemplate: CardTemplateEntity)
+    fun delete(cardTemplate: TemplateEntity)
 
     @Delete
     fun delete(reviewLog: ReviewLogEntity)
@@ -131,61 +131,61 @@ interface DatabaseDao {
     fun delete(noteType: NoteTypeEntity)
 
     @Delete
-    fun delete(fieldDef: FieldDefEntity)
+    fun delete(fieldDef: FieldEntity)
 
-    @Query("DELETE FROM notes WHERE noteId = :noteId")
+    @Query("DELETE FROM notes WHERE id = :noteId")
     fun deleteNote(noteId: Long)
 
     @Query("DELETE FROM decks WHERE id = :id")
     suspend fun deleteDeck(id: Long)
 
-    @Query("DELETE FROM card_templates WHERE id = :id")
+    @Query("DELETE FROM templates WHERE id = :id")
     suspend fun deleteTemplate(id: Long)
 
     /*Get*/
 
     @Query(
         """
-        SELECT * FROM fsrs_card WHERE deckId = :deckId
+        SELECT * FROM fsrs_card WHERE dId = :deckId
     """
     )
     fun getFsrsCardByDeckId(deckId: Long): Flow<List<FsrsCardEntity>?>
 
-    @Query("SELECT * FROM review_log")
+    @Query("SELECT * FROM review_logs")
     fun getReviewLogs(): Flow<List<ReviewLogEntity>>
 
     @Query("SELECT * FROM note_types")
     fun getNoteTypes(): Flow<List<NoteTypeEntity>?>
 
-    @Query("SELECT * FROM notes WHERE noteId = :noteId")
+    @Query("SELECT * FROM notes WHERE id = :noteId")
     fun getNoteByNoteId(noteId: Long): Flow<NoteEntity?>
 
-    @Query("SELECT * FROM field_defs WHERE noteTypeId = :noteTypeId")
-    fun getFieldDefByNoteTypeId(noteTypeId: Long): Flow<List<FieldDefEntity>?>
+    @Query("SELECT * FROM fields WHERE ntId = :noteTypeId")
+    fun getFieldDefByNoteTypeId(noteTypeId: Long): Flow<List<FieldEntity>?>
 
-    @Query("SELECT * FROM card_templates WHERE noteTypeId = :noteTypeId")
-    fun getCardTemplateByNoteTypeId(noteTypeId: Long): Flow<List<CardTemplateEntity>?>
+    @Query("SELECT * FROM templates WHERE ntId = :noteTypeId")
+    fun getCardTemplateByNoteTypeId(noteTypeId: Long): Flow<List<TemplateEntity>?>
 
 
     @Query(
         """
     SELECT * FROM fsrs_card 
-    WHERE deckId = :deckId 
-      AND date(due) = date('now', 'localtime')
+    WHERE dId = :deckId 
+      AND date(due) <= date('now', 'localtime')
     ORDER BY due ASC 
     """
     )
     fun getDueCardsToday(deckId: Long): Flow<List<FsrsCardEntity>?>
 
     //This is for study case
-    @Query("SELECT * FROM notes WHERE noteId IN (:nIds)")
+    @Query("SELECT * FROM notes WHERE id IN (:nIds)")
     fun getNoteAndTemplates(nIds: List<Long>): Flow<List<NoteAndTemplate>>
 
-    @Query("SELECT * FROM field_defs WHERE noteTypeId = :noteTypeId")
-    fun getFieldDefs(noteTypeId: Long): Flow<List<FieldDefEntity>?>
+    @Query("SELECT * FROM fields WHERE ntId = :noteTypeId")
+    fun getFieldDefs(noteTypeId: Long): Flow<List<FieldEntity>?>
 
-    @Query("SELECT * FROM card_templates WHERE noteTypeId = :noteTypeId")
-    fun getCardTemplate(noteTypeId: Long): Flow<CardTemplateEntity?>
+    @Query("SELECT * FROM templates WHERE ntId = :noteTypeId")
+    fun getCardTemplate(noteTypeId: Long): Flow<TemplateEntity?>
 
     /*-------------------------------------------------------------------------*/
     /*Deck*/
@@ -213,31 +213,46 @@ interface DatabaseDao {
           d.id               AS deckId,
           d.name             AS name,
           
-          -- Tổng số thẻ ở trạng thái REVIEW
-          SUM(CASE WHEN c.state = 'Review' THEN 1 ELSE 0 END)   AS reviewCount,
+          -- Tổng số thẻ ở trạng thái REVIEW và đến hạn
+          SUM(
+            CASE 
+              WHEN c.state = 'Review' AND datetime(c.due) <= datetime('now', 'localtime') 
+              THEN 1 ELSE 0 
+            END
+          ) AS reviewCount,
           
-          -- Tổng số thẻ đang học (LEARNING)
-          SUM(CASE WHEN c.state = 'Learing' THEN 1 ELSE 0 END) AS learnCount,
+          -- Tổng số thẻ ở trạng thái LEARNING và đến hạn
+          SUM(
+            CASE 
+              WHEN c.state = 'Learning' AND datetime(c.due) <= datetime('now', 'localtime') 
+              THEN 1 ELSE 0 
+            END
+          ) AS learnCount,
           
-          -- Tổng số thẻ mới (NEW)
-          SUM(CASE WHEN c.state = 'New' THEN 1 ELSE 0 END)      AS newCount,
+          -- Tổng số thẻ ở trạng thái NEW và đến hạn
+          SUM(
+            CASE 
+              WHEN c.state = 'New' AND datetime(c.due) <= datetime('now', 'localtime') 
+              THEN 1 ELSE 0 
+            END
+          ) AS newCount,
           
-          -- Tổng số thẻ đến hạn trong ngày hôm nay (00:00 → 23:59)
+          -- Tổng số thẻ đến hạn (tất cả trạng thái), nhỏ hơn thời gian hiện tại
           SUM(
             CASE
-              WHEN date(c.due) = date('now', 'localtime')
-              THEN 1
-              ELSE 0
+              WHEN datetime(c.due) <= datetime('now', 'localtime')
+              THEN 1 ELSE 0
             END
-          )                                                      AS dueToday,
-          
-          -- Ngày giờ review cuối cùng của cả deck
-          MAX(c.lastReview)                                      AS lastReview
+          ) AS dueToday,
+        
+          -- Ngày giờ review cuối cùng
+          MAX(c.lastReview) AS lastReview
+        
         FROM decks d
-        LEFT JOIN fsrs_card c
-          ON c.deckId = d.id
+        LEFT JOIN fsrs_card c ON c.dId = d.id
         GROUP BY d.id, d.name
-        ORDER BY d.name
+        ORDER BY d.name;
+
     """
     )
     fun getAllDeckWidgetData(): Flow<List<DeckWidgetData>>
@@ -286,10 +301,10 @@ interface DatabaseDao {
             d.createdTime,
             d.modifiedTime,
             d.flags,
-            COUNT(n.noteId)    AS noteCount
+            COUNT(n.id)    AS noteCount
         FROM decks AS d
         LEFT JOIN notes AS n
-            ON d.id = n.deckId
+            ON d.id = n.dId
         WHERE d.id = :dId
         GROUP BY d.id
     """
@@ -297,8 +312,12 @@ interface DatabaseDao {
     fun getDecksWithNoteCount(dId: Long): Flow<DeckData>
 
     @Transaction
-    @Query("SELECT * FROM notes WHERE deckId = :dId LIMIT :limit")
+    @Query("SELECT * FROM notes WHERE dId = :dId LIMIT :limit")
     fun getNoteAndTemplateByDeckId(dId: Long, limit: Int = 100): Flow<List<NoteAndTemplate>>
+
+    @Transaction
+    @Query("SELECT * FROM notes WHERE id IN (:nIds)")
+    fun getNoteAndTemplateByNoteIds(nIds: List<Long>) : Flow<List<NoteAndTemplate>>
 
     /*End Note*/
     /*-------------------------------------------------------------------------*/
@@ -309,7 +328,7 @@ interface DatabaseDao {
     @Query(
         """
             SELECT
-              n.noteId                       AS nid,
+              n.id                       AS nid,
               t.id                           AS tId,
               d.name                         AS dName,
               nt.name                        AS typeName,
@@ -325,22 +344,22 @@ interface DatabaseDao {
               n.modifiedTime                 AS modifiedTime
             FROM notes AS n
             INNER JOIN decks AS d
-              ON n.deckId = d.id
-            INNER JOIN card_templates AS t
+              ON n.dId = d.id
+            INNER JOIN templates AS t
               ON n.templateId = t.id
             INNER JOIN note_types AS nt
-              ON t.noteTypeId = nt.id
+              ON t.ntId = nt.id
             INNER JOIN fsrs_card AS f
-              ON f.nId = n.noteId
+              ON f.nId = n.id
             LEFT JOIN (
               /* Đếm số lần review cho mỗi card */
               SELECT
-                fsrsCardId,
+                nId,
                 COUNT(*) AS review_count
-              FROM review_log
-              GROUP BY fsrsCardId
+              FROM review_logs
+              GROUP BY nId
             ) AS r
-              ON r.fsrsCardId = f.id
+              ON r.nId = f.nId
             WHERE d.id = :dId
             ;
         """
