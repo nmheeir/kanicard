@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.nmheir.kanicard.core.presentation.components.SECONDARY_ALPHA
@@ -58,3 +59,16 @@ fun Modifier.dashedBorder(
         brush = brush
     )
 }
+
+fun Modifier.visible(
+    visible: Boolean = true
+) = this.then(Modifier.layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    if (visible) {
+        layout(placeable.width, placeable.height) {
+            placeable.placeRelative(0, 0)
+        }
+    } else {
+        layout(0, 0) {}
+    }
+})

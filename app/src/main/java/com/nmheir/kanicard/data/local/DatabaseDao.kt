@@ -213,31 +213,46 @@ interface DatabaseDao {
           d.id               AS deckId,
           d.name             AS name,
           
-          -- Tổng số thẻ ở trạng thái REVIEW
-          SUM(CASE WHEN c.state = 'Review' THEN 1 ELSE 0 END)   AS reviewCount,
+          -- Tổng số thẻ ở trạng thái REVIEW và đến hạn
+          SUM(
+            CASE 
+              WHEN c.state = 'Review' AND datetime(c.due) <= datetime('now', 'localtime') 
+              THEN 1 ELSE 0 
+            END
+          ) AS reviewCount,
           
-          -- Tổng số thẻ đang học (LEARNING)
-          SUM(CASE WHEN c.state = 'Learning' THEN 1 ELSE 0 END) AS learnCount,
+          -- Tổng số thẻ ở trạng thái LEARNING và đến hạn
+          SUM(
+            CASE 
+              WHEN c.state = 'Learning' AND datetime(c.due) <= datetime('now', 'localtime') 
+              THEN 1 ELSE 0 
+            END
+          ) AS learnCount,
           
-          -- Tổng số thẻ mới (NEW)
-          SUM(CASE WHEN c.state = 'New' THEN 1 ELSE 0 END)      AS newCount,
+          -- Tổng số thẻ ở trạng thái NEW và đến hạn
+          SUM(
+            CASE 
+              WHEN c.state = 'New' AND datetime(c.due) <= datetime('now', 'localtime') 
+              THEN 1 ELSE 0 
+            END
+          ) AS newCount,
           
-          -- Tổng số thẻ đến hạn trong ngày hôm nay (00:00 → 23:59)
+          -- Tổng số thẻ đến hạn (tất cả trạng thái), nhỏ hơn thời gian hiện tại
           SUM(
             CASE
-              WHEN date(c.due) <= date('now', 'localtime')
-              THEN 1
-              ELSE 0
+              WHEN datetime(c.due) <= datetime('now', 'localtime')
+              THEN 1 ELSE 0
             END
-          )                                                      AS dueToday,
-          
-          -- Ngày giờ review cuối cùng của cả deck
-          MAX(c.lastReview)                                      AS lastReview
+          ) AS dueToday,
+        
+          -- Ngày giờ review cuối cùng
+          MAX(c.lastReview) AS lastReview
+        
         FROM decks d
-        LEFT JOIN fsrs_card c
-          ON c.dId = d.id
+        LEFT JOIN fsrs_card c ON c.dId = d.id
         GROUP BY d.id, d.name
-        ORDER BY d.name
+        ORDER BY d.name;
+
     """
     )
     fun getAllDeckWidgetData(): Flow<List<DeckWidgetData>>

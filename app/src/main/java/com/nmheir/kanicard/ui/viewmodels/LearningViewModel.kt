@@ -18,6 +18,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -43,7 +44,7 @@ class LearningViewModel @Inject constructor(
 
     private val fsrs = FSRS()
 
-    val isLoading = MutableStateFlow(false)
+    val startLearning = MutableStateFlow(false)
 
     // 1) Pure, declarative flows
     private val dueCards =
@@ -102,11 +103,23 @@ class LearningViewModel @Inject constructor(
             initialValue = State.entries.associateWith { 0 }
         )
 
+    val isCompleteLearning = combine(
+        startLearning, datas
+    ) { isStart, datas ->
+        isStart && datas.isEmpty()
+    }
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(1000), false)
+
+    val haveData = dueCards.map {
+        it.isNotEmpty()
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(500), null)
 
     // 6) Handle actions
     fun onAction(action: LearningAction) {
         when (action) {
             is LearningAction.SubmitReview -> {
+                startLearning.value = true
                 submitReview(action.nId, action.rating)
             }
         }

@@ -10,6 +10,7 @@ import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +33,7 @@ import com.nmheir.kanicard.extensions.toHexColor
 import com.nmheir.kanicard.ui.theme.linkColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 data class MarkdownStyles(
     val hexTextColor: String,
@@ -97,7 +99,10 @@ fun ReviewFlashCard(
 
     AndroidView(
         modifier = modifier
-            .fillMaxHeight(0.5f),
+            .clickable {
+                Timber.d("Android view clicked !")
+            }
+            .fillMaxHeight(),
         factory = {
             WebView(it).also { webView = it }.apply {
                 layoutParams = ViewGroup.LayoutParams(
