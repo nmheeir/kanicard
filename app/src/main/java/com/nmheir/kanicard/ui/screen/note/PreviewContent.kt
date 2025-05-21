@@ -24,7 +24,8 @@ import com.nmheir.kanicard.R
 import com.nmheir.kanicard.core.presentation.components.flip.FlipState
 import com.nmheir.kanicard.core.presentation.components.flip.Flippable
 import com.nmheir.kanicard.core.presentation.components.flip.rememberFlipController
-import com.nmheir.kanicard.ui.component.card.ReviewFlashCard
+import com.nmheir.kanicard.ui.component.card.InteractiveFlashcard
+import com.nmheir.kanicard.ui.component.webview.RenderHtmlContent
 import com.nmheir.kanicard.ui.viewmodels.TemplatePreview
 
 @Composable
@@ -57,37 +58,16 @@ fun PreviewContent(
             }
         }
     ) { pv ->
-        Flippable(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .padding(pv),
-            frontSide = {
-                ReviewFlashCard(
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .shadow(
-                            elevation = 8.dp,
-                            shape = MaterialTheme.shapes.medium
-                        ),
-                    html = template.qstHtml
-                )
-            },
-            backSide = {
-                ReviewFlashCard(
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .shadow(
-                            elevation = 8.dp,
-                            shape = MaterialTheme.shapes.medium
-                        ),
-                    html = template.ansHtml
-                )
-            },
-            flipOnTouch = false,
+        InteractiveFlashcard(
             flipController = flipController,
+            qHtml = template.qstHtml,
+            aHtml = template.ansHtml,
             onFlippedListener = {
                 reverseLayout = it
-            }
+            },
+            modifier = Modifier
+                .padding(pv)
+                .padding(12.dp)
         )
     }
 }

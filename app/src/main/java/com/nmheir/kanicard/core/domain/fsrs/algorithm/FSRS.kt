@@ -5,6 +5,7 @@ import com.nmheir.kanicard.data.enums.Rating
 import com.nmheir.kanicard.core.domain.fsrs.model.RecordLog
 import com.nmheir.kanicard.data.enums.State
 import com.nmheir.kanicard.core.domain.fsrs.scheduler.SchedulingFsrsCard
+import timber.log.Timber
 import java.math.MathContext
 import java.math.RoundingMode
 import java.time.OffsetDateTime
@@ -30,9 +31,9 @@ class FSRS(
 
         if (card.state == State.New) {
             this.initDifficultiesAndStabilities(s)
-            s.again.due = now.plusDays(0)
-            s.hard.due = now.plusDays(1)
-            s.good.due = now.plusDays(3)
+            s.again.due = now.plusMinutes(1)
+            s.hard.due = now.plusMinutes(5)
+            s.good.due = now.plusMinutes(10)
             easyInterval = nextInterval(s.easy.stability)
             s.easy.scheduledDays = easyInterval
             s.easy.due = now.plusDays(easyInterval)
@@ -66,7 +67,14 @@ class FSRS(
         }
 
 
-        return s.recordLog(card, now)
+        Timber.d("FSRS card: %s", card.toString())
+
+        val abc = s.recordLog(card, now)
+        Timber.d("Rating Good: %s", abc[Rating.Good])
+        Timber.d("Rating Hard: %s", abc[Rating.Hard])
+        Timber.d("Rating Easy: %s", abc[Rating.Easy])
+        Timber.d("Rating Again: %s", abc[Rating.Again])
+        return abc
     }
 
     private fun nextDs(

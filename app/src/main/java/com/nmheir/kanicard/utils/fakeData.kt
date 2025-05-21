@@ -218,8 +218,8 @@ val fakeNoteData = List(10) {
     NoteData(
         id = it.toLong(),
         dId = 0L,
-        qFmt = "Question $it",
-        aFmt = "Answer $it",
+        qHtml = "Question $it",
+        aHtml = "Answer $it",
     )
 }
 
@@ -587,8 +587,8 @@ val fakeNoteDatas = List(10) { index ->
     NoteData(
         id = index + 1L,
         dId = (index % 3 + 1).toLong(), // Giả định có 3 deck khác nhau
-        qFmt = "<p><b>Question ${index + 1}:</b> What is ${index + 1} + ${index + 2}?</p>",
-        aFmt = "<p><i>Answer:</i> ${index + 1 + index + 2}</p>"
+        qHtml = "<p><b>Question ${index + 1}:</b> What is ${index + 1} + ${index + 2}?</p>",
+        aHtml = "<p><i>Answer:</i> ${index + 1 + index + 2}</p>"
     )
 }
 

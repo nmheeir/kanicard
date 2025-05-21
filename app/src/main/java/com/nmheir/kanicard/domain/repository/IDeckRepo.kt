@@ -4,6 +4,7 @@ import com.nmheir.kanicard.data.dto.deck.DeckData
 import com.nmheir.kanicard.data.dto.deck.DeckDto
 import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
 import com.nmheir.kanicard.data.entities.deck.CollectionEntity
+import com.nmheir.kanicard.data.entities.deck.DeckEntity
 import kotlinx.coroutines.flow.Flow
 
 interface IDeckRepo {
@@ -11,7 +12,7 @@ interface IDeckRepo {
     fun getAllDecks(): Flow<List<DeckDto>?>
     fun getAllCollections(): Flow<List<CollectionEntity>>
     fun getDeckDataById(dId: Long): Flow<DeckData>
-    suspend fun queryDeck(id: Long? = null, name: String? = null): DeckDto?
+    fun queryDeck(id: Long? = null, name: String? = null): Flow<DeckDto?>
 
     suspend fun insert(deck: DeckDto)
     suspend fun insert(collection: CollectionEntity)

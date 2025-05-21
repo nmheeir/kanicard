@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "32f8f0634cd187715515e2e050689f34",
+    "identityHash": "e0e252a716a44054edf854f8105b63ec",
     "entities": [
       {
         "tableName": "search_history",
@@ -42,23 +42,17 @@
       },
       {
         "tableName": "fsrs_card",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `dId` INTEGER NOT NULL, `nId` INTEGER NOT NULL, `due` TEXT NOT NULL, `stability` REAL NOT NULL, `difficulty` REAL NOT NULL, `elapsedDays` INTEGER NOT NULL, `scheduledDays` INTEGER NOT NULL, `reps` INTEGER NOT NULL, `lapses` INTEGER NOT NULL, `state` TEXT NOT NULL, `lastReview` TEXT, FOREIGN KEY(`dId`) REFERENCES `decks`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`nId`) REFERENCES `notes`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`nId` INTEGER NOT NULL, `dId` INTEGER NOT NULL, `due` TEXT NOT NULL, `stability` REAL NOT NULL, `difficulty` REAL NOT NULL, `elapsedDays` INTEGER NOT NULL, `scheduledDays` INTEGER NOT NULL, `reps` INTEGER NOT NULL, `lapses` INTEGER NOT NULL, `state` TEXT NOT NULL, `lastReview` TEXT, PRIMARY KEY(`nId`), FOREIGN KEY(`dId`) REFERENCES `decks`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`nId`) REFERENCES `notes`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
-            "fieldPath": "id",
-            "columnName": "id",
+            "fieldPath": "nId",
+            "columnName": "nId",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
             "fieldPath": "dId",
             "columnName": "dId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "nId",
-            "columnName": "nId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -118,9 +112,9 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": true,
+          "autoGenerate": false,
           "columnNames": [
-            "id"
+            "nId"
           ]
         },
         "indices": [
@@ -170,7 +164,7 @@
       },
       {
         "tableName": "review_logs",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fsrsCardId` INTEGER NOT NULL, `rating` TEXT NOT NULL, `state` TEXT NOT NULL, `due` TEXT NOT NULL, `stability` REAL NOT NULL, `difficulty` REAL NOT NULL, `elapsedDays` INTEGER NOT NULL, `lastElapsedDays` INTEGER NOT NULL, `scheduledDays` INTEGER NOT NULL, `review` TEXT NOT NULL, FOREIGN KEY(`fsrsCardId`) REFERENCES `fsrs_card`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nId` INTEGER NOT NULL, `rating` TEXT NOT NULL, `state` TEXT NOT NULL, `due` TEXT NOT NULL, `stability` REAL NOT NULL, `difficulty` REAL NOT NULL, `elapsedDays` INTEGER NOT NULL, `lastElapsedDays` INTEGER NOT NULL, `scheduledDays` INTEGER NOT NULL, `review` TEXT NOT NULL, FOREIGN KEY(`nId`) REFERENCES `fsrs_card`(`nId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -179,8 +173,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "fsrsCardId",
-            "columnName": "fsrsCardId",
+            "fieldPath": "nId",
+            "columnName": "nId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -247,13 +241,13 @@
         },
         "indices": [
           {
-            "name": "index_review_logs_fsrsCardId",
+            "name": "index_review_logs_nId",
             "unique": false,
             "columnNames": [
-              "fsrsCardId"
+              "nId"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_review_logs_fsrsCardId` ON `${TABLE_NAME}` (`fsrsCardId`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_review_logs_nId` ON `${TABLE_NAME}` (`nId`)"
           }
         ],
         "foreignKeys": [
@@ -262,10 +256,10 @@
             "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
-              "fsrsCardId"
+              "nId"
             ],
             "referencedColumns": [
-              "id"
+              "nId"
             ]
           }
         ]
@@ -779,7 +773,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '32f8f0634cd187715515e2e050689f34')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e0e252a716a44054edf854f8105b63ec')"
     ]
   }
 }

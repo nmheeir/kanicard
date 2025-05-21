@@ -197,7 +197,7 @@ interface DatabaseDao {
             LIMIT 1
         """
     )
-    suspend fun deck(id: Long?, name: String?): DeckEntity?
+    fun deck(id: Long?, name: String?): Flow<DeckEntity?>
 
     @Query("SELECT * FROM decks")
     fun allDecks(): Flow<List<DeckEntity>?>
@@ -369,7 +369,13 @@ interface DatabaseDao {
     /*End Card*/
     /*-------------------------------------------------------------------------*/
 
+    /*-------------------------------------------------------------------------*/
+    /*Review*/
+    @Query("SELECT * FROM review_logs WHERE nId = :nId")
+    fun getReviewsByNoteId(nId: Long): Flow<List<ReviewLogEntity>>
 
+    /*End Review*/
+    /*-------------------------------------------------------------------------*/
     @RawQuery
     fun raw(supportSQLiteQuery: SupportSQLiteQuery): Int
 

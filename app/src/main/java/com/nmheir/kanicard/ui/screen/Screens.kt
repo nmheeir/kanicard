@@ -75,6 +75,7 @@ sealed interface Screens {
         data object Deck : Base("deck")
         data object BrowseCard : Base("browse_card")
         data object Learn : Base("learn")
+        data object PreviewNote : Base("preview_note")
 
         data object CompleteLearn : Base("complete_learn")
     }

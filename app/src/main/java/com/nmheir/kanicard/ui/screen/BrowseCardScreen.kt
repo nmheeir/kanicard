@@ -2,6 +2,7 @@
 
 package com.nmheir.kanicard.ui.screen
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -10,9 +11,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -20,28 +23,42 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.nmheir.kanicard.R
+import com.nmheir.kanicard.core.presentation.screens.LoadingScreen
 import com.nmheir.kanicard.core.presentation.utils.extractMembers
 import com.nmheir.kanicard.core.presentation.utils.hozPadding
 import com.nmheir.kanicard.ui.component.button.IconButtonDropdownMenu
+import com.nmheir.kanicard.ui.component.dialog.DefaultDialog
+import com.nmheir.kanicard.ui.component.dialog.ListDialog
 import com.nmheir.kanicard.ui.component.dialog.ListOptionDialog
 import com.nmheir.kanicard.ui.theme.KaniTheme
 import com.nmheir.kanicard.ui.viewmodels.BrowseCardUiAction
@@ -51,32 +68,112 @@ import com.nmheir.kanicard.ui.viewmodels.BrowseOption
 import com.nmheir.kanicard.ui.viewmodels.SortType
 import com.nmheir.kanicard.ui.viewmodels.toQstValuePairs
 import com.nmheir.kanicard.utils.fakeCardBrowseDatas
+import kotlinx.coroutines.delay
 
 @Composable
 fun BrowseCardScreen(
     navController: NavHostController,
     viewModel: BrowseCardViewModel = hiltViewModel()
 ) {
+    val deck by viewModel.deck.collectAsStateWithLifecycle()
     val headerOption by viewModel.headerOption.collectAsStateWithLifecycle()
     val sortType by viewModel.sortType.collectAsStateWithLifecycle()
     val data by viewModel.data.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val selectedNote by viewModel.selectedNote.collectAsStateWithLifecycle()
+    val filterData by viewModel.filterData.collectAsStateWithLifecycle()
 
-    var showSelectCheckBox by remember { mutableStateOf(false) }
+    var inSelectMode by rememberSaveable { mutableStateOf(false) }
+    var isSearching by rememberSaveable { mutableStateOf(false) }
+    var query by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue())
+    }
+
+    val focusRequest = remember { FocusRequester() }
+    LaunchedEffect(isSearching) {
+        if (isSearching)
+            focusRequest.requestFocus()
+    }
+
+    BackHandler {
+        if (isSearching) isSearching = false
+        if (inSelectMode) inSelectMode = false
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = "Browse card")
+                    if (inSelectMode) {
+                        Text(
+                            text = pluralStringResource(
+                                R.plurals.n_selected,
+                                selectedNote.size,
+                                selectedNote.size
+                            )
+                        )
+                    } else if (isSearching) {
+                        TextField(
+                            value = query,
+                            onValueChange = {
+                                query = it
+                                viewModel.onQueryChange(it)
+                            },
+                            placeholder = {
+                                Text(
+                                    text = stringResource(R.string.search),
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                            },
+                            singleLine = true,
+                            textStyle = MaterialTheme.typography.titleMedium,
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                disabledIndicatorColor = Color.Transparent,
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(focusRequest)
+                        )
+                    } else {
+                        Text(
+                            text = deck?.name ?: "",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
                 },
                 navigationIcon = {
-                    IconButton(onClick = navController::navigateUp) {
-                        Icon(painterResource(R.drawable.ic_arrow_back_ios), null)
+                    if (inSelectMode) {
+                        IconButton(
+                            onClick = { inSelectMode = false }
+                        ) {
+                            Icon(painterResource(R.drawable.ic_close), null)
+                        }
+                    } else {
+                        IconButton(
+                            onClick = navController::navigateUp
+                        ) {
+                            Icon(painterResource(R.drawable.ic_arrow_back_ios), null)
+                        }
                     }
                 },
                 actions = {
-                    IconButton(onClick = {}) {
-                        Icon(painterResource(R.drawable.ic_search), null)
+                    if (inSelectMode) {
+                        IconButton(
+                            onClick = {}
+                        ) {
+                            Icon(painterResource(R.drawable.ic_check), null)
+                        }
+                    } else {
+                        IconButton(
+                            onClick = { isSearching = true }
+                        ) {
+                            Icon(painterResource(R.drawable.ic_search), null)
+                        }
                     }
                     IconButtonDropdownMenu(
                         iconRes = R.drawable.ic_more_vert,
@@ -86,7 +183,11 @@ fun BrowseCardScreen(
                             when (it) {
                                 BrowseCardMenuOption.SELECT_ALL -> {
                                     viewModel.onAction(BrowseCardUiAction.UpdateSelectAll)
-                                    showSelectCheckBox = true
+                                    inSelectMode = true
+                                }
+
+                                BrowseCardMenuOption.PREVIEW -> {
+                                    navController.navigate("${deck!!.id}/${Screens.Base.PreviewNote}")
                                 }
                             }
                         }
@@ -95,23 +196,28 @@ fun BrowseCardScreen(
             )
         }
     ) { pv ->
+        if (isLoading) {
+            LoadingScreen()
+        }
         LazyColumn(
-            contentPadding = pv
+            contentPadding = pv,
+            modifier = Modifier.imePadding()
         ) {
             item {
                 HeaderSection(
                     headerOption = headerOption,
                     sortType = sortType,
+                    inSelectMode = inSelectMode,
                     action = viewModel::onAction
                 )
             }
             items(
-                items = data,
+                items = if (isSearching) filterData else data,
                 key = { it.nid }
             ) {
                 RowData(
                     data = it,
-                    showSelectCheckBox = showSelectCheckBox,
+                    inSelectMode = inSelectMode,
                     action = viewModel::onAction,
                     modifier = Modifier
                         .hozPadding()
@@ -119,12 +225,12 @@ fun BrowseCardScreen(
                             enabled = true,
                             onClick = {
                                 //navigate to edit note screen
-                                if (showSelectCheckBox) {
+                                if (inSelectMode) {
                                     viewModel.onAction(BrowseCardUiAction.UpdateSelect(it.nid))
                                 }
                             },
                             onLongClick = {
-                                showSelectCheckBox = !showSelectCheckBox
+                                inSelectMode = !inSelectMode
                                 viewModel.onAction(BrowseCardUiAction.UpdateSelect(it.nid))
                             }
                         ),
@@ -138,6 +244,7 @@ fun BrowseCardScreen(
 private fun HeaderSection(
     headerOption: Pair<String, BrowseOption>,
     sortType: SortType,
+    inSelectMode: Boolean,
     action: (BrowseCardUiAction) -> Unit
 ) {
     var showOption by remember { mutableStateOf(false) }
@@ -146,11 +253,28 @@ private fun HeaderSection(
         modifier = Modifier
             .fillMaxWidth()
     ) {
+        if (inSelectMode) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(2f)
+            ) {
+                Text(
+                    text = "Select all",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+
+                IconButton(
+                    onClick = {}
+                ) {
+                    Icon(painterResource(R.drawable.ic_check), null)
+                }
+            }
+        }
         Text(
             text = headerOption.first,
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier
-                .weight(1f)
+                .weight(4f)
                 .padding(12.dp)
         )
 
@@ -158,7 +282,7 @@ private fun HeaderSection(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
-                .weight(1f)
+                .weight(4f)
                 .padding(12.dp)
                 .clickable {
                     showOption = true
@@ -167,6 +291,7 @@ private fun HeaderSection(
             Text(
                 text = headerOption.second.title,
                 style = MaterialTheme.typography.bodyLarge,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
             IconButton(
@@ -201,29 +326,45 @@ private fun HeaderSection(
 private fun RowData(
     modifier: Modifier = Modifier,
     data: BrowseCardUiData,
-    showSelectCheckBox: Boolean,
+    inSelectMode: Boolean,
     action: (BrowseCardUiAction) -> Unit
 ) {
     val itemData = extractMembers(data).filter {
-        if (!showSelectCheckBox) {
+        if (!inSelectMode) {
             it.first != "nid" && it.first != "isSelect"
         } else {
             it.first != "nid"
         }
     }
+
     val strokeColor = MaterialTheme.colorScheme.onBackground
     Row(
         modifier = modifier
             .fillMaxWidth()
             .drawBehind {
-                val colCount = itemData.size
                 val stroke = 1.dp.toPx()
                 val w = size.width
                 val h = size.height
 
-                // Vẽ đường dọc cho tất cả cột, kể cả biên trái và biên phải
-                for (i in 0..colCount) {
-                    val x = w * i / colCount
+                val weights = itemData.map { (attr, _) ->
+                    if (attr == "isSelect") 2f else 4f
+                }
+                val totalWeight = weights.sum()
+
+                var accumulatedWeight = 0f
+
+                // 🔹 Vẽ đường trái ngoài cùng
+                drawLine(
+                    color = strokeColor,
+                    start = Offset(0f, 0f),
+                    end = Offset(0f, h),
+                    strokeWidth = stroke
+                )
+
+                // Vẽ đường dọc theo tỉ lệ weight
+                for (i in 0..weights.lastIndex) {
+                    accumulatedWeight += weights[i]
+                    val x = w * (accumulatedWeight / totalWeight)
                     drawLine(
                         color = strokeColor,
                         start = Offset(x, 0f),
@@ -231,6 +372,7 @@ private fun RowData(
                         strokeWidth = stroke
                     )
                 }
+
 
                 // Vẽ đường ngang trên
                 drawLine(
@@ -254,7 +396,9 @@ private fun RowData(
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .weight(1f)
+                    .weight(
+                        if (attribute == "isSelect") 2f else 4f
+                    )
                     .padding(12.dp)
             ) {
                 if (attribute == "isSelect") {
@@ -276,11 +420,26 @@ private fun RowData(
     }
 }
 
-private enum class BrowseCardMenuOption(val title: String) {
-    SELECT_ALL("Select all")
+@Composable
+private fun CardOptionDialog(
+    onDismiss: () -> Unit
+) {
+    ListDialog(
+        onDismiss = onDismiss,
+        modifier = Modifier
+            .fillMaxWidth()
+            .hozPadding()
+    ) {
+
+    }
 }
 
-@Preview(showBackground = true)
+private enum class BrowseCardMenuOption(val title: String) {
+    SELECT_ALL("Select all"),
+    PREVIEW("Preview")
+}
+
+//@Preview(showBackground = true)
 @Composable
 private fun Test() {
     val data = fakeCardBrowseDatas.toQstValuePairs(BrowseOption.Answer, SortType.Ascending)
@@ -289,7 +448,7 @@ private fun Test() {
             modifier = Modifier.padding(24.dp)
         ) {
             data.fastForEach {
-                RowData(data = it, showSelectCheckBox = true) {
+                RowData(data = it, inSelectMode = true) {
 
                 }
             }
