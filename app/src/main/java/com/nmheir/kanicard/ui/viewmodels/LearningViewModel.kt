@@ -51,7 +51,7 @@ class LearningViewModel @Inject constructor(
     // 1) Pure, declarative flows
     private val dueCards =
         cardRepo.getDueCardsToday(deckId)
-            .distinctUntilChanged()
+//            .distinctUntilChanged()
             .map { it.orEmpty() }
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
@@ -64,7 +64,7 @@ class LearningViewModel @Inject constructor(
         nIds.flatMapLatest { ids ->
             noteRepo.getNoteDataByNoteIds(ids).map { it.orEmpty() }
         }
-            .distinctUntilChanged()
+//            .distinctUntilChanged()
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     // 2) Deck info

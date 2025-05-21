@@ -14,6 +14,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -103,7 +106,8 @@ class HomeViewModel @Inject constructor(
 
     private fun createNewDeck(name: String, collectionId: Long) {
         viewModelScope.launch {
-            val existedDeck = deckRepo.queryDeck(name = name)
+            val existedDeck = deckRepo.queryDeck(name = name).first()
+            Timber.d(existedDeck.toString())
             if (existedDeck != null) {
 //                _channel.send(HomeUiEvent.Failure(R.string.alert_already_exist_deck))
                 error.value = "Deck already exist"

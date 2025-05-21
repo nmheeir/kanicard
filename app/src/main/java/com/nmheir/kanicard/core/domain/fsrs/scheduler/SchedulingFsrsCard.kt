@@ -37,6 +37,7 @@ class SchedulingFsrsCard(
                 this.hard.state = State.Learning
                 this.good.state = State.Learning
                 this.easy.state = State.Review
+                this.again.lapses += 1
             }
 
             state === State.Learning || state === State.Relearning -> {
@@ -67,9 +68,9 @@ class SchedulingFsrsCard(
         this.hard.scheduledDays = hardInterval
         this.good.scheduledDays = goodInterval
         this.easy.scheduledDays = easyInterval
-        this.again.due = now.plusDays(5)
+        this.again.due = now.plusMinutes(5)
         this.hard.due =
-            if (hardInterval > 0) now.plusDays(hardInterval) else now.plusDays(10)
+            if (hardInterval > 0) now.plusDays(hardInterval) else now.plusMinutes(10)
         this.good.due = now.plusDays(goodInterval)
         this.easy.due = now.plusDays(easyInterval)
         return this
