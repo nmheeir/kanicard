@@ -25,6 +25,7 @@ fun InteractiveFlashcard(
     flipController: FlipController,
     qHtml: String,
     aHtml: String,
+    enableFlip: Boolean = false,
     onFlippedListener: (currentSide: FlipState) -> Unit = { _ -> }
 ) {
     Box(
@@ -60,7 +61,8 @@ fun InteractiveFlashcard(
                 .matchParentSize()
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
-                    indication = null
+                    indication = null,
+                    enabled = enableFlip
                 ) {
                     flipController.flip()
                 }

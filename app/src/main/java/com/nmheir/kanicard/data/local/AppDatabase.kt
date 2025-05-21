@@ -10,7 +10,7 @@ import com.nmheir.kanicard.data.converters.Converters
 import com.nmheir.kanicard.data.entities.SearchHistoryEntity
 import com.nmheir.kanicard.data.entities.card.TemplateEntity
 import com.nmheir.kanicard.data.entities.deck.CollectionEntity
-import com.nmheir.kanicard.data.entities.deck.DeckConfigEntity
+import com.nmheir.kanicard.data.entities.option.DeckConfigEntity
 import com.nmheir.kanicard.data.entities.deck.DeckEntity
 import com.nmheir.kanicard.data.entities.fsrs.FsrsCardEntity
 import com.nmheir.kanicard.data.entities.fsrs.ReviewLogEntity

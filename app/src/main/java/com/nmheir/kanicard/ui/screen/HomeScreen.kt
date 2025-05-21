@@ -244,12 +244,7 @@ private fun CollectionWithDeck(
                     var showEditDialog by remember { mutableStateOf(false) }
                     DeckItem(
                         modifier = Modifier
-                            .hozPadding()
-                            .combinedClickable(
-                                enabled = true,
-                                onClick = { onLearn(deckWidgetData.deckId) },
-                                onLongClick = { showOptionDialog = true }
-                            ),
+                            .hozPadding(),
                         deck = deckWidgetData,
                         onLearn = { onLearn(deckWidgetData.deckId) },
                         onEdit = { showEditDialog = true },

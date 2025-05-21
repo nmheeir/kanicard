@@ -1,7 +1,12 @@
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package com.nmheir.kanicard.ui.component
 
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -54,9 +59,13 @@ fun DeckItem(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        onClick = onLearn,
         shape = MaterialTheme.shapes.small,
         modifier = modifier
+            .combinedClickable(
+                enabled = true,
+                onClick = onLearn,
+                onLongClick = onOption
+            )
             .animateContentSize()
     ) {
         Column(

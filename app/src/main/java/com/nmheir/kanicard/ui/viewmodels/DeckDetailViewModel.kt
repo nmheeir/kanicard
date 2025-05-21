@@ -84,8 +84,8 @@ sealed interface DeckDetailUiAction {
 private val sampleDeckData = DeckData(
     id = 0L,
     cId = 0L,
-    name = "TODO()",
-    description = "TODO()",
+    name = "",
+    description = "",
     noteCount = 0,
     createdTime = OffsetDateTime.now(),
     modifiedTime = null

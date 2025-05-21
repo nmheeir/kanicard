@@ -5,6 +5,7 @@ package com.nmheir.kanicard.ui.screen
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -61,6 +63,7 @@ import com.nmheir.kanicard.core.presentation.utils.hozPadding
 import com.nmheir.kanicard.data.dto.note.NoteData
 import com.nmheir.kanicard.ui.component.card.FlashCardLite
 import com.nmheir.kanicard.ui.component.dialog.AlertDialog
+import com.nmheir.kanicard.ui.component.dialog.TextFieldDialog
 import com.nmheir.kanicard.ui.component.widget.PreferenceEntry
 import com.nmheir.kanicard.ui.screen.note.CardSide
 import com.nmheir.kanicard.ui.viewmodels.DeckDetailUiAction
@@ -96,10 +99,19 @@ fun DeckDetailScreen(
                                 expanded = true,
                                 offset = DpOffset(x = 0.dp, y = (-12).dp)
                             ) {
+                                var showRenameDialog by remember { mutableStateOf(false) }
                                 DeckDetailMenu.entries.fastForEach {
                                     DropdownMenuItem(
                                         text = { Text(text = it.title) },
-                                        onClick = {}
+                                        onClick = { showRenameDialog = true }
+                                    )
+                                }
+                                if (showRenameDialog) {
+                                    TextFieldDialog(
+                                        onDismiss = { showRenameDialog = false },
+                                        onDone = {
+                                            viewModel.onAction(DeckDetailUiAction.RenameDeck(it))
+                                        }
                                     )
                                 }
                             }
@@ -203,8 +215,7 @@ fun DeckDetailScreen(
                                 } else {
                                     if (descriptionState.text.toString() != deckData.description) {
                                         showConfirmDialog = true
-                                    }
-                                    else {
+                                    } else {
                                         canEdit = false
                                     }
                                 }
@@ -254,39 +265,47 @@ private fun SampleNoteSection(
     data: List<NoteData>
 ) {
     val state = rememberLazyListState()
-    LazyRow(
-        state = state,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = PaddingValues(horizontal = MaterialTheme.padding.mediumSmall)
-    ) {
-        items(
-            items = data,
-            key = { it.id }
+    BoxWithConstraints {
+        val horizontalLazyGridItemWidthFactor =
+            if (this.maxWidth * 0.475f >= 320.dp) 0.475f else 0.9f
+        val horizontalLazyGridItemWidth = this.maxWidth * horizontalLazyGridItemWidthFactor
+
+        LazyRow(
+            state = state,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(horizontal = MaterialTheme.padding.mediumSmall)
         ) {
-            val flipController = rememberFlipController()
-            Flippable(
-                frontSide = {
-                    FlashCardLite(
-                        text = it.qHtml,
-                        side = CardSide.Front,
-                        modifier = Modifier,
-                        onClick = {
-                            flipController.flipToBack()
-                        }
-                    )
-                },
-                backSide = {
-                    FlashCardLite(
-                        text = it.aHtml,
-                        side = CardSide.Back,
-                        modifier = Modifier,
-                        onClick = {
-                            flipController.flipToFront()
-                        }
-                    )
-                },
-                flipController = flipController
-            )
+            items(
+                items = data,
+                key = { it.id }
+            ) {
+                val flipController = rememberFlipController()
+                Flippable(
+                    modifier = Modifier
+                        .width(horizontalLazyGridItemWidth),
+                    frontSide = {
+                        FlashCardLite(
+                            text = it.qHtml,
+                            side = CardSide.Front,
+                            modifier = Modifier,
+                            onClick = {
+                                flipController.flipToBack()
+                            }
+                        )
+                    },
+                    backSide = {
+                        FlashCardLite(
+                            text = it.aHtml,
+                            side = CardSide.Back,
+                            modifier = Modifier,
+                            onClick = {
+                                flipController.flipToFront()
+                            }
+                        )
+                    },
+                    flipController = flipController
+                )
+            }
         }
     }
 }

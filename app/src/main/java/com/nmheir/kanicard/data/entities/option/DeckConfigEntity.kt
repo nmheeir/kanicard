@@ -1,9 +1,10 @@
-package com.nmheir.kanicard.data.entities.deck
+package com.nmheir.kanicard.data.entities.option
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.nmheir.kanicard.data.entities.deck.DeckEntity
 
 @Entity(
     tableName = "deck_configs",
@@ -12,7 +13,7 @@ import androidx.room.PrimaryKey
             entity = DeckEntity::class,
             parentColumns = ["id"],
             childColumns = ["deckId"],
-            onDelete = ForeignKey.CASCADE
+            onDelete = ForeignKey.Companion.CASCADE
         )
     ],
     indices = [Index(value = ["deckId"], unique = true)]

@@ -138,6 +138,7 @@
     <string name="info_last_review">Last review</string>
     <string name="info_no_review">No review</string>
     <string name="info_no_collection_choose">No collection choose</string>
+    <string name="info_recently">recently</string>
 
     <!--Action-->
     <string name="action_add_cards">Add Cards</string>
@@ -181,7 +182,28 @@
     <string name="sub_title_restore">Restore all data and application settings from a backup</string>
     <string name="sub_title_csv_import_export">Import or export database data in CSV format</string>
     
+    <!--Plurals-->
     <plurals name="n_selected">
         <item quantity="other">%d selected</item>
+    </plurals>
+    
+    <plurals name="relative_minute_ago">
+        <item quantity="one">%d minute ago</item>
+        <item quantity="other">%d minutes ago</item>
+    </plurals>
+
+    <plurals name="relative_hours_ago">
+        <item quantity="one">%d hour ago</item>
+        <item quantity="other">%d hours ago</item>
+    </plurals>
+
+    <plurals name="relative_days_ago">
+        <item quantity="one">%d day ago</item>
+        <item quantity="other">%d days ago</item>
+    </plurals>
+
+    <plurals name="relative_months_ago">
+        <item quantity="one">%d month ago</item>
+        <item quantity="other">%d months ago</item>
     </plurals>
 </resources>
