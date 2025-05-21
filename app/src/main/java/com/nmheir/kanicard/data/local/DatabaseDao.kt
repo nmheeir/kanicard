@@ -21,6 +21,7 @@ import com.nmheir.kanicard.data.entities.fsrs.ReviewLogEntity
 import com.nmheir.kanicard.data.entities.note.FieldEntity
 import com.nmheir.kanicard.data.entities.note.NoteEntity
 import com.nmheir.kanicard.data.entities.note.NoteTypeEntity
+import com.nmheir.kanicard.data.entities.option.DeckOptionEntity
 import com.nmheir.kanicard.data.relations.CollectionWithDecks
 import com.nmheir.kanicard.data.relations.DeckWithNotesAndTemplates
 import com.nmheir.kanicard.data.relations.NoteAndTemplate
@@ -60,6 +61,9 @@ interface DatabaseDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(collection: CollectionEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(option: DeckOptionEntity)
 
     /*Insert list*/
 
@@ -295,7 +299,7 @@ interface DatabaseDao {
         """
         SELECT
             d.id,
-            d.collectionId AS cId,
+            d.colId AS cId,
             d.name,
             d.description,
             d.createdTime,

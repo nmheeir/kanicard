@@ -14,8 +14,9 @@ import com.nmheir.kanicard.extensions.md.MarkdownWithParametersParser
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import javax.inject.Inject
 
-class NoteRepo(
+class NoteRepo @Inject constructor(
     private val database: KaniDatabase
 ) : INoteRepo {
     override fun getNoteByNoteId(noteId: Long): Flow<NoteDto?> {

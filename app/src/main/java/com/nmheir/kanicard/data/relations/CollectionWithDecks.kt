@@ -9,7 +9,7 @@ data class CollectionWithDecks(
     @Embedded val collection: CollectionEntity,
     @Relation(
         parentColumn = "id",
-        entityColumn = "collectionId"
+        entityColumn = "colId"
     )
     val decks: List<DeckEntity>
 )

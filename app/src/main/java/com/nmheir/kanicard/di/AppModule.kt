@@ -1,8 +1,10 @@
 package com.nmheir.kanicard.di
 
 import android.content.Context
+import com.nmheir.kanicard.data.local.DatabaseDao
 import com.nmheir.kanicard.data.local.InternalDatabase
 import com.nmheir.kanicard.data.local.KaniDatabase
+import com.nmheir.kanicard.data.local.RoomCallBack
 import com.nmheir.kanicard.data.repository.CardRepo
 import com.nmheir.kanicard.data.repository.DeckRepo
 import com.nmheir.kanicard.data.repository.NoteRepo
@@ -16,6 +18,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module
@@ -24,13 +27,16 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext context: Context): KaniDatabase {
-        return InternalDatabase.newInstance(context)
+    fun provideDatabase(
+        @ApplicationContext context: Context,
+        roomCallBack: RoomCallBack
+    ): KaniDatabase {
+        return InternalDatabase.newInstance(context, roomCallBack)
     }
 
+
     @Provides
-    @Singleton
-    fun provideNoteRepo(database: KaniDatabase): INoteRepo {
-        return NoteRepo(database)
+    fun provideDatabaseDao(db: KaniDatabase): DatabaseDao {
+        return db
     }
 }

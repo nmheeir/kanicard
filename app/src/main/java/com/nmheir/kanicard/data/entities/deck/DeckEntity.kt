@@ -5,6 +5,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.nmheir.kanicard.data.dto.deck.DeckDto
+import com.nmheir.kanicard.data.entities.option.DeckOptionEntity
 import java.time.OffsetDateTime
 
 @Entity(
@@ -13,25 +14,32 @@ import java.time.OffsetDateTime
         ForeignKey(
             entity = CollectionEntity::class,
             parentColumns = ["id"],
-            childColumns = ["collectionId"],
+            childColumns = ["colId"],
             onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = DeckOptionEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["oId"],
+            onDelete = ForeignKey.SET_DEFAULT
         )
     ],
     indices = [Index("name", unique = true)]
 )
 data class DeckEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val collectionId: Long,
+    val oId: Long = 1L,
+    val colId: Long,
     val name: String,
     val description: String,
     val createdTime: OffsetDateTime = OffsetDateTime.now(),
     val modifiedTime: OffsetDateTime? = null,
     val flags: Int? = null
 ) {
-    fun toDeckDto() : DeckDto {
+    fun toDeckDto(): DeckDto {
         return DeckDto(
             id = id,
-            collectionId = collectionId,
+            colId = colId,
             name = name,
             description = description,
             createdTime = createdTime,
