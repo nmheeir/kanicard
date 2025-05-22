@@ -35,7 +35,10 @@ class DeckOptionViewModel @Inject constructor(
         list.find { it.option.id == id }?.option ?: defaultDeckOption
     }.distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.Lazily, defaultDeckOption)
-    val isLoading = MutableStateFlow<Boolean?>(null)
+    val isLoading = MutableStateFlow<Boolean>(false)
+
+    val alertCannotDelete = MutableStateFlow(false)
+    val saveOptionSuccess = MutableStateFlow(false)
 
 
     fun onAction(action: DeckOptionUiAction) {
@@ -62,8 +65,8 @@ class DeckOptionViewModel @Inject constructor(
                 deletePreset()
             }
 
-            DeckOptionUiAction.NewPreset -> {
-                newPreset()
+            is DeckOptionUiAction.NewPreset -> {
+                newPreset(action.name)
             }
 
             is DeckOptionUiAction.RenamePreset -> {
@@ -71,17 +74,30 @@ class DeckOptionViewModel @Inject constructor(
                     optionRepo.update(optionData.value.id, action.name)
                 }
             }
+
+            DeckOptionUiAction.ConfirmAlertCannotDelete -> {
+                alertCannotDelete.value = false
+            }
+
+            DeckOptionUiAction.ConfirmSaveSuccess -> {
+                saveOptionSuccess.value = false
+            }
         }
     }
 
-    private fun newPreset() {
+    private fun newPreset(name: String) {
         viewModelScope.launch {
-            optionRepo.insert(DeckOptionEntity.new())
+            val newId = optionRepo.insert(DeckOptionEntity.new(name))
+            selectedDeckOptionId.value = newId
         }
     }
 
     private fun deletePreset() {
         viewModelScope.launch {
+            if (optionData.value.id == defaultDeckOption.id) {
+                alertCannotDelete.value = true
+                return@launch
+            }
             optionRepo.delete(optionData.value)
         }
     }
@@ -89,8 +105,8 @@ class DeckOptionViewModel @Inject constructor(
     private fun clonePreset() {
         viewModelScope.launch {
             val clone = optionData.value.clone()
-            optionRepo.insert(clone)
-            selectedDeckOptionId.value = clone.id
+            val newId = optionRepo.insert(clone)
+            selectedDeckOptionId.value = newId
         }
     }
 
@@ -101,7 +117,6 @@ class DeckOptionViewModel @Inject constructor(
         autoShowAnswer: Long,
         fsrsParams: List<Double>
     ) {
-        isLoading.value = true
         viewModelScope.launch {
             val a = optionData.value.copy(
                 newPerDay = newPerDay,
@@ -111,7 +126,7 @@ class DeckOptionViewModel @Inject constructor(
                 fsrsParams = fsrsParams
             )
             optionRepo.update(a)
-            isLoading.value = false
+            saveOptionSuccess.value = true
         }
     }
 }
@@ -127,8 +142,11 @@ sealed interface DeckOptionUiAction {
 
     data class ChangeSelectedOption(val optionId: Long) : DeckOptionUiAction
 
-    data object NewPreset : DeckOptionUiAction
+    data class NewPreset(val name: String) : DeckOptionUiAction
     data object ClonePreset : DeckOptionUiAction
     data object DeletePreset : DeckOptionUiAction
     data class RenamePreset(val name: String) : DeckOptionUiAction
+
+    data object ConfirmAlertCannotDelete : DeckOptionUiAction
+    data object ConfirmSaveSuccess : DeckOptionUiAction
 }

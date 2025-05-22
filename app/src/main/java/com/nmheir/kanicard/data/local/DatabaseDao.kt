@@ -64,7 +64,7 @@ interface DatabaseDao {
     suspend fun insert(collection: CollectionEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(option: DeckOptionEntity)
+    suspend fun insert(option: DeckOptionEntity) : Long
 
     /*Insert list*/
 

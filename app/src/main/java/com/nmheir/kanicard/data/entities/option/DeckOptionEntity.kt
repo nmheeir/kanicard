@@ -37,9 +37,9 @@ data class DeckOptionEntity(
     }
 
     companion object {
-        fun new(): DeckOptionEntity {
+        fun new(name: String): DeckOptionEntity {
             return DeckOptionEntity(
-                name = defaultDeckOption.name,
+                name = name,
                 createdAt = OffsetDateTime.now(),
                 updatedAt = null,
                 newPerDay = defaultDeckOption.newPerDay,

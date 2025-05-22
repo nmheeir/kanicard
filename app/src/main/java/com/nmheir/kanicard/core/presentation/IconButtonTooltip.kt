@@ -46,12 +46,15 @@ fun IconButtonTooltip(
     ) {
         IconButton(
             enabled = enabled,
-            onClick = onClick
+            onClick = onClick,
+            colors = IconButtonDefaults.iconButtonColors(
+                contentColor = tint,
+                disabledContentColor = MaterialTheme.colorScheme.outlineVariant
+            )
         ) {
             Icon(
                 painter = painterResource(iconRes),
                 contentDescription = contentDescription,
-                tint = tint
             )
         }
     }

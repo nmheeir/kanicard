@@ -9,7 +9,7 @@ interface IDeckOptionRepo {
     fun getDeckOption(id: Long): Flow<DeckOptionEntity>
     fun getDeckOptionUsage(): Flow<List<DeckOptionUsageDto>>
 
-    suspend fun insert(option: DeckOptionEntity)
+    suspend fun insert(option: DeckOptionEntity) : Long
 
     suspend fun update(deckOptionEntity: DeckOptionEntity)
     suspend fun update(id: Long, name: String? = null)

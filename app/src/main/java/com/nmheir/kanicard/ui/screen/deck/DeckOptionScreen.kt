@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 
 package com.nmheir.kanicard.ui.screen.deck
 
@@ -8,19 +8,18 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,8 +28,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -59,10 +58,10 @@ import com.nmheir.kanicard.core.presentation.utils.hozPadding
 import com.nmheir.kanicard.data.dto.deck.DeckOptionUsageDto
 import com.nmheir.kanicard.data.entities.option.DeckOptionEntity
 import com.nmheir.kanicard.data.entities.option.defaultDeckOption
-import com.nmheir.kanicard.ui.activities.LocalAwareWindowInset
 import com.nmheir.kanicard.ui.component.ImprovedDropdownMenu
 import com.nmheir.kanicard.ui.component.InfoBanner
 import com.nmheir.kanicard.ui.component.dialog.AlertDialog
+import com.nmheir.kanicard.ui.component.dialog.DefaultDialog
 import com.nmheir.kanicard.ui.component.dialog.TextFieldDialog
 import com.nmheir.kanicard.ui.component.widget.EditTextPreferenceWidget
 import com.nmheir.kanicard.ui.component.widget.PreferenceGroupHeader
@@ -74,12 +73,15 @@ import com.nmheir.kanicard.ui.viewmodels.DeckOptionViewModel
 @Composable
 fun DeckOptionScreen(
     navController: NavHostController,
+    scrollBehaviour: TopAppBarScrollBehavior,
     viewModel: DeckOptionViewModel = hiltViewModel()
 ) {
 
     val optionUsages by viewModel.optionUsages.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val optionData by viewModel.optionData.collectAsStateWithLifecycle()
+    val alertCannotDelete by viewModel.alertCannotDelete.collectAsStateWithLifecycle()
+    val saveOptionSuccess by viewModel.saveOptionSuccess.collectAsStateWithLifecycle()
 
     val selectedDto = remember(optionUsages, optionData.id) {
         optionUsages.find { it.option.id == optionData.id }
@@ -119,9 +121,32 @@ fun DeckOptionScreen(
         }
     }
 
-    LaunchedEffect(isLoading) {
-        if (isLoading == false) {
-            navController.navigateUp()
+    if (alertCannotDelete) {
+        DefaultDialog(
+            onDismiss = { viewModel.onAction(DeckOptionUiAction.ConfirmAlertCannotDelete) },
+            icon = {
+                Icon(
+                    painterResource(R.drawable.ic_error), null
+                )
+            }
+        ) {
+            Text(text = "Cannot delete default preset")
+        }
+    }
+
+    if (saveOptionSuccess) {
+        AlertDialog(
+            onDismiss = { viewModel.onAction(DeckOptionUiAction.ConfirmSaveSuccess) },
+            onConfirm = navController::navigateUp,
+            confirmText = "OK",
+            dismissText = "Keep editing",
+            icon = {
+                Icon(
+                    painterResource(R.drawable.ic_check_circle), null
+                )
+            }
+        ) {
+            Text(text = "Save success. Do you want to continue or leave out")
         }
     }
 
@@ -138,9 +163,9 @@ fun DeckOptionScreen(
     }
 
     Scaffold(
-        modifier = Modifier.padding(LocalAwareWindowInset.current.asPaddingValues()),
         topBar = {
             TopAppBar(
+                scrollBehavior = scrollBehaviour,
                 title = {
                     Text(
                         text = "Deck options"
@@ -169,14 +194,15 @@ fun DeckOptionScreen(
         }
     ) { pv ->
         LazyColumn(
+            contentPadding = pv,
             verticalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = pv
         ) {
             item(
-                key = "dropdown_option"
+                key = "deck_option"
             ) {
                 DropDownDeckOption(
                     datas = optionUsages,
+                    isDataChange = checkData,
                     action = viewModel::onAction,
                     optionData = selectedDto,
                     onSave = {
@@ -230,7 +256,6 @@ fun DeckOptionScreen(
             item(
                 key = "fsrs"
             ) {
-
                 PreferenceGroupHeader(title = stringResource(R.string.pref_fsrs))
                 TextPreferenceWidget(
                     title = stringResource(R.string.label_fsrs_param),
@@ -308,6 +333,7 @@ fun DeckOptionScreen(
 @Composable
 private fun DropDownDeckOption(
     modifier: Modifier = Modifier,
+    isDataChange: () -> Boolean,
     optionData: DeckOptionUsageDto?,
     datas: List<DeckOptionUsageDto>,
     onSave: () -> Unit,
@@ -340,12 +366,13 @@ private fun DropDownDeckOption(
                     )
                 }
             },
-            modifier = Modifier.weight(8f)
+            modifier = Modifier.weight(1f)
         )
 
         TextButton(
-            onClick = {},
-            modifier = Modifier.weight(2f)
+            enabled = isDataChange(),
+            onClick = onSave,
+//            modifier = Modifier.weight(2f)
         ) {
             Text(
                 text = stringResource(R.string.action_save)
@@ -445,16 +472,26 @@ private fun RowScope.TopAppBarActionButton(
         }
     }
 
+    var showNewNameDialog by remember { mutableStateOf(false) }
     if (showAddNewPreset) {
         AlertDialog(
             onDismiss = { showAddNewPreset = false },
             onConfirm = {
-                action(DeckOptionUiAction.NewPreset)
+                showNewNameDialog = true
                 showAddNewPreset = false
             }
         ) {
             Text(text = "Do you want to add new preset")
         }
+    }
+    if (showNewNameDialog) {
+        TextFieldDialog(
+            onDismiss = { showNewNameDialog = false },
+            onDone = {
+                action(DeckOptionUiAction.NewPreset(it))
+                showNewNameDialog = false
+            }
+        )
     }
 }
 

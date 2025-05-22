@@ -23,7 +23,7 @@ class DeckOptionRepo @Inject constructor(
         return database.getDeckOptionUsages()
     }
 
-    override suspend fun insert(option: DeckOptionEntity) {
+    override suspend fun insert(option: DeckOptionEntity) : Long {
         return database.insert(option)
     }
 
