@@ -58,6 +58,7 @@ import com.nmheir.kanicard.core.presentation.utils.hozPadding
 import com.nmheir.kanicard.data.dto.deck.DeckOptionUsageDto
 import com.nmheir.kanicard.data.entities.option.DeckOptionEntity
 import com.nmheir.kanicard.data.entities.option.defaultDeckOption
+import com.nmheir.kanicard.ui.component.Gap
 import com.nmheir.kanicard.ui.component.ImprovedDropdownMenu
 import com.nmheir.kanicard.ui.component.InfoBanner
 import com.nmheir.kanicard.ui.component.dialog.AlertDialog
@@ -82,6 +83,7 @@ fun DeckOptionScreen(
     val optionData by viewModel.optionData.collectAsStateWithLifecycle()
     val alertCannotDelete by viewModel.alertCannotDelete.collectAsStateWithLifecycle()
     val saveOptionSuccess by viewModel.saveOptionSuccess.collectAsStateWithLifecycle()
+    val showCheckConfirmSaveAction by viewModel.showCheckConfirmSaveAction.collectAsStateWithLifecycle()
 
     val selectedDto = remember(optionUsages, optionData.id) {
         optionUsages.find { it.option.id == optionData.id }
@@ -138,7 +140,7 @@ fun DeckOptionScreen(
         AlertDialog(
             onDismiss = { viewModel.onAction(DeckOptionUiAction.ConfirmSaveSuccess) },
             onConfirm = navController::navigateUp,
-            confirmText = "OK",
+            confirmText = "Leave",
             dismissText = "Keep editing",
             icon = {
                 Icon(
@@ -146,7 +148,7 @@ fun DeckOptionScreen(
                 )
             }
         ) {
-            Text(text = "Save success. Do you want to continue or leave out")
+            Text(text = "Save success. Do you want to continue or leave out?")
         }
     }
 
@@ -158,6 +160,32 @@ fun DeckOptionScreen(
             },
             onConfirm = {
                 confirmChange = false
+            }
+        )
+    }
+
+    if (showCheckConfirmSaveAction) {
+        ConfirmSaveActionDialog(
+            onDismiss = { viewModel.onAction(DeckOptionUiAction.DismissCheckConfirmSaveAction) },
+            onApplyAllPreset = {
+                viewModel.onAction(
+                    DeckOptionUiAction.Save(
+                        newPerDay = newPerDay.toLong(),
+                        revPerDay = revPerDay.toLong(),
+                        autoPlayAudio = autoPlayAudio,
+                        autoShowAnswer = autoShowAnswer,
+                        fsrsParams = parameterState.text.split(", ").map { it.toDouble() }
+                    ))
+            },
+            onClonePreset = {
+                viewModel.onAction(
+                    DeckOptionUiAction.CloneToNewPreset(
+                        newPerDay = newPerDay.toLong(),
+                        revPerDay = revPerDay.toLong(),
+                        autoPlayAudio = autoPlayAudio,
+                        autoShowAnswer = autoShowAnswer,
+                        fsrsParams = parameterState.text.split(", ").map { it.toDouble() }
+                    ))
             }
         )
     }
@@ -201,12 +229,20 @@ fun DeckOptionScreen(
                 key = "deck_option"
             ) {
                 DropDownDeckOption(
+                    modifier = Modifier.padding(top = 8.dp),
                     datas = optionUsages,
                     isDataChange = checkData,
                     action = viewModel::onAction,
                     optionData = selectedDto,
                     onSave = {
-                        viewModel.onAction(
+                        viewModel.onAction(DeckOptionUiAction.CheckConfirmSaveAction(
+                            newPerDay = newPerDay.toLong(),
+                            revPerDay = revPerDay.toLong(),
+                            autoPlayAudio = autoPlayAudio,
+                            autoShowAnswer = autoShowAnswer,
+                            fsrsParams = parameterState.text.split(", ").map { it.toDouble() }
+                        ))
+                        /*viewModel.onAction(
                             DeckOptionUiAction.Save(
                                 newPerDay = newPerDay.toLong(),
                                 revPerDay = revPerDay.toLong(),
@@ -214,7 +250,7 @@ fun DeckOptionScreen(
                                 autoShowAnswer = autoShowAnswer,
                                 fsrsParams = parameterState.text.split(", ").map { it.toDouble() }
                             )
-                        )
+                        )*/
                     }
                 )
             }
@@ -353,7 +389,7 @@ private fun DropDownDeckOption(
                 action(DeckOptionUiAction.ChangeSelectedOption(it.option.id))
             },
             itemLabel = {
-                it.option.name
+                it.option.name + " (${it.usage})"
             },
             itemSubLabel = {
                 if (it == null) {
@@ -492,6 +528,37 @@ private fun RowScope.TopAppBarActionButton(
                 showNewNameDialog = false
             }
         )
+    }
+}
+
+@Composable
+private fun ConfirmSaveActionDialog(
+    onDismiss: () -> Unit,
+    onApplyAllPreset: () -> Unit,
+    onClonePreset: () -> Unit
+) {
+    DefaultDialog(
+        onDismiss = onDismiss,
+        buttons = {
+            TextButton(
+                onClick = {
+                    onClonePreset()
+                    onDismiss()
+                }
+            ) {
+                Text(text = "Clone to new preset")
+            }
+            TextButton(
+                onClick = {
+                    onApplyAllPreset()
+                    onDismiss()
+                }
+            ) {
+                Text(text = "Apply all preset")
+            }
+        }
+    ) {
+        Text(text = "Do you want to apply all preset or copy to new preset ?")
     }
 }
 

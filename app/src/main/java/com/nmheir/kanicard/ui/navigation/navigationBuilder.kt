@@ -123,11 +123,15 @@ fun NavGraphBuilder.navigationBuilder(
     }
 
     composable(
-        route = "${Screens.Base.Deck.route}/${Screens.Base.DeckOption.route}/{optionId}",
+        route = "${Screens.Base.Deck.route}/{deckId}/${Screens.Base.DeckOption.route}/{optionId}",
         arguments = listOf(
             navArgument("optionId") {
                 type = NavType.LongType
                 defaultValue = 1L
+            },
+            navArgument("deckId") {
+                type = NavType.LongType
+                defaultValue = -1L
             }
         )
     ) {

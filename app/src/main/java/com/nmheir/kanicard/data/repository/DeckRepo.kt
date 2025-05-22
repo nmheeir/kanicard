@@ -67,9 +67,10 @@ class DeckRepo @Inject constructor(
     override suspend fun update(
         id: Long,
         name: String?,
-        description: String?
+        description: String?,
+        optionId: Long
     ) {
-        database.updateDeck(id, name, description)
+        database.updateDeck(id, name, description, optionId)
     }
 
     override suspend fun updateName(id: Long, name: String) {

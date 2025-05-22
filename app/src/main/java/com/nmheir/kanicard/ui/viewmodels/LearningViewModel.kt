@@ -6,11 +6,14 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nmheir.kanicard.core.domain.fsrs.algorithm.FSRS
+import com.nmheir.kanicard.core.domain.fsrs.algorithm.FsrsParameters
 import com.nmheir.kanicard.core.domain.fsrs.model.FsrsCard
 import com.nmheir.kanicard.data.dto.note.NoteData
+import com.nmheir.kanicard.data.entities.option.defaultDeckOption
 import com.nmheir.kanicard.data.enums.Rating
 import com.nmheir.kanicard.data.enums.State
 import com.nmheir.kanicard.domain.repository.ICardRepo
+import com.nmheir.kanicard.domain.repository.IDeckOptionRepo
 import com.nmheir.kanicard.domain.repository.IDeckRepo
 import com.nmheir.kanicard.domain.repository.INoteRepo
 import com.nmheir.kanicard.domain.repository.IReviewRepo
@@ -38,13 +41,22 @@ class LearningViewModel @Inject constructor(
     private val noteRepo: INoteRepo,
     private val deckRepo: IDeckRepo,
     private val reviewRepo: IReviewRepo,
+    private val optionRepo: IDeckOptionRepo,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val deckId: Long = savedStateHandle["deckId"]
         ?: error("Missing deckId")
 
-    private val fsrs = FSRS()
+    private val parameters = optionRepo.getDeckOption(deckId)
+        .map {
+            FsrsParameters().copy(
+                w = it.fsrsParams
+            )
+        }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, FsrsParameters())
+
+    private val fsrs = FSRS(parameters.value)
 
     val startLearning = MutableStateFlow(false)
 
@@ -134,6 +146,7 @@ class LearningViewModel @Inject constructor(
     }
 
     private fun submitReview(nId: Long, rating: Rating) {
+        Timber.d(parameters.value.w.toString())
         viewModelScope.launch {
             val abc = dueCards.value.firstOrNull {
                 it.nId == nId

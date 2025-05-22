@@ -108,14 +108,16 @@ interface DatabaseDao {
         UPDATE decks
         SET
             name = COALESCE(:name, name),
-            description = COALESCE(:description, description)
+            description = COALESCE(:description, description),
+            oId = :optionId
         WHERE id = :id
         """
     )
     suspend fun updateDeck(
         id: Long,
         name: String? = null,
-        description: String? = null
+        description: String? = null,
+        optionId: Long = 1L
     )
 
     @Query(

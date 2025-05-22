@@ -1,5 +1,6 @@
 package com.nmheir.kanicard.data.entities.deck
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -28,6 +29,7 @@ import java.time.OffsetDateTime
 )
 data class DeckEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @ColumnInfo(defaultValue = "1")
     val oId: Long = 1L,
     val colId: Long,
     val name: String,
