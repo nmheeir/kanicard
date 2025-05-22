@@ -118,6 +118,25 @@ interface DatabaseDao {
         description: String? = null
     )
 
+    @Query(
+        """
+            UPDATE deck_options
+            SET
+                name = COALESCE(:name, name),
+                newPerDay = COALESCE(:newPerDay, newPerDay),
+                revPerDay = COALESCE(:revPerDay, revPerDay),
+                fsrsParams = COALESCE(:fsrsParams, fsrsParams)
+            WHERE id = :id
+        """
+    )
+    suspend fun updateDeckOption(
+        id: Long,
+        name: String? = null,
+        newPerDay: Long? = null,
+        revPerDay: Long? = null,
+        fsrsParams: List<Double>? = null
+    )
+
     /*Delete*/
 
     @Delete
@@ -141,6 +160,9 @@ interface DatabaseDao {
     @Delete
     fun delete(fieldDef: FieldEntity)
 
+    @Delete
+    suspend fun delete(option: DeckOptionEntity)
+
     @Query("DELETE FROM notes WHERE id = :noteId")
     fun deleteNote(noteId: Long)
 
@@ -149,6 +171,9 @@ interface DatabaseDao {
 
     @Query("DELETE FROM templates WHERE id = :id")
     suspend fun deleteTemplate(id: Long)
+
+    @Query("DELETE FROM deck_options WHERE id = :id")
+    suspend fun deleteDeckOption(id: Long)
 
     /*Get*/
 
@@ -393,7 +418,7 @@ interface DatabaseDao {
     fun getDeckOption(id: Long): Flow<DeckOptionEntity?>
 
     @Query(
-    """
+        """
         SELECT  o.id,
                 o.name,
                 o.createdAt,

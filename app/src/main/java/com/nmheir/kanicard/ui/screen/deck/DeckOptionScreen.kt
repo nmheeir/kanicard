@@ -2,72 +2,53 @@
 
 package com.nmheir.kanicard.ui.screen.deck
 
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.internal.enableLiveLiterals
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastForEach
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -76,22 +57,19 @@ import com.nmheir.kanicard.core.presentation.IconButtonTooltip
 import com.nmheir.kanicard.core.presentation.IconTooltip
 import com.nmheir.kanicard.core.presentation.utils.hozPadding
 import com.nmheir.kanicard.data.dto.deck.DeckOptionUsageDto
+import com.nmheir.kanicard.data.entities.option.DeckOptionEntity
 import com.nmheir.kanicard.data.entities.option.defaultDeckOption
-import com.nmheir.kanicard.data.local.KaniDatabase
 import com.nmheir.kanicard.ui.activities.LocalAwareWindowInset
+import com.nmheir.kanicard.ui.component.ImprovedDropdownMenu
 import com.nmheir.kanicard.ui.component.InfoBanner
 import com.nmheir.kanicard.ui.component.dialog.AlertDialog
-import com.nmheir.kanicard.ui.component.dialog.DefaultDialog
+import com.nmheir.kanicard.ui.component.dialog.TextFieldDialog
 import com.nmheir.kanicard.ui.component.widget.EditTextPreferenceWidget
 import com.nmheir.kanicard.ui.component.widget.PreferenceGroupHeader
 import com.nmheir.kanicard.ui.component.widget.SwitchPreferenceWidget
 import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
-import com.nmheir.kanicard.ui.theme.KaniTheme
 import com.nmheir.kanicard.ui.viewmodels.DeckOptionUiAction
 import com.nmheir.kanicard.ui.viewmodels.DeckOptionViewModel
-import kotlinx.coroutines.selects.select
-import timber.log.Timber
-import kotlin.text.split
 
 @Composable
 fun DeckOptionScreen(
@@ -99,33 +77,29 @@ fun DeckOptionScreen(
     viewModel: DeckOptionViewModel = hiltViewModel()
 ) {
 
-    val selectedOption by viewModel.selectedDeckOption.collectAsStateWithLifecycle()
-    val optionData by viewModel.optionData.collectAsStateWithLifecycle()
     val optionUsages by viewModel.optionUsages.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val optionData by viewModel.optionData.collectAsStateWithLifecycle()
 
-    val (newPerDay, onNewPerDayChange) = remember(optionData) {
-        mutableStateOf(optionData.newPerDay.toString())
-    }
-    val (revPerDay, onRevPerDayChange) = remember(optionData) {
-        mutableStateOf(optionData.revPerDay.toString())
+    val selectedDto = remember(optionUsages, optionData.id) {
+        optionUsages.find { it.option.id == optionData.id }
     }
 
-    val (autoPlayAudio, onAutoPlayAudio) = remember(optionData) {
-        mutableStateOf(optionData.autoAudio)
-    }
 
-    val (autoShowAnswer, onAutoShowAnswer) = remember(optionData) {
-        mutableLongStateOf(optionData.autoShowAnswer)
-    }
+    // State for editable values
+    var newPerDay by rememberSaveable(optionData.id) { mutableStateOf(optionData.newPerDay.toString()) }
+    var revPerDay by rememberSaveable(optionData.id) { mutableStateOf(optionData.revPerDay.toString()) }
+    var autoPlayAudio by rememberSaveable(optionData.id) { mutableStateOf(optionData.autoAudio) }
+    var autoShowAnswer by rememberSaveable(optionData.id) { mutableLongStateOf(optionData.autoShowAnswer) }
 
-    val parameterState = remember(optionData) {
+    val parameterState = remember(optionData.id) {
         TextFieldState(initialText = optionData.fsrsParams.joinToString(", "))
     }
 
-    val shouldShowWarningDailyLimit by remember(optionData, newPerDay, revPerDay) {
+    val shouldShowWarningDailyLimit by remember(newPerDay, revPerDay) {
         derivedStateOf {
-            newPerDay.toLong() * 10 > revPerDay.toLong()
+            newPerDay.toLongOrNull()?.times(10)
+                ?.let { it > (revPerDay.toLongOrNull() ?: Long.MAX_VALUE) } == true
         }
     }
 
@@ -146,7 +120,7 @@ fun DeckOptionScreen(
     }
 
     LaunchedEffect(isLoading) {
-        if (isLoading == true) {
+        if (isLoading == false) {
             navController.navigateUp()
         }
     }
@@ -164,7 +138,7 @@ fun DeckOptionScreen(
     }
 
     Scaffold(
-//        modifier = Modifier.padding(LocalAwareWindowInset.current.asPaddingValues()),
+        modifier = Modifier.padding(LocalAwareWindowInset.current.asPaddingValues()),
         topBar = {
             TopAppBar(
                 title = {
@@ -184,6 +158,12 @@ fun DeckOptionScreen(
                     ) {
                         Icon(painterResource(R.drawable.ic_arrow_back_ios), null)
                     }
+                },
+                actions = {
+                    TopAppBarActionButton(
+                        optionData = optionData,
+                        action = viewModel::onAction
+                    )
                 }
             )
         }
@@ -196,9 +176,9 @@ fun DeckOptionScreen(
                 key = "dropdown_option"
             ) {
                 DropDownDeckOption(
-                    selectedOption = selectedOption,
                     datas = optionUsages,
                     action = viewModel::onAction,
+                    optionData = selectedDto,
                     onSave = {
                         viewModel.onAction(
                             DeckOptionUiAction.Save(
@@ -221,14 +201,14 @@ fun DeckOptionScreen(
                     title = stringResource(R.string.label_new_card_days),
                     subtitle = newPerDay,
                     value = newPerDay,
-                    onValueChange = onNewPerDayChange,
+                    onValueChange = { newPerDay = it },
                     singleLine = true
                 )
                 EditTextPreferenceWidget(
                     title = stringResource(R.string.label_maximum_review_days),
                     subtitle = revPerDay,
                     value = revPerDay,
-                    onValueChange = onRevPerDayChange,
+                    onValueChange = { revPerDay = it },
                     singleLine = true
                 )
                 AnimatedVisibility(
@@ -304,7 +284,7 @@ fun DeckOptionScreen(
                 SwitchPreferenceWidget(
                     title = "Don't play audio automatically",
                     checked = autoPlayAudio,
-                    onCheckedChanged = onAutoPlayAudio
+                    onCheckedChanged = { autoPlayAudio = it }
                 )
             }
 
@@ -317,7 +297,7 @@ fun DeckOptionScreen(
                     subtitle = autoShowAnswer.toString(),
                     value = autoShowAnswer.toString(),
                     onValueChange = {
-                        onAutoShowAnswer(it.toLong())
+                        autoShowAnswer = it.toLong()
                     }
                 )
             }
@@ -328,68 +308,47 @@ fun DeckOptionScreen(
 @Composable
 private fun DropDownDeckOption(
     modifier: Modifier = Modifier,
-    selectedOption: Long,
+    optionData: DeckOptionUsageDto?,
     datas: List<DeckOptionUsageDto>,
     onSave: () -> Unit,
     action: (DeckOptionUiAction) -> Unit
 ) {
     Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
         modifier = modifier
             .fillMaxWidth()
             .hozPadding()
     ) {
-        var showList by remember { mutableStateOf(false) }
-        var boxWidth by remember { mutableIntStateOf(0) }
-
-        Box(
-            modifier = Modifier
-                .weight(7f)
-                .shadow(4.dp, shape = MaterialTheme.shapes.medium, clip = false)
-                .clip(MaterialTheme.shapes.medium)
-                .clickable { showList = true }
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 12.dp, vertical = 8.dp)
-                .onGloballyPositioned { coordinates ->
-                    boxWidth = coordinates.size.width
-                }
-        ) {
-            Text(
-                text = datas.find { it.option.id == selectedOption }?.option?.name ?: "No deck",
-                textAlign = TextAlign.Start,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            DropdownMenu(
-                expanded = showList,
-                onDismissRequest = { showList = false },
-                modifier = Modifier.width(
-                    with(LocalDensity.current) { boxWidth.toDp() }
-                ) // <-- match width
-            ) {
-                datas.fastForEach {
-                    DropdownMenuItem(
-                        text = {
-                            Text(text = "${it.option.name} used by ${it.usage}")
-                        },
-                        onClick = {
-                            action(DeckOptionUiAction.UpdateSelectedOption(it.option.id))
-                            showList = false
-                        }
+        ImprovedDropdownMenu(
+            items = datas,
+            selectedItem = optionData,
+            onItemSelected = {
+                action(DeckOptionUiAction.ChangeSelectedOption(it.option.id))
+            },
+            itemLabel = {
+                it.option.name
+            },
+            itemSubLabel = {
+                if (it == null) {
+                    "No used"
+                } else {
+                    pluralStringResource(
+                        R.plurals.deck_used_by,
+                        it.usage.toInt(),
+                        it.usage.toInt()
                     )
                 }
-            }
-        }
-
+            },
+            modifier = Modifier.weight(8f)
+        )
 
         TextButton(
-            onClick = onSave,
+            onClick = {},
             modifier = Modifier.weight(2f)
         ) {
             Text(
-                text = "Save"
+                text = stringResource(R.string.action_save)
             )
         }
     }
@@ -410,7 +369,96 @@ private fun ConfirmChangeDialog(
     }
 }
 
-val fakeDeckOption = List(10) {
+@Composable
+private fun RowScope.TopAppBarActionButton(
+    optionData: DeckOptionEntity,
+    action: (DeckOptionUiAction) -> Unit
+) {
+    var showAddNewPreset by remember { mutableStateOf(false) }
+    var showClonePreset by remember { mutableStateOf(false) }
+    var showRenamePreset by remember { mutableStateOf(false) }
+    var showDeletePreset by remember { mutableStateOf(false) }
+
+    IconButtonTooltip(
+        iconRes = R.drawable.ic_add,
+        shortCutDescription = "Add new preset"
+    ) {
+        showAddNewPreset = true
+    }
+
+    IconButtonTooltip(
+        iconRes = R.drawable.ic_content_copy,
+        shortCutDescription = "Clone preset"
+    ) {
+        showClonePreset = true
+    }
+
+    IconButtonTooltip(
+        iconRes = R.drawable.ic_edit,
+        shortCutDescription = "Rename preset"
+    ) {
+        showRenamePreset = true
+    }
+
+    IconButtonTooltip(
+        iconRes = R.drawable.ic_delete,
+        shortCutDescription = "Delete preset"
+    ) {
+        showDeletePreset = true
+    }
+
+    if (showClonePreset) {
+        AlertDialog(
+            onDismiss = { showClonePreset = false },
+            onConfirm = {
+                action(DeckOptionUiAction.ClonePreset)
+                showClonePreset = false
+            }
+        ) {
+            Text(text = "Do you want to clone this preset")
+        }
+    }
+
+    if (showRenamePreset) {
+        TextFieldDialog(
+            onDismiss = { showRenamePreset = false },
+            onDone = {
+                action(DeckOptionUiAction.RenamePreset(it))
+                showRenamePreset = false
+            },
+            initialTextFieldValue = TextFieldValue(
+                text = optionData.name,
+                selection = TextRange(optionData.name.length)
+            )
+        )
+    }
+
+    if (showDeletePreset) {
+        AlertDialog(
+            onDismiss = { showDeletePreset = false },
+            onConfirm = {
+                action(DeckOptionUiAction.DeletePreset)
+                showDeletePreset = false
+            }
+        ) {
+            Text(text = "Do you want to delete this preset")
+        }
+    }
+
+    if (showAddNewPreset) {
+        AlertDialog(
+            onDismiss = { showAddNewPreset = false },
+            onConfirm = {
+                action(DeckOptionUiAction.NewPreset)
+                showAddNewPreset = false
+            }
+        ) {
+            Text(text = "Do you want to add new preset")
+        }
+    }
+}
+
+val fakeDeckOptionUsages = List(10) {
     DeckOptionUsageDto(
         option = defaultDeckOption.copy(
             id = it.toLong(),

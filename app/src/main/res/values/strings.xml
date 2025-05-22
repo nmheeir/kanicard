@@ -170,6 +170,7 @@
     <string name="action_show_front">Show front</string>
     <string name="action_show_back">Show back</string>
     <string name="action_optimize_preset">Optimize preset</string>
+    <string name="action_save">Save</string>
 
     <!--Markdown-->
     <string name="md_bold">Bold</string>
@@ -194,6 +195,11 @@
     <!--Plurals-->
     <plurals name="n_selected">
         <item quantity="other">%d selected</item>
+    </plurals>
+
+    <plurals name="deck_used_by">
+        <item quantity="one">used by %d deck</item>
+        <item quantity="other">used by %d decks</item>
     </plurals>
 
     <plurals name="relative_minute_ago">

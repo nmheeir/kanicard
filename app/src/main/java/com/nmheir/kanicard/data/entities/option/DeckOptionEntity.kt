@@ -21,7 +21,37 @@ data class DeckOptionEntity(
     val autoShowAnswer: Long,       //Seconds
     val autoAudio: Boolean,
     val autoAnswer: Boolean
-)
+) {
+    fun clone(): DeckOptionEntity {
+        return DeckOptionEntity(
+            name = "Clone of $name",
+            createdAt = OffsetDateTime.now(),
+            updatedAt = null,
+            newPerDay = newPerDay,
+            revPerDay = revPerDay,
+            fsrsParams = fsrsParams,
+            autoShowAnswer = autoShowAnswer,
+            autoAudio = autoAudio,
+            autoAnswer = autoAnswer
+        )
+    }
+
+    companion object {
+        fun new(): DeckOptionEntity {
+            return DeckOptionEntity(
+                name = defaultDeckOption.name,
+                createdAt = OffsetDateTime.now(),
+                updatedAt = null,
+                newPerDay = defaultDeckOption.newPerDay,
+                revPerDay = defaultDeckOption.revPerDay,
+                fsrsParams = defaultDeckOption.fsrsParams,
+                autoShowAnswer = defaultDeckOption.autoShowAnswer,
+                autoAudio = defaultDeckOption.autoAudio,
+                autoAnswer = defaultDeckOption.autoAnswer
+            )
+        }
+    }
+}
 
 val defaultDeckOption = DeckOptionEntity(
     id = 1L,

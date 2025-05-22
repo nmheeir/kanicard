@@ -5,13 +5,15 @@ package com.nmheir.kanicard.ui.viewmodels
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nmheir.kanicard.data.entities.option.DeckOptionEntity
 import com.nmheir.kanicard.data.entities.option.defaultDeckOption
 import com.nmheir.kanicard.domain.repository.IDeckOptionRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,18 +24,18 @@ class DeckOptionViewModel @Inject constructor(
     private val optionRepo: IDeckOptionRepo
 ) : ViewModel() {
     private val dOptionId = savedStateHandle.get<Long>("optionId") ?: 1L
-
-    val selectedDeckOption = MutableStateFlow(dOptionId)
-
-    val optionData = selectedDeckOption
-        .flatMapLatest {
-            optionRepo.getDeckOption(it)
-        }.stateIn(viewModelScope, SharingStarted.Lazily, defaultDeckOption)
+    private val selectedDeckOptionId = MutableStateFlow(dOptionId)
 
     val optionUsages = optionRepo.getDeckOptionUsage()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    val isLoading = MutableStateFlow(false)
+    val optionData = combine(
+        optionUsages, selectedDeckOptionId
+    ) { list, id ->
+        list.find { it.option.id == id }?.option ?: defaultDeckOption
+    }.distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.Lazily, defaultDeckOption)
+    val isLoading = MutableStateFlow<Boolean?>(null)
 
 
     fun onAction(action: DeckOptionUiAction) {
@@ -48,9 +50,47 @@ class DeckOptionViewModel @Inject constructor(
                 )
             }
 
-            is DeckOptionUiAction.UpdateSelectedOption -> {
-                selectedDeckOption.value = action.optionId
+            is DeckOptionUiAction.ChangeSelectedOption -> {
+                selectedDeckOptionId.value = action.optionId
             }
+
+            DeckOptionUiAction.ClonePreset -> {
+                clonePreset()
+            }
+
+            DeckOptionUiAction.DeletePreset -> {
+                deletePreset()
+            }
+
+            DeckOptionUiAction.NewPreset -> {
+                newPreset()
+            }
+
+            is DeckOptionUiAction.RenamePreset -> {
+                viewModelScope.launch {
+                    optionRepo.update(optionData.value.id, action.name)
+                }
+            }
+        }
+    }
+
+    private fun newPreset() {
+        viewModelScope.launch {
+            optionRepo.insert(DeckOptionEntity.new())
+        }
+    }
+
+    private fun deletePreset() {
+        viewModelScope.launch {
+            optionRepo.delete(optionData.value)
+        }
+    }
+
+    private fun clonePreset() {
+        viewModelScope.launch {
+            val clone = optionData.value.clone()
+            optionRepo.insert(clone)
+            selectedDeckOptionId.value = clone.id
         }
     }
 
@@ -85,5 +125,10 @@ sealed interface DeckOptionUiAction {
         val fsrsParams: List<Double>
     ) : DeckOptionUiAction
 
-    data class UpdateSelectedOption(val optionId: Long) : DeckOptionUiAction
+    data class ChangeSelectedOption(val optionId: Long) : DeckOptionUiAction
+
+    data object NewPreset : DeckOptionUiAction
+    data object ClonePreset : DeckOptionUiAction
+    data object DeletePreset : DeckOptionUiAction
+    data class RenamePreset(val name: String) : DeckOptionUiAction
 }

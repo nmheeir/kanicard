@@ -34,8 +34,8 @@ fun NavGraphBuilder.navigationBuilder(
 
     composable(Screens.MainScreen.Home.route) {
 //        TestScreen()
-        HomeScreen(navController = navController)
-//        DeckOptionScreen(navController)
+//        HomeScreen(navController = navController)
+        DeckOptionScreen(navController)
     }
 
     composable(Screens.MainScreen.Statistics.route) {

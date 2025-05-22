@@ -23,7 +23,26 @@ class DeckOptionRepo @Inject constructor(
         return database.getDeckOptionUsages()
     }
 
+    override suspend fun insert(option: DeckOptionEntity) {
+        return database.insert(option)
+    }
+
     override suspend fun update(deckOptionEntity: DeckOptionEntity) {
         return database.update(deckOptionEntity)
+    }
+
+    override suspend fun update(id: Long, name: String?) {
+        return database.updateDeckOption(
+            id = id,
+            name = name
+        )
+    }
+
+    override suspend fun delete(option: DeckOptionEntity) {
+        return database.delete(option)
+    }
+
+    override suspend fun delete(id: Long) {
+        return database.deleteDeckOption(id)
     }
 }
