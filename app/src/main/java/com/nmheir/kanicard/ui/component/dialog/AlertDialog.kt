@@ -1,6 +1,10 @@
 package com.nmheir.kanicard.ui.component.dialog
 
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -13,6 +17,8 @@ fun AlertDialog(
     preventDismissRequest: Boolean = false,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
+    confirmText: String = stringResource(R.string.ok),
+    dismissText: String = stringResource(R.string.cancel),
     enableButton: () -> Boolean = { true },
     icon: (@Composable () -> Unit)? = null,
     title: (@Composable () -> Unit)? = null,
@@ -23,9 +29,12 @@ fun AlertDialog(
         onDismiss = onDismiss,
         buttons = {
             TextButton(
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error
+                ),
                 onClick = onDismiss
             ) {
-                Text(text = stringResource(R.string.cancel))
+                Text(text = dismissText)
             }
             TextButton(
                 enabled = enableButton(),
@@ -33,7 +42,7 @@ fun AlertDialog(
                     onConfirm()
                 }
             ) {
-                Text(text = stringResource(R.string.ok))
+                Text(text = confirmText)
             }
         },
         icon = icon,

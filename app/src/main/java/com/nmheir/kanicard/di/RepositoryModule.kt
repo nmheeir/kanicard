@@ -2,6 +2,7 @@ package com.nmheir.kanicard.di
 
 import com.nmheir.kanicard.data.repository.CardRepo
 import com.nmheir.kanicard.data.repository.CollectionRepo
+import com.nmheir.kanicard.data.repository.DeckOptionRepo
 import com.nmheir.kanicard.data.repository.DeckRepo
 import com.nmheir.kanicard.data.repository.FieldRepo
 import com.nmheir.kanicard.data.repository.NoteRepo
@@ -10,6 +11,7 @@ import com.nmheir.kanicard.data.repository.StatisticRepo
 import com.nmheir.kanicard.data.repository.TemplateRepo
 import com.nmheir.kanicard.domain.repository.ICardRepo
 import com.nmheir.kanicard.domain.repository.ICollectionRepo
+import com.nmheir.kanicard.domain.repository.IDeckOptionRepo
 import com.nmheir.kanicard.domain.repository.IDeckRepo
 import com.nmheir.kanicard.domain.repository.IFieldRepo
 import com.nmheir.kanicard.domain.repository.INoteRepo
@@ -50,4 +52,7 @@ interface RepositoryModule {
 
     @Binds
     fun bindNoteRepo(noteRepo: NoteRepo): INoteRepo
+
+    @Binds
+    fun bindDeckOptionRepo(deckOptionRepo: DeckOptionRepo): IDeckOptionRepo
 }

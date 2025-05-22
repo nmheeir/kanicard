@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
@@ -20,9 +21,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.nmheir.kanicard.R
 import com.nmheir.kanicard.core.presentation.utils.secondaryItemAlpha
 import com.nmheir.kanicard.ui.component.dialog.ListDialog
+import com.nmheir.kanicard.ui.component.dialog.TextFieldDialog
 
 @Composable
 fun TextPreferenceWidget(
@@ -142,5 +147,50 @@ fun <T> ListPreferenceWidget(
         subtitle = valueText(selectedValue),
         icon = icon,
         onPreferenceClick = { showDialog = true }
+    )
+}
+
+@Composable
+fun EditTextPreferenceWidget(
+    modifier: Modifier = Modifier,
+    title: String,
+    subtitle: String? = null,
+    @DrawableRes icon: Int? = null,
+    value: String,
+    onValueChange: (String) -> Unit,
+    singleLine: Boolean = true,
+    isInputValid: (String) -> Boolean = { it.isNotEmpty() },
+    isEnabled: Boolean = true,
+) {
+    var showDialog by remember {
+        mutableStateOf(false)
+    }
+
+    if (showDialog) {
+        TextFieldDialog(
+            initialTextFieldValue = TextFieldValue(
+                text = value,
+                selection = TextRange(value.length)
+            ),
+            singleLine = singleLine,
+            isInputValid = isInputValid,
+            onDone = onValueChange,
+            onDismiss = { showDialog = false }
+        )
+    }
+
+    TextPreferenceWidget(
+        modifier = modifier,
+        title = title,
+        subtitle = subtitle,
+        icon = icon,
+        widget = {
+            IconButton(
+                enabled = isEnabled,
+                onClick = { showDialog = true }
+            ) {
+                Icon(painterResource(R.drawable.ic_edit), null)
+            }
+        }
     )
 }

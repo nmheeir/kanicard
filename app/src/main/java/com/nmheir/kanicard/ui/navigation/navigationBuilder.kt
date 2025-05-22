@@ -13,6 +13,7 @@ import com.nmheir.kanicard.ui.screen.BrowseCardScreen
 import com.nmheir.kanicard.ui.screen.DeckDetailScreen
 import com.nmheir.kanicard.ui.screen.HomeScreen
 import com.nmheir.kanicard.ui.screen.Screens
+import com.nmheir.kanicard.ui.screen.deck.DeckOptionScreen
 import com.nmheir.kanicard.ui.screen.learn.LearningScreen
 import com.nmheir.kanicard.ui.screen.note.NoteEditorScreen
 import com.nmheir.kanicard.ui.screen.note.NoteTemplateScreen
@@ -34,6 +35,7 @@ fun NavGraphBuilder.navigationBuilder(
     composable(Screens.MainScreen.Home.route) {
 //        TestScreen()
         HomeScreen(navController = navController)
+//        DeckOptionScreen(navController)
     }
 
     composable(Screens.MainScreen.Statistics.route) {
@@ -118,6 +120,18 @@ fun NavGraphBuilder.navigationBuilder(
         )
     ) {
         PreviewNoteScreen(navController)
+    }
+
+    composable(
+        route = "${Screens.Base.Deck.route}/${Screens.Base.DeckOption.route}/{optionId}",
+        arguments = listOf(
+            navArgument("optionId") {
+                type = NavType.LongType
+                defaultValue = 1L
+            }
+        )
+    ) {
+        DeckOptionScreen(navController)
     }
 
     composable(

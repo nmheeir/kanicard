@@ -107,6 +107,7 @@ val fakeDeckWidgetData = List(10) { index ->
         learnCount = Random.nextInt(0, 50),
         newCount = Random.nextInt(0, 30),
         dueToday = Random.nextInt(0, 20),
+        optionId = index.toLong(),
         lastReview = if (Random.nextBoolean()) {
             OffsetDateTime.now(ZoneOffset.UTC).minusDays(Random.nextLong(0, 30))
         } else {

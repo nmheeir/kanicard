@@ -11,6 +11,7 @@ import androidx.room.Update
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.nmheir.kanicard.data.dto.card.CardBrowseDto
 import com.nmheir.kanicard.data.dto.deck.DeckData
+import com.nmheir.kanicard.data.dto.deck.DeckOptionUsageDto
 import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
 import com.nmheir.kanicard.data.entities.SearchHistoryEntity
 import com.nmheir.kanicard.data.entities.card.TemplateEntity
@@ -98,6 +99,9 @@ interface DatabaseDao {
 
     @Update
     suspend fun update(noteType: NoteTypeEntity)
+
+    @Update
+    suspend fun update(option: DeckOptionEntity)
 
     @Query(
         """
@@ -216,6 +220,7 @@ interface DatabaseDao {
         SELECT
           d.id               AS deckId,
           d.name             AS name,
+          d.oId              AS optionId,
           
           -- Tổng số thẻ ở trạng thái REVIEW và đến hạn
           SUM(
@@ -321,7 +326,7 @@ interface DatabaseDao {
 
     @Transaction
     @Query("SELECT * FROM notes WHERE id IN (:nIds)")
-    fun getNoteAndTemplateByNoteIds(nIds: List<Long>) : Flow<List<NoteAndTemplate>>
+    fun getNoteAndTemplateByNoteIds(nIds: List<Long>): Flow<List<NoteAndTemplate>>
 
     /*End Note*/
     /*-------------------------------------------------------------------------*/
@@ -380,6 +385,37 @@ interface DatabaseDao {
 
     /*End Review*/
     /*-------------------------------------------------------------------------*/
+
+    /*-------------------------------------------------------------------------*/
+    /*DeckOption*/
+
+    @Query("SELECT * FROM deck_options WHERE id = :id")
+    fun getDeckOption(id: Long): Flow<DeckOptionEntity?>
+
+    @Query(
+    """
+        SELECT  o.id,
+                o.name,
+                o.createdAt,
+                o.updatedAt,
+                o.newPerDay,
+                o.revPerDay,
+                o.fsrsParams,
+                o.autoShowAnswer,
+                o.autoAudio,
+                o.autoAnswer,
+                COUNT(d.id) AS usage
+        FROM deck_options o
+        LEFT JOIN decks d ON d.oId = o.id
+        GROUP BY o.id, o.name
+    """
+    )
+    fun getDeckOptionUsages(): Flow<List<DeckOptionUsageDto>>
+
+
+    /*End DeckOption*/
+    /*-------------------------------------------------------------------------*/
+
     @RawQuery
     fun raw(supportSQLiteQuery: SupportSQLiteQuery): Int
 

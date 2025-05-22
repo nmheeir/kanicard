@@ -193,15 +193,18 @@ private fun HomeContent(
         items(
             items = collectionWithDeckWidgetData,
             key = { it.collection.id }
-        ) {
+        ) { data ->
             CollectionWithDeck(
-                data = it,
+                data = data,
                 onAdd = {
                     navController.navigate("${Screens.Base.NoteEditor.route}?deckId=${it}")
                 },
                 onLearn = { navController.navigate("learn/${it}") },
                 onView = { navController.navigate("deck/${it}") },
-                action = action
+                action = action,
+                onConfig = {
+                    navController.navigate("${Screens.Base.Deck.route}/${Screens.Base.DeckOption.route}/$it")
+                }
             )
         }
     }
@@ -214,7 +217,8 @@ private fun CollectionWithDeck(
     onAdd: (Long) -> Unit,
     onLearn: (Long) -> Unit,
     onView: (Long) -> Unit,
-    action: (HomeUiAction) -> Unit
+    action: (HomeUiAction) -> Unit,
+    onConfig: (Long) -> Unit
 ) {
     var showMore by rememberSaveable { mutableStateOf(false) }
     Column(
@@ -262,7 +266,11 @@ private fun CollectionWithDeck(
                                         showEditDialog = true
                                     }
 
-                                    DeckOptions.Config -> {}
+                                    DeckOptions.Config -> {
+                                        showOptionDialog = false
+                                        onConfig(deckWidgetData.optionId)
+                                    }
+
                                     DeckOptions.Delete -> {
                                         showDeleteDialog = true
                                     }
