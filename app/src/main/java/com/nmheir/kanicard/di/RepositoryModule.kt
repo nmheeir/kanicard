@@ -6,6 +6,7 @@ import com.nmheir.kanicard.data.repository.DeckOptionRepo
 import com.nmheir.kanicard.data.repository.DeckRepo
 import com.nmheir.kanicard.data.repository.FieldRepo
 import com.nmheir.kanicard.data.repository.NoteRepo
+import com.nmheir.kanicard.data.repository.ReviewLogRepo
 import com.nmheir.kanicard.data.repository.ReviewRepo
 import com.nmheir.kanicard.data.repository.StatisticRepo
 import com.nmheir.kanicard.data.repository.TemplateRepo
@@ -15,6 +16,7 @@ import com.nmheir.kanicard.domain.repository.IDeckOptionRepo
 import com.nmheir.kanicard.domain.repository.IDeckRepo
 import com.nmheir.kanicard.domain.repository.IFieldRepo
 import com.nmheir.kanicard.domain.repository.INoteRepo
+import com.nmheir.kanicard.domain.repository.IReviewLogRepo
 import com.nmheir.kanicard.domain.repository.IReviewRepo
 import com.nmheir.kanicard.domain.repository.IStatisticRepo
 import com.nmheir.kanicard.domain.repository.ITemplateRepo
@@ -55,4 +57,7 @@ interface RepositoryModule {
 
     @Binds
     fun bindDeckOptionRepo(deckOptionRepo: DeckOptionRepo): IDeckOptionRepo
+
+    @Binds
+    fun bindReviewLogRepo(reviewLogRepo: ReviewLogRepo): IReviewLogRepo
 }

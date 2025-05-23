@@ -24,7 +24,7 @@ import com.nmheir.kanicard.ui.screen.settings.screen.SettingAppearanceScreen
 import com.nmheir.kanicard.ui.screen.settings.screen.SettingScreen
 import com.nmheir.kanicard.ui.screen.settings.screen.SettingsAdvancedScreen
 import com.nmheir.kanicard.ui.screen.state.LearningCompleteScreen
-import com.nmheir.kanicard.ui.screen.statistics.StatisticsScreen
+import com.nmheir.kanicard.ui.screen.statistics.StatisticScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 fun NavGraphBuilder.navigationBuilder(
@@ -39,7 +39,7 @@ fun NavGraphBuilder.navigationBuilder(
     }
 
     composable(Screens.MainScreen.Statistics.route) {
-        StatisticsScreen()
+        StatisticScreen(navController)
     }
 
     composable(

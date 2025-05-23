@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 interface ICardRepo {
     fun getDueCardsToday(deckId: Long): Flow<List<FsrsCardEntity>?>
     fun getBrowseCard(dId: Long): Flow<List<CardBrowseData>?>
+    fun getAllCards(dId: Long = -1L): Flow<List<FsrsCardEntity>>
 
     suspend fun cardsByDeckId(deckId: Long, pageNumber: Int): List<CardDto>
 

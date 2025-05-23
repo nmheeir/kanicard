@@ -64,7 +64,7 @@ interface DatabaseDao {
     suspend fun insert(collection: CollectionEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(option: DeckOptionEntity) : Long
+    suspend fun insert(option: DeckOptionEntity): Long
 
     /*Insert list*/
 
@@ -185,9 +185,6 @@ interface DatabaseDao {
     """
     )
     fun getFsrsCardByDeckId(deckId: Long): Flow<List<FsrsCardEntity>?>
-
-    @Query("SELECT * FROM review_logs")
-    fun getReviewLogs(): Flow<List<ReviewLogEntity>>
 
     @Query("SELECT * FROM note_types")
     fun getNoteTypes(): Flow<List<NoteTypeEntity>?>
@@ -361,6 +358,12 @@ interface DatabaseDao {
     /*-------------------------------------------------------------------------*/
     /*Card*/
 
+    @Query("SELECT * FROM fsrs_card")
+    fun getAllCards(): Flow<List<FsrsCardEntity>>
+
+    @Query("SELECT * FROM fsrs_card WHERE dId = :dId")
+    fun getAllCards(dId: Long): Flow<List<FsrsCardEntity>>
+
     @Query(
         """
             SELECT
@@ -439,9 +442,14 @@ interface DatabaseDao {
     )
     fun getDeckOptionUsages(): Flow<List<DeckOptionUsageDto>>
 
-
     /*End DeckOption*/
     /*-------------------------------------------------------------------------*/
+
+    @Query("SELECT * FROM review_logs")
+    fun getReviewLogs(): Flow<List<ReviewLogEntity>>
+    /*-------------------------------------------------------------------------*/
+    /*Review Log*/
+
 
     @RawQuery
     fun raw(supportSQLiteQuery: SupportSQLiteQuery): Int
