@@ -113,6 +113,10 @@
     <string name="label_answer">Answer</string>
     <string name="label_import_csv">Import CSV File</string>
     <string name="label_export_csv">Export to CSV File</string>
+    <string name="label_new_card_days">New cards/day</string>
+    <string name="label_maximum_review_days">Maximum reviews/day</string>
+    <string name="label_fsrs_param">FSRS parameters</string>
+    <string name="label_fsrs_simulator">FSRS simulator</string>
 
     <!--Category-->
     <string name="pref_category_appearance">Appearance</string>
@@ -125,6 +129,10 @@
     <string name="pref_category_import_deck">Imported Decks</string>
     <string name="pref_category_all_deck">All</string>
     <string name="pref_category_latest_review">My latest review</string>
+    <string name="pref_daily_limit">Daily Limits</string>
+    <string name="pref_fsrs">FSRS</string>
+    <string name="pref_audio">Audio</string>
+    <string name="pref_auto_advance">Auto Advance</string>
     <!--Summary-->
     <string name="pref_appearance_summary">Theme, date &amp; time format</string>
     <string name="pref_security_summary">App lock, secure screen</string>
@@ -138,6 +146,7 @@
     <string name="info_last_review">Last review</string>
     <string name="info_no_review">No review</string>
     <string name="info_no_collection_choose">No collection choose</string>
+    <string name="info_recently">recently</string>
 
     <!--Action-->
     <string name="action_add_cards">Add Cards</string>
@@ -160,6 +169,8 @@
     <string name="action_copy_as_markdown">Copy as Markdown</string>
     <string name="action_show_front">Show front</string>
     <string name="action_show_back">Show back</string>
+    <string name="action_optimize_preset">Optimize preset</string>
+    <string name="action_save">Save</string>
 
     <!--Markdown-->
     <string name="md_bold">Bold</string>
@@ -180,8 +191,38 @@
     <string name="sub_title_backup">Back up all data and application settings</string>
     <string name="sub_title_restore">Restore all data and application settings from a backup</string>
     <string name="sub_title_csv_import_export">Import or export database data in CSV format</string>
-    
+
+    <!--Plurals-->
     <plurals name="n_selected">
         <item quantity="other">%d selected</item>
+    </plurals>
+
+    <plurals name="deck_used_by">
+        <item quantity="one">used by %d deck</item>
+        <item quantity="other">used by %d decks</item>
+    </plurals>
+
+    <plurals name="relative_minute_ago">
+        <item quantity="one">%d minute ago</item>
+        <item quantity="other">%d minutes ago</item>
+    </plurals>
+
+    <plurals name="relative_hours_ago">
+        <item quantity="one">%d hour ago</item>
+        <item quantity="other">%d hours ago</item>
+    </plurals>
+
+    <plurals name="relative_days_ago">
+        <item quantity="one">%d day ago</item>
+        <item quantity="other">%d days ago</item>
+    </plurals>
+
+    <plurals name="relative_months_ago">
+        <item quantity="one">%d month ago</item>
+        <item quantity="other">%d months ago</item>
+    </plurals>
+
+    <plurals name="daily_limit_warning">
+        <item quantity="other">If adding %1$d new cards each day, your review limit should be at least %2$d.</item>
     </plurals>
 </resources>

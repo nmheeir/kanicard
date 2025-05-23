@@ -13,6 +13,7 @@ import com.nmheir.kanicard.ui.screen.BrowseCardScreen
 import com.nmheir.kanicard.ui.screen.DeckDetailScreen
 import com.nmheir.kanicard.ui.screen.HomeScreen
 import com.nmheir.kanicard.ui.screen.Screens
+import com.nmheir.kanicard.ui.screen.deck.DeckOptionScreen
 import com.nmheir.kanicard.ui.screen.learn.LearningScreen
 import com.nmheir.kanicard.ui.screen.note.NoteEditorScreen
 import com.nmheir.kanicard.ui.screen.note.NoteTemplateScreen
@@ -23,7 +24,7 @@ import com.nmheir.kanicard.ui.screen.settings.screen.SettingAppearanceScreen
 import com.nmheir.kanicard.ui.screen.settings.screen.SettingScreen
 import com.nmheir.kanicard.ui.screen.settings.screen.SettingsAdvancedScreen
 import com.nmheir.kanicard.ui.screen.state.LearningCompleteScreen
-import com.nmheir.kanicard.ui.screen.statistics.StatisticsScreen
+import com.nmheir.kanicard.ui.screen.statistics.StatisticScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 fun NavGraphBuilder.navigationBuilder(
@@ -34,10 +35,11 @@ fun NavGraphBuilder.navigationBuilder(
     composable(Screens.MainScreen.Home.route) {
 //        TestScreen()
         HomeScreen(navController = navController)
+//        DeckOptionScreen(navController)
     }
 
     composable(Screens.MainScreen.Statistics.route) {
-        StatisticsScreen()
+        StatisticScreen(navController)
     }
 
     composable(
@@ -118,6 +120,22 @@ fun NavGraphBuilder.navigationBuilder(
         )
     ) {
         PreviewNoteScreen(navController)
+    }
+
+    composable(
+        route = "${Screens.Base.Deck.route}/{deckId}/${Screens.Base.DeckOption.route}/{optionId}",
+        arguments = listOf(
+            navArgument("optionId") {
+                type = NavType.LongType
+                defaultValue = 1L
+            },
+            navArgument("deckId") {
+                type = NavType.LongType
+                defaultValue = -1L
+            }
+        )
+    ) {
+        DeckOptionScreen(navController, topAppBarScrollBehavior)
     }
 
     composable(

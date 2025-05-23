@@ -20,6 +20,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -86,32 +87,36 @@ fun LearningScreen(
             )
         }
     ) { pv ->
-        if (haveData == false) {
-            Text(
-                text = "No data to learn"
-            )
-        }
-        if (datas.isNotEmpty()) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(pv)
-            ) {
-                StateCountSection(
-                    data = stateCount
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.padding(pv)
+        ) {
+            if (haveData == false) {
+                Text(
+                    text = "No data to learn"
                 )
-
-                Box(
-                    modifier = Modifier
-                        .weight(1f)          // <-- quan trọng: cho Box chiếm toàn bộ remaining space
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
+            }
+            if (datas.isNotEmpty()) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    LearningSection(
-                        datas = datas,
-                        ratingDue = ratingDueInfo,
-                        action = viewModel::onAction
+                    StateCountSection(
+                        data = stateCount
                     )
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)          // <-- quan trọng: cho Box chiếm toàn bộ remaining space
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        LearningSection(
+                            datas = datas,
+                            ratingDue = ratingDueInfo,
+                            action = viewModel::onAction
+                        )
+                    }
                 }
             }
         }
@@ -209,6 +214,9 @@ private fun LearnFlashcard(
 ) {
     val flipController = rememberFlipController()
     val swipeState = rememberSwipeableCardState()
+    val enableFlip by remember(showRating) {
+        derivedStateOf { showRating }
+    }
 
     LaunchedEffect(showRating) {
         Timber.d("Show rating: %s %d", showRating.toString(), data.id)
@@ -219,18 +227,18 @@ private fun LearnFlashcard(
         }
     }
 
-   /* LaunchedEffect(onRatingChoose) {
-        if (onRatingChoose != null) {
-            swipeState.swipe(
-                direction  = when (onRatingChoose) {
-                    Rating.Again -> SwipeDirection.Left
-                    Rating.Hard -> SwipeDirection.Left
-                    Rating.Good -> SwipeDirection.Right
-                    Rating.Easy -> SwipeDirection.Right
-                }
-            )
-        }
-    }*/
+    /* LaunchedEffect(onRatingChoose) {
+         if (onRatingChoose != null) {
+             swipeState.swipe(
+                 direction  = when (onRatingChoose) {
+                     Rating.Again -> SwipeDirection.Left
+                     Rating.Hard -> SwipeDirection.Left
+                     Rating.Good -> SwipeDirection.Right
+                     Rating.Easy -> SwipeDirection.Right
+                 }
+             )
+         }
+     }*/
 
     InteractiveFlashcard(
         modifier = Modifier
@@ -241,7 +249,8 @@ private fun LearnFlashcard(
             ),
         flipController = flipController,
         qHtml = data.noteData.qHtml,
-        aHtml = data.noteData.aHtml
+        aHtml = data.noteData.aHtml,
+        enableFlip = enableFlip
     )
 }
 

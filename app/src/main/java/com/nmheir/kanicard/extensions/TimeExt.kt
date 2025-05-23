@@ -1,31 +1,45 @@
 package com.nmheir.kanicard.extensions
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import com.nmheir.kanicard.R
+import timber.log.Timber
 import java.time.Duration
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 
+@Composable
 fun OffsetDateTime.relativeTime(): String {
     val now = OffsetDateTime.now()
-    // Nếu trong quá khứ; ngược lại có thể trả về "in the future" hoặc tùy xử lý
-    if (this.isAfter(now)) return "in the future"
+
+    if (this.isAfter(now)) return "In the future"
+
+    val seconds = ChronoUnit.SECONDS.between(this, now)
+    if (seconds < 60) {
+        return stringResource(R.string.info_recently)
+    }
+
+    val minutes = ChronoUnit.MINUTES.between(this, now)
+    if (minutes < 60) {
+        return pluralStringResource(R.plurals.relative_minute_ago, minutes.toInt(), minutes)
+    }
 
     val hours = ChronoUnit.HOURS.between(this, now)
     if (hours < 24) {
-        return "$hours hour${if (hours != 1L) "s" else ""} ago"
+        return pluralStringResource(R.plurals.relative_hours_ago, hours.toInt(), hours)
     }
 
     val days = ChronoUnit.DAYS.between(this, now)
     if (days < 30) {
-        return "$days day${if (days != 1L) "s" else ""} ago"
+        return pluralStringResource(R.plurals.relative_days_ago, days.toInt(), days)
     }
 
     val months = ChronoUnit.MONTHS.between(this, now)
-    return when {
-        months < 1 -> "1 month ago"                  // đã qua 30–59 ngày
-        else -> "$months month${if (months != 1L) "s" else ""} ago"
-    }
+    val showMonths = if (months < 1) 1 else months
+    return pluralStringResource(R.plurals.relative_months_ago, showMonths.toInt(), showMonths)
 }
 
 fun OffsetDateTime.timeUntilDue(): String {
@@ -48,13 +62,26 @@ fun OffsetDateTime.timeUntilDue(): String {
 
     // 3) Nếu < 24 giờ → hiển thị giờ thập phân
     val totalHours = duration.toHours()
+
     if (totalHours < 24) {
         val hours = totalHours
         val minutesRem = totalMinutes % 60
         val decimal = hours + minutesRem / 60.0
-        // Giữ 1 chữ số sau dấu thập phân
-        return "${"%.1f".format(decimal)}h"
+        Timber.d("Decimal: %s", decimal.toString())
+        Timber.d("Minute rem: %s", minutesRem.toString())
+        Timber.d("Hours: %s", hours.toString())
+
+        val formattedDecimal = "%.1f".format(decimal)
+        Timber.d("Formatted decimal: %s", formattedDecimal)
+
+        return if (formattedDecimal == "24,0") {
+            "1d"
+        } else {
+            "< ${formattedDecimal}h"
+        }
     }
+
+
 
     // 4) Nếu < 30 ngày → hiển thị ngày thập phân
     val totalDays = duration.toDays()

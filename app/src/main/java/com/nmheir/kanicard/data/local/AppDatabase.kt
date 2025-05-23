@@ -10,13 +10,14 @@ import com.nmheir.kanicard.data.converters.Converters
 import com.nmheir.kanicard.data.entities.SearchHistoryEntity
 import com.nmheir.kanicard.data.entities.card.TemplateEntity
 import com.nmheir.kanicard.data.entities.deck.CollectionEntity
-import com.nmheir.kanicard.data.entities.deck.DeckConfigEntity
+import com.nmheir.kanicard.data.entities.option.DeckOptionEntity
 import com.nmheir.kanicard.data.entities.deck.DeckEntity
 import com.nmheir.kanicard.data.entities.fsrs.FsrsCardEntity
 import com.nmheir.kanicard.data.entities.fsrs.ReviewLogEntity
 import com.nmheir.kanicard.data.entities.note.FieldEntity
 import com.nmheir.kanicard.data.entities.note.NoteEntity
 import com.nmheir.kanicard.data.entities.note.NoteTypeEntity
+import javax.inject.Provider
 
 class KaniDatabase(
     private val delegate: InternalDatabase
@@ -52,10 +53,10 @@ class KaniDatabase(
         NoteTypeEntity::class,
         TemplateEntity::class,
         FieldEntity::class,
-        DeckConfigEntity::class,
+        DeckOptionEntity::class,
         CollectionEntity::class
     ],
-    version = 1,
+    version = 4,
     exportSchema = true,
     autoMigrations = [
     ]
@@ -67,10 +68,13 @@ abstract class InternalDatabase : RoomDatabase() {
     companion object {
         const val DB_NAME = "kanicard.db"
 
-        fun newInstance(context: Context) =
+        fun newInstance(
+            context: Context,
+            roomCallBack: RoomCallBack
+        ) =
             KaniDatabase(
                 delegate = Room.databaseBuilder(context, InternalDatabase::class.java, DB_NAME)
-                    .addCallback(roomTrigger)
+                    .addCallback(roomCallBack)
                     .fallbackToDestructiveMigration()
                     .build()
             )

@@ -15,8 +15,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -40,7 +38,7 @@ class HomeViewModel @Inject constructor(
     val collections = collectionRepo.getAllCollections()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    val deckWidgetData = deckRepo.getAllDeckWidgetData()
+    private val deckWidgetData = deckRepo.getAllDeckWidgetData()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     private val collectionWithDecks = collectionRepo.getAllCollectionWithDecks()
@@ -117,7 +115,7 @@ class HomeViewModel @Inject constructor(
             val deckDto = DeckDto(
                 name = name,
                 description = "",
-                collectionId = collectionId,
+                colId = collectionId,
                 createdTime = OffsetDateTime.now(),
             )
 

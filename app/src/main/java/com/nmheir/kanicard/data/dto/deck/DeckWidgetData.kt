@@ -4,6 +4,7 @@ import java.time.OffsetDateTime
 
 data class DeckWidgetData(
     val deckId: Long,
+    val optionId: Long,
     val name: String,
     val reviewCount: Int,
     val learnCount: Int,

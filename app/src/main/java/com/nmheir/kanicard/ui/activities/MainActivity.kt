@@ -197,11 +197,11 @@ class MainActivity : ComponentActivity() {
                         if (it.isNotEmpty()) {
                             onActiveChange(false)
                             navController.navigate("${Screens.Base.Search}/$it")
-                            if (dataStore[PauseSearchHistoryKey] != true) {
+                            /*if (dataStore[PauseSearchHistoryKey] != true) {
                                 database.query {
                                     insert(SearchHistoryEntity(query = it))
                                 }
-                            }
+                            }*/
                         }
                     }
 

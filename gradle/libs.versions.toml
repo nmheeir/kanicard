@@ -1,5 +1,6 @@
 [versions]
 agp = "8.9.0"
+composeWebview = "0.33.6"
 kotlin = "2.0.10"
 coreKtx = "1.15.0"
 junit = "4.13.2"
@@ -41,6 +42,8 @@ motionComposeCore = "1.2.1"
 appcompat = "1.7.0"
 
 commonmark = "0.24.0"
+
+vico = "2.1.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -90,11 +93,11 @@ room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 
 supabase-bom = { module = "io.github.jan-tennert.supabase:bom", version.ref = "supabase-bom" }
-supabase-postgrest= { module = "io.github.jan-tennert.supabase:postgrest-kt" }
+supabase-postgrest = { module = "io.github.jan-tennert.supabase:postgrest-kt" }
 supabase-realtime = { module = "io.github.jan-tennert.supabase:realtime-kt" }
 supabase-auth = { module = "io.github.jan-tennert.supabase:auth-kt" }
 supabase-storage = { module = "io.github.jan-tennert.supabase:storage-kt" }
-supabase-serializer-moshi = { module = "io.github.jan-tennert.supabase:serializer-moshi", version.ref = "supabaseSerializerMoshi"}
+supabase-serializer-moshi = { module = "io.github.jan-tennert.supabase:serializer-moshi", version.ref = "supabaseSerializerMoshi" }
 
 motion-compose-core = { module = "io.github.fornewid:material-motion-compose-core", version.ref = "motionComposeCore" }
 
@@ -110,6 +113,10 @@ commonmark-ext-gfm-tables = { group = "org.commonmark", name = "commonmark-ext-g
 commonmark-ext-image-attributes = { group = "org.commonmark", name = "commonmark-ext-image-attributes", version.ref = "commonmark" }
 commonmark-ext-task-list-items = { group = "org.commonmark", name = "commonmark-ext-task-list-items", version.ref = "commonmark" }
 commonmark-ext-heading-anchor = { group = "org.commonmark", name = "commonmark-ext-heading-anchor", version.ref = "commonmark" }
+
+compose-webview = { module = "io.github.kevinnzou:compose-webview", version.ref = "composeWebview" }
+
+vico-compose = { group = "com.patrykandpatrick.vico", name = "compose", version.ref = "vico" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

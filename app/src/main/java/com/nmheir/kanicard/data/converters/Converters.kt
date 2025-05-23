@@ -35,4 +35,14 @@ class Converters {
     fun stringToRating(value: String): Rating {
         return value.let { Rating.valueOf(value) }
     }
+
+    @TypeConverter
+    fun listDoubleToString(value: List<Double>): String {
+        return value.joinToString(", ")
+    }
+
+    @TypeConverter
+    fun stringToListDouble(value: String): List<Double> {
+        return value.split(", ").map { it.toDouble() }
+    }
 }

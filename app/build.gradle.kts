@@ -143,5 +143,8 @@ dependencies {
     implementation(libs.commonmark)
 
     //Compose Webview
-    implementation("io.github.kevinnzou:compose-webview:0.33.6")
+    implementation(libs.compose.webview)
+
+    //Chart
+    implementation(libs.vico.compose)
 }

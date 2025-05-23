@@ -21,6 +21,11 @@ interface IDeckRepo {
     suspend fun deleteById(id: Long)
 
     suspend fun update(deck: DeckDto)
-    suspend fun update(id: Long, name: String? = null, description: String? = null)
+    suspend fun update(
+        id: Long,
+        name: String? = null,
+        description: String? = null,
+        optionId: Long = 1L
+    )
     suspend fun updateName(id: Long, name: String)
 }

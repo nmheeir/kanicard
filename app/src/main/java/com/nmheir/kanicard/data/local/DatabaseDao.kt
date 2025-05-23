@@ -11,6 +11,7 @@ import androidx.room.Update
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.nmheir.kanicard.data.dto.card.CardBrowseDto
 import com.nmheir.kanicard.data.dto.deck.DeckData
+import com.nmheir.kanicard.data.dto.deck.DeckOptionUsageDto
 import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
 import com.nmheir.kanicard.data.entities.SearchHistoryEntity
 import com.nmheir.kanicard.data.entities.card.TemplateEntity
@@ -21,6 +22,7 @@ import com.nmheir.kanicard.data.entities.fsrs.ReviewLogEntity
 import com.nmheir.kanicard.data.entities.note.FieldEntity
 import com.nmheir.kanicard.data.entities.note.NoteEntity
 import com.nmheir.kanicard.data.entities.note.NoteTypeEntity
+import com.nmheir.kanicard.data.entities.option.DeckOptionEntity
 import com.nmheir.kanicard.data.relations.CollectionWithDecks
 import com.nmheir.kanicard.data.relations.DeckWithNotesAndTemplates
 import com.nmheir.kanicard.data.relations.NoteAndTemplate
@@ -61,6 +63,9 @@ interface DatabaseDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(collection: CollectionEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(option: DeckOptionEntity): Long
+
     /*Insert list*/
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -95,19 +100,43 @@ interface DatabaseDao {
     @Update
     suspend fun update(noteType: NoteTypeEntity)
 
+    @Update
+    suspend fun update(option: DeckOptionEntity)
+
     @Query(
         """
         UPDATE decks
         SET
             name = COALESCE(:name, name),
-            description = COALESCE(:description, description)
+            description = COALESCE(:description, description),
+            oId = :optionId
         WHERE id = :id
         """
     )
     suspend fun updateDeck(
         id: Long,
         name: String? = null,
-        description: String? = null
+        description: String? = null,
+        optionId: Long = 1L
+    )
+
+    @Query(
+        """
+            UPDATE deck_options
+            SET
+                name = COALESCE(:name, name),
+                newPerDay = COALESCE(:newPerDay, newPerDay),
+                revPerDay = COALESCE(:revPerDay, revPerDay),
+                fsrsParams = COALESCE(:fsrsParams, fsrsParams)
+            WHERE id = :id
+        """
+    )
+    suspend fun updateDeckOption(
+        id: Long,
+        name: String? = null,
+        newPerDay: Long? = null,
+        revPerDay: Long? = null,
+        fsrsParams: List<Double>? = null
     )
 
     /*Delete*/
@@ -133,6 +162,9 @@ interface DatabaseDao {
     @Delete
     fun delete(fieldDef: FieldEntity)
 
+    @Delete
+    suspend fun delete(option: DeckOptionEntity)
+
     @Query("DELETE FROM notes WHERE id = :noteId")
     fun deleteNote(noteId: Long)
 
@@ -142,6 +174,9 @@ interface DatabaseDao {
     @Query("DELETE FROM templates WHERE id = :id")
     suspend fun deleteTemplate(id: Long)
 
+    @Query("DELETE FROM deck_options WHERE id = :id")
+    suspend fun deleteDeckOption(id: Long)
+
     /*Get*/
 
     @Query(
@@ -150,9 +185,6 @@ interface DatabaseDao {
     """
     )
     fun getFsrsCardByDeckId(deckId: Long): Flow<List<FsrsCardEntity>?>
-
-    @Query("SELECT * FROM review_logs")
-    fun getReviewLogs(): Flow<List<ReviewLogEntity>>
 
     @Query("SELECT * FROM note_types")
     fun getNoteTypes(): Flow<List<NoteTypeEntity>?>
@@ -212,6 +244,7 @@ interface DatabaseDao {
         SELECT
           d.id               AS deckId,
           d.name             AS name,
+          d.oId              AS optionId,
           
           -- Tổng số thẻ ở trạng thái REVIEW và đến hạn
           SUM(
@@ -295,7 +328,7 @@ interface DatabaseDao {
         """
         SELECT
             d.id,
-            d.collectionId AS cId,
+            d.colId AS cId,
             d.name,
             d.description,
             d.createdTime,
@@ -317,13 +350,19 @@ interface DatabaseDao {
 
     @Transaction
     @Query("SELECT * FROM notes WHERE id IN (:nIds)")
-    fun getNoteAndTemplateByNoteIds(nIds: List<Long>) : Flow<List<NoteAndTemplate>>
+    fun getNoteAndTemplateByNoteIds(nIds: List<Long>): Flow<List<NoteAndTemplate>>
 
     /*End Note*/
     /*-------------------------------------------------------------------------*/
 
     /*-------------------------------------------------------------------------*/
     /*Card*/
+
+    @Query("SELECT * FROM fsrs_card")
+    fun getAllCards(): Flow<List<FsrsCardEntity>>
+
+    @Query("SELECT * FROM fsrs_card WHERE dId = :dId")
+    fun getAllCards(dId: Long): Flow<List<FsrsCardEntity>>
 
     @Query(
         """
@@ -376,6 +415,42 @@ interface DatabaseDao {
 
     /*End Review*/
     /*-------------------------------------------------------------------------*/
+
+    /*-------------------------------------------------------------------------*/
+    /*DeckOption*/
+
+    @Query("SELECT * FROM deck_options WHERE id = :id")
+    fun getDeckOption(id: Long): Flow<DeckOptionEntity?>
+
+    @Query(
+        """
+        SELECT  o.id,
+                o.name,
+                o.createdAt,
+                o.updatedAt,
+                o.newPerDay,
+                o.revPerDay,
+                o.fsrsParams,
+                o.autoShowAnswer,
+                o.autoAudio,
+                o.autoAnswer,
+                COUNT(d.id) AS usage
+        FROM deck_options o
+        LEFT JOIN decks d ON d.oId = o.id
+        GROUP BY o.id, o.name
+    """
+    )
+    fun getDeckOptionUsages(): Flow<List<DeckOptionUsageDto>>
+
+    /*End DeckOption*/
+    /*-------------------------------------------------------------------------*/
+
+    @Query("SELECT * FROM review_logs")
+    fun getReviewLogs(): Flow<List<ReviewLogEntity>>
+    /*-------------------------------------------------------------------------*/
+    /*Review Log*/
+
+
     @RawQuery
     fun raw(supportSQLiteQuery: SupportSQLiteQuery): Int
 
