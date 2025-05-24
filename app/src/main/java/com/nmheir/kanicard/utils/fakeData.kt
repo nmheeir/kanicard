@@ -14,6 +14,9 @@ import com.nmheir.kanicard.ui.screen.statistics.model.CalendarChartData
 import com.nmheir.kanicard.ui.screen.statistics.model.CalendarChartItemData
 import com.nmheir.kanicard.ui.screen.statistics.model.FutureDueChartData
 import com.nmheir.kanicard.ui.screen.statistics.model.FutureDueChartState
+import com.nmheir.kanicard.ui.screen.statistics.model.ReviewChartCardData
+import com.nmheir.kanicard.ui.screen.statistics.model.ReviewChartData
+import com.nmheir.kanicard.ui.screen.statistics.model.ReviewChartState
 import com.nmheir.kanicard.ui.viewmodels.LearningData
 import com.nmheir.kanicard.ui.viewmodels.TemplatePreview
 import java.time.LocalDate
@@ -682,3 +685,60 @@ val fakeCalendarData = CalendarChartData(
     }
 )
 
+private fun generateMockReviewChartData(
+    state: ReviewChartState,
+    seed: Int = 42
+): ReviewChartData {
+    val today = LocalDate.now()
+    val days = when (state) {
+        ReviewChartState.LAST_7_DAYS -> 7
+        ReviewChartState.LAST_30_DAYS -> 30
+        ReviewChartState.LAST_90_DAYS -> 90
+        ReviewChartState.LAST_YEAR -> 365
+    }
+
+    val rand = Random(seed)
+    // 1. Sinh ngày liên tục từ today - (days-1) tới today
+    val allDates = (0 until days).map { i ->
+        today.minusDays((days - 1 - i).toLong())
+    }
+
+    // 2. Tạo barData: với mỗi ngày, random 0..5 cho mỗi state
+    val listBars = allDates.map { date ->
+        ReviewChartCardData(
+            learning = rand.nextInt(0, 6),
+            relearning = rand.nextInt(0, 6),
+            young = rand.nextInt(0, 6),
+            mature = rand.nextInt(0, 6)
+        )
+    }
+
+    val barData = listBars
+        .mapIndexed { idx, chart -> idx to chart }
+        .toMap()
+
+    // 3. dailyTotals và lineData
+    val dailyTotals = listBars.map { it.learning + it.relearning + it.young + it.mature }
+    val lineData = dailyTotals
+        .runningReduce { acc, v -> acc + v }
+        .mapIndexed { idx, cum -> idx to cum }
+        .toMap()
+
+    // 4. Các thống kê
+    val totalReviews = dailyTotals.sum()
+    val daysWithReview = dailyTotals.count { it > 0 }
+    val avgDayStudied = if (daysWithReview > 0) totalReviews.toDouble() / daysWithReview else 0.0
+    val avgOverPeriod = totalReviews.toDouble() / days
+
+    return ReviewChartData(
+        barData = barData,
+        lineData = lineData,
+        dayStudied = daysWithReview,
+        total = totalReviews,
+        averageDayStudied = avgDayStudied,
+        averageOverPeriod = avgOverPeriod
+    )
+}
+
+// Ví dụ sử dụng:
+val mock7 = generateMockReviewChartData(ReviewChartState.LAST_7_DAYS)

@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.nmheir.kanicard.ui.viewmodels
 
 import androidx.lifecycle.SavedStateHandle
@@ -10,6 +12,8 @@ import com.nmheir.kanicard.ui.screen.statistics.model.CalendarChartData
 import com.nmheir.kanicard.ui.screen.statistics.model.CalendarChartItemData
 import com.nmheir.kanicard.ui.screen.statistics.model.FutureDueChartData
 import com.nmheir.kanicard.ui.screen.statistics.model.FutureDueChartState
+import com.nmheir.kanicard.ui.screen.statistics.model.ReviewChartData
+import com.nmheir.kanicard.ui.screen.statistics.model.ReviewChartState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,6 +30,14 @@ import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 import kotlin.math.min
 import kotlin.math.roundToInt
+import com.nmheir.kanicard.data.enums.State
+import com.nmheir.kanicard.ui.screen.statistics.model.ReviewChartCardData
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.withContext
+import kotlin.math.ceil
 
 @HiltViewModel
 class StatisticViewModel @Inject constructor(
@@ -85,6 +97,25 @@ class StatisticViewModel @Inject constructor(
             // Bạn cần một default cho stateIn, có thể là empty data
             FutureDueChartData()
         )
+
+    val reviewChartState = MutableStateFlow<ReviewChartState>(ReviewChartState.LAST_7_DAYS)
+
+    val reviewChartData = combine(
+        allReviewLogs,
+        reviewChartState
+    ) { reviewLogs, state ->
+        state to reviewLogs
+    }
+        .filter {
+            it.second.isNotEmpty()
+        }
+        .mapLatest { (state, reviewLogs) ->
+            withContext(Dispatchers.IO) {
+                calculateReviewData(state, reviewLogs)
+            }
+        }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ReviewChartData())
 
     private fun calculateFutureDueData(state: FutureDueChartState): FutureDueChartData {
         // 1. Xác định khoảng days dựa vào state
@@ -170,6 +201,111 @@ class StatisticViewModel @Inject constructor(
         return CalendarChartData(data = monthToItems)
     }
 
+    private fun calculateReviewData(
+        state: ReviewChartState,
+        reviewLogs: List<ReviewLogEntity>
+    ): ReviewChartData {
+        val today = LocalDate.now()
+
+        // 1. Xác định số ngày look‐back
+        val totalDays = when (state) {
+            ReviewChartState.LAST_7_DAYS  -> 7
+            ReviewChartState.LAST_30_DAYS -> 30
+            ReviewChartState.LAST_90_DAYS -> 90
+            ReviewChartState.LAST_YEAR    -> 365
+        }
+
+        // 2. Lọc và nhóm theo ngày
+        val startDate = today.minusDays((totalDays - 1).toLong())
+        val byDate = reviewLogs
+            .filter {
+                val d = it.review.toLocalDate()
+                !d.isBefore(startDate) && !d.isAfter(today)
+            }
+            .groupBy { it.review.toLocalDate() }
+
+        // 3. Build barData với keys chạy từ -(totalDays-1) … 0
+        val barData: Map<Int, ReviewChartCardData> = when (state) {
+            ReviewChartState.LAST_YEAR -> {
+                // Năm: bucket 5-ngày, reversed order
+                val buckets = ceil(totalDays / 5.0).toInt()
+                (0 until buckets)
+                    .reversed()    // từ bucket xa nhất về gần nhất
+                    .associateWith { bucketIdx ->
+                        val startOff = bucketIdx * 5
+                        val endOff   = min(startOff + 4, totalDays - 1)
+                        val bucketLogs = (startOff..endOff).flatMap { off ->
+                            byDate[today.minusDays(off.toLong())].orEmpty()
+                        }
+                        countStates(bucketLogs)
+                    }
+                    // chuyển từ bucketIdx thành key = -startOff
+                    .mapKeys { (bucketIdx, _) -> -bucketIdx * 5 }
+            }
+
+            else -> {
+                // Ngày-lẻ: offset 0(today),1,2,… rồi reverse => (totalDays-1)..0
+                (0 until totalDays)
+                    .reversed()    // ví dụ 6,5,…,0
+                    .associateWith { off ->
+                        val date = today.minusDays(off.toLong())
+                        val logs = byDate[date].orEmpty()
+                        countStates(logs)
+                    }
+                    // rồi đổi key từ off thành -off
+                    .mapKeys { (off, _) -> -off }
+            }
+        }
+
+        // 4. Tính lineData
+        val sortedKeys = barData.keys.sorted()
+        val running = mutableListOf<Number>()
+        var sum = 0
+        for (k in sortedKeys) {
+            val c = barData[k]!!
+            val dayTotal = c.learning + c.relearning + c.young + c.mature
+            sum += dayTotal
+            running += sum
+        }
+        val lineData = sortedKeys.zip(running).toMap()
+
+        // 5. Thống kê
+        val dailyTotals = sortedKeys.map { k ->
+            val c = barData[k]!!
+            c.learning + c.relearning + c.young + c.mature
+        }
+        val totalReviews   = dailyTotals.sum()
+        val daysStudied    = dailyTotals.count { it > 0 }
+        val periodDays     = sortedKeys.size
+        val avgStudiedDay  = if (daysStudied > 0) totalReviews.toDouble() / daysStudied else 0.0
+        val avgOverPeriod  = if (periodDays > 0) totalReviews.toDouble() / periodDays else 0.0
+
+        return ReviewChartData(
+            barData           = barData,
+            lineData          = lineData,
+            dayStudied        = daysStudied,
+            total             = totalReviews,
+            averageDayStudied = avgStudiedDay,
+            averageOverPeriod = avgOverPeriod
+        )
+    }
+
+
+    // Helper để đếm 4 state theo rule Anki
+    private fun countStates(logs: List<ReviewLogEntity>): ReviewChartCardData {
+        var l = 0; var r = 0; var y = 0; var m = 0
+        for (rlog in logs) {
+            when (rlog.state) {
+                State.Learning   -> l++
+                State.Relearning -> r++
+                State.Review     ->
+                    if (rlog.scheduledDays < 21) y++ else m++
+                else -> {} // New bỏ qua
+            }
+        }
+        return ReviewChartCardData(l, r, y, m)
+    }
+
 
     fun onAction(action: StatisticUiAction) {
         when (action) {
@@ -180,6 +316,10 @@ class StatisticViewModel @Inject constructor(
             is StatisticUiAction.ChangeCalendarChartState -> {
                 calendarChartState.value = action.year
             }
+
+            is StatisticUiAction.ChangeReviewCHartState -> {
+                reviewChartState.value = action.state
+            }
         }
     }
 }
@@ -187,4 +327,5 @@ class StatisticViewModel @Inject constructor(
 sealed interface StatisticUiAction {
     data class ChangeFutureDueChartState(val state: FutureDueChartState) : StatisticUiAction
     data class ChangeCalendarChartState(val year: Int) : StatisticUiAction
+    data class ChangeReviewCHartState(val state: ReviewChartState) : StatisticUiAction
 }
