@@ -10,10 +10,17 @@ import com.nmheir.kanicard.data.dto.note.NoteData
 import com.nmheir.kanicard.data.entities.card.TemplateEntity
 import com.nmheir.kanicard.data.entities.note.FieldEntity
 import com.nmheir.kanicard.data.enums.State
+import com.nmheir.kanicard.ui.screen.statistics.model.CalendarChartData
+import com.nmheir.kanicard.ui.screen.statistics.model.CalendarChartItemData
+import com.nmheir.kanicard.ui.screen.statistics.model.FutureDueChartData
+import com.nmheir.kanicard.ui.screen.statistics.model.FutureDueChartState
 import com.nmheir.kanicard.ui.viewmodels.LearningData
 import com.nmheir.kanicard.ui.viewmodels.TemplatePreview
+import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.time.YearMonth
 import java.time.ZoneOffset
+import kotlin.math.roundToInt
 import kotlin.random.Random
 
 val fakeCardList = listOf(
@@ -600,3 +607,78 @@ val fakeLearningDataList = List(10) { index ->
         noteData = fakeNoteDatas[index]
     )
 }
+
+val fakeFutureDueData: Map<FutureDueChartState, FutureDueChartData> = mapOf(
+
+    // 1 tháng: giả định lấy mẫu 7 ngày đầu
+    FutureDueChartState.ONE_MONTH to FutureDueChartData(
+        barData = mapOf(
+            0 to 2,   // hôm nay có 2 thẻ đến hạn
+            1 to 5,   // ngày mai 5 thẻ
+            2 to 3,
+            3 to 4,
+            4 to 1,
+            5 to 0,
+            6 to 2
+        ),
+        lineData = mapOf(
+            0 to 2,   // cumulative
+            1 to 7,
+            2 to 10,
+            3 to 14,
+            4 to 15,
+            5 to 15,
+            6 to 17
+        ),
+        average = 17.0 / 7,   // ≈2.43
+        dueTomorrow = 5,          // barData[1]
+        dailyLoad = (17.0 / 7).roundToInt() // =2
+    ),
+
+    // 3 tháng: thử với mẫu 7 ngày đầu, volume lớn hơn
+    FutureDueChartState.THREE_MONTHS to FutureDueChartData(
+        barData = mapOf(0 to 8, 1 to 12, 2 to 9, 3 to 7, 4 to 5, 5 to 4, 6 to 3),
+        lineData = mapOf(0 to 8, 1 to 20, 2 to 29, 3 to 36, 4 to 41, 5 to 45, 6 to 48),
+        average = 48.0 / 7,   // ≈6.86
+        dueTomorrow = 12,
+        dailyLoad = (48.0 / 7).roundToInt() // =7
+    ),
+
+    // 1 năm: sample 7 ngày đầu
+    FutureDueChartState.ONE_YEAR to FutureDueChartData(
+        barData = mapOf(0 to 15, 1 to 18, 2 to 20, 3 to 22, 4 to 17, 5 to 14, 6 to 10),
+        lineData = mapOf(0 to 15, 1 to 33, 2 to 53, 3 to 75, 4 to 92, 5 to 106, 6 to 116),
+        average = 116.0 / 7,  // ≈16.57
+        dueTomorrow = 18,
+        dailyLoad = (116.0 / 7).roundToInt() // =17
+    ),
+
+    // ALL: lấy sample 7 ngày, có thể “tất cả” tức không giới hạn ngày
+    FutureDueChartState.ALL to FutureDueChartData(
+        barData = mapOf(0 to 30, 1 to 25, 2 to 28, 3 to 22, 4 to 20, 5 to 18, 6 to 15),
+        lineData = mapOf(0 to 30, 1 to 55, 2 to 83, 3 to 105, 4 to 125, 5 to 143, 6 to 158),
+        average = 158.0 / 7,  // ≈22.57
+        dueTomorrow = 25,
+        dailyLoad = (158.0 / 7).roundToInt() // =23
+    )
+)
+
+const val fakeYear = 2025
+val random = Random(123)
+
+val fakeCalendarData = CalendarChartData(
+    data = (1..12).associateWith { month ->
+        val daysInMonth = YearMonth.of(fakeYear, month).lengthOfMonth()
+        (1..daysInMonth).map { day ->
+            // Chỉ “random” với ~20% ngày có review
+            val count = if (random.nextFloat() < 0.8f) {
+                random.nextInt(0, 200)  // 1..5 reviews
+            } else 0
+            CalendarChartItemData(
+                day = LocalDate.of(fakeYear, month, day),
+                reviewCount = count
+            )
+        }
+    }
+)
+

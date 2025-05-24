@@ -225,4 +225,10 @@
     <plurals name="daily_limit_warning">
         <item quantity="other">If adding %1$d new cards each day, your review limit should be at least %2$d.</item>
     </plurals>
+
+    <plurals name="n_reviews">
+        <item quantity="zero">0 review</item>
+        <item quantity="one">1 review</item>
+        <item quantity="other">%d reviews</item>
+    </plurals>
 </resources>

@@ -3,20 +3,25 @@ package com.nmheir.kanicard.ui.viewmodels
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nmheir.kanicard.data.entities.fsrs.FsrsCardEntity
+import com.nmheir.kanicard.data.entities.fsrs.ReviewLogEntity
 import com.nmheir.kanicard.domain.repository.ICardRepo
 import com.nmheir.kanicard.domain.repository.IReviewLogRepo
+import com.nmheir.kanicard.ui.screen.statistics.model.CalendarChartData
+import com.nmheir.kanicard.ui.screen.statistics.model.CalendarChartItemData
+import com.nmheir.kanicard.ui.screen.statistics.model.FutureDueChartData
+import com.nmheir.kanicard.ui.screen.statistics.model.FutureDueChartState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import timber.log.Timber
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
+import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 import kotlin.math.min
@@ -34,10 +39,30 @@ class StatisticViewModel @Inject constructor(
     private val allCards = cardRepo.getAllCards(dId)
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
+    private val allReviewLogs = reviewLogRepo.allReviewLogs()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
     private val futureDueChartDataMap =
         MutableStateFlow<Map<FutureDueChartState, FutureDueChartData>>(emptyMap())
 
     val futureDueChartState = MutableStateFlow<FutureDueChartState>(FutureDueChartState.ONE_MONTH)
+
+    //Can be extend in future
+    val calendarChartState = MutableStateFlow<Int>(LocalDateTime.now().year)
+
+    val calendarChartDate = combine(
+        calendarChartState,
+        allReviewLogs
+    ) { year, reviewLogs ->
+        reviewLogs to year
+    }
+        .filter { (reviewLogs, _) ->
+            reviewLogs.isNotEmpty()
+        }
+        .map { (reviewLogs, year) ->
+            calculateChartData(year, reviewLogs)
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), CalendarChartData())
 
     // 1. Kết hợp 2 flow: allCards + futureDueChartState
     val futureDueChartData = combine(
@@ -114,10 +139,46 @@ class StatisticViewModel @Inject constructor(
         )
     }
 
+    private fun calculateChartData(
+        year: Int,
+        reviewLogs: List<ReviewLogEntity>
+    ): CalendarChartData {
+        val today = LocalDate.now()
+        val currentYear = today.year
+        val currentMonth = today.monthValue
+
+        // Chỉ lấy tới tháng hiện tại nếu là năm nay, ngược lại lấy 1..12
+        val months = if (year == currentYear) 1..currentMonth else 1..12
+
+        // Gom log theo ngày
+        val countByDate = reviewLogs
+            .filter { it.review.toLocalDate().year == year }
+            .groupBy { it.review.toLocalDate() }
+            .mapValues { it.value.size }
+
+        val monthToItems = months.associateWith { month ->
+            val daysInMonth = YearMonth.of(year, month).lengthOfMonth()
+            (1..daysInMonth).map { day ->
+                val date = LocalDate.of(year, month, day)
+                CalendarChartItemData(
+                    day = date,
+                    reviewCount = countByDate[date] ?: 0
+                )
+            }
+        }
+
+        return CalendarChartData(data = monthToItems)
+    }
+
+
     fun onAction(action: StatisticUiAction) {
         when (action) {
             is StatisticUiAction.ChangeFutureDueChartState -> {
                 futureDueChartState.value = action.state
+            }
+
+            is StatisticUiAction.ChangeCalendarChartState -> {
+                calendarChartState.value = action.year
             }
         }
     }
@@ -125,72 +186,5 @@ class StatisticViewModel @Inject constructor(
 
 sealed interface StatisticUiAction {
     data class ChangeFutureDueChartState(val state: FutureDueChartState) : StatisticUiAction
+    data class ChangeCalendarChartState(val year: Int) : StatisticUiAction
 }
-
-data class FutureDueChartData(
-    val barData: Map<Int, Number> = emptyMap(),
-    val lineData: Map<Int, Number> = emptyMap(),
-    val average: Double = 0.0,
-    val dueTomorrow: Int = 0,
-    val dailyLoad: Int = 0
-)
-
-enum class FutureDueChartState(val title: String) {
-    ONE_MONTH("1 month"), THREE_MONTHS("3 months"), ONE_YEAR("1 year"), ALL("All")
-}
-
-
-val fakeFutureDueData: Map<FutureDueChartState, FutureDueChartData> = mapOf(
-
-    // 1 tháng: giả định lấy mẫu 7 ngày đầu
-    FutureDueChartState.ONE_MONTH to FutureDueChartData(
-        barData = mapOf(
-            0 to 2,   // hôm nay có 2 thẻ đến hạn
-            1 to 5,   // ngày mai 5 thẻ
-            2 to 3,
-            3 to 4,
-            4 to 1,
-            5 to 0,
-            6 to 2
-        ),
-        lineData = mapOf(
-            0 to 2,   // cumulative
-            1 to 7,
-            2 to 10,
-            3 to 14,
-            4 to 15,
-            5 to 15,
-            6 to 17
-        ),
-        average = 17.0 / 7,   // ≈2.43
-        dueTomorrow = 5,          // barData[1]
-        dailyLoad = (17.0 / 7).roundToInt() // =2
-    ),
-
-    // 3 tháng: thử với mẫu 7 ngày đầu, volume lớn hơn
-    FutureDueChartState.THREE_MONTHS to FutureDueChartData(
-        barData = mapOf(0 to 8, 1 to 12, 2 to 9, 3 to 7, 4 to 5, 5 to 4, 6 to 3),
-        lineData = mapOf(0 to 8, 1 to 20, 2 to 29, 3 to 36, 4 to 41, 5 to 45, 6 to 48),
-        average = 48.0 / 7,   // ≈6.86
-        dueTomorrow = 12,
-        dailyLoad = (48.0 / 7).roundToInt() // =7
-    ),
-
-    // 1 năm: sample 7 ngày đầu
-    FutureDueChartState.ONE_YEAR to FutureDueChartData(
-        barData = mapOf(0 to 15, 1 to 18, 2 to 20, 3 to 22, 4 to 17, 5 to 14, 6 to 10),
-        lineData = mapOf(0 to 15, 1 to 33, 2 to 53, 3 to 75, 4 to 92, 5 to 106, 6 to 116),
-        average = 116.0 / 7,  // ≈16.57
-        dueTomorrow = 18,
-        dailyLoad = (116.0 / 7).roundToInt() // =17
-    ),
-
-    // ALL: lấy sample 7 ngày, có thể “tất cả” tức không giới hạn ngày
-    FutureDueChartState.ALL to FutureDueChartData(
-        barData = mapOf(0 to 30, 1 to 25, 2 to 28, 3 to 22, 4 to 20, 5 to 18, 6 to 15),
-        lineData = mapOf(0 to 30, 1 to 55, 2 to 83, 3 to 105, 4 to 125, 5 to 143, 6 to 158),
-        average = 158.0 / 7,  // ≈22.57
-        dueTomorrow = 25,
-        dailyLoad = (158.0 / 7).roundToInt() // =23
-    )
-)

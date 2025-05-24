@@ -2,7 +2,6 @@ package com.nmheir.kanicard.ui.screen.statistics.chart
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MultiChoiceSegmentedButtonRow
 import androidx.compose.material3.SegmentedButton
@@ -10,23 +9,19 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
-import com.nmheir.kanicard.R
 import com.nmheir.kanicard.core.presentation.utils.hozPadding
+import com.nmheir.kanicard.ui.screen.statistics.model.FutureDueChartData
+import com.nmheir.kanicard.ui.screen.statistics.model.FutureDueChartState
 import com.nmheir.kanicard.ui.theme.KaniTheme
-import com.nmheir.kanicard.ui.viewmodels.FutureDueChartData
-import com.nmheir.kanicard.ui.viewmodels.FutureDueChartState
 import com.nmheir.kanicard.ui.viewmodels.StatisticUiAction
-import com.nmheir.kanicard.ui.viewmodels.fakeFutureDueData
+import com.nmheir.kanicard.utils.fakeFutureDueData
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberEnd
