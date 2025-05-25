@@ -19,6 +19,7 @@ import androidx.compose.ui.util.fastForEachIndexed
 import com.nmheir.kanicard.core.presentation.utils.hozPadding
 import com.nmheir.kanicard.ui.screen.statistics.model.FutureDueChartData
 import com.nmheir.kanicard.ui.screen.statistics.model.FutureDueChartState
+import com.nmheir.kanicard.ui.screen.statistics.rememberMarker
 import com.nmheir.kanicard.ui.theme.KaniTheme
 import com.nmheir.kanicard.ui.viewmodels.StatisticUiAction
 import com.nmheir.kanicard.utils.fakeFutureDueData
@@ -112,7 +113,7 @@ fun FutureDueChart(
                             ),
                     ),
                     rangeProvider = CartesianLayerRangeProvider.auto(),
-                    verticalAxisPosition = Axis.Position.Vertical.End
+                    verticalAxisPosition = Axis.Position.Vertical.Start
                 ),
                 rememberLineCartesianLayer(
                     LineCartesianLayer.LineProvider.series(
@@ -136,11 +137,12 @@ fun FutureDueChart(
                         ),
                     ),
                     rangeProvider = CartesianLayerRangeProvider.auto(),
-                    verticalAxisPosition = Axis.Position.Vertical.Start
+                    verticalAxisPosition = Axis.Position.Vertical.End
                 ),
                 startAxis = VerticalAxis.rememberStart(),
                 bottomAxis = HorizontalAxis.rememberBottom(),
                 endAxis = VerticalAxis.rememberEnd(),
+                marker = rememberMarker(),
                 legend = rememberVerticalLegend(
                     items = {
                         add(

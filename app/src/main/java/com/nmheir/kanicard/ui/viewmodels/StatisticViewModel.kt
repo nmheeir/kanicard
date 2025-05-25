@@ -37,6 +37,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import kotlin.math.ceil
 
 @HiltViewModel
@@ -127,14 +128,15 @@ class StatisticViewModel @Inject constructor(
         }
 
         // 2. Lấy thời điểm hiện tại (OffsetDateTime)
-        val today = OffsetDateTime.now()
+        val today = OffsetDateTime.now().toLocalDate()
 
         // 3. Tính số cards sẽ due trong tương lai, gom theo khoảng ngày
         //    barData: số card mỗi ngày
         //    lineData: số tích lũy (cumulative) đến ngày đó
         val counts = mutableMapOf<Int, Int>()
         allCards.value.forEach { card ->
-            val daysUntil = ChronoUnit.DAYS.between(today, card.due).toInt()
+            val dueDate = card.due.toLocalDate()
+            val daysUntil = ChronoUnit.DAYS.between(today, dueDate).toInt()
             if (daysUntil in 0..maxDays) {
                 counts[daysUntil] = (counts[daysUntil] ?: 0) + 1
             }
@@ -160,6 +162,16 @@ class StatisticViewModel @Inject constructor(
         val total = barData.values.sum()
         val daysCounted = barData.size.takeIf { it > 0 } ?: 1
         val average = total.toDouble() / daysCounted
+
+        val abc = FutureDueChartData(
+            barData = barData,
+            lineData = lineData,
+            average = average,
+            dueTomorrow = dueTomorrow,
+            dailyLoad = average.roundToInt()
+        )
+
+        Timber.d(abc.toString())
 
         return FutureDueChartData(
             barData = barData,
@@ -209,10 +221,10 @@ class StatisticViewModel @Inject constructor(
 
         // 1. Xác định số ngày look‐back
         val totalDays = when (state) {
-            ReviewChartState.LAST_7_DAYS  -> 7
+            ReviewChartState.LAST_7_DAYS -> 7
             ReviewChartState.LAST_30_DAYS -> 30
             ReviewChartState.LAST_90_DAYS -> 90
-            ReviewChartState.LAST_YEAR    -> 365
+            ReviewChartState.LAST_YEAR -> 365
         }
 
         // 2. Lọc và nhóm theo ngày
@@ -233,7 +245,7 @@ class StatisticViewModel @Inject constructor(
                     .reversed()    // từ bucket xa nhất về gần nhất
                     .associateWith { bucketIdx ->
                         val startOff = bucketIdx * 5
-                        val endOff   = min(startOff + 4, totalDays - 1)
+                        val endOff = min(startOff + 4, totalDays - 1)
                         val bucketLogs = (startOff..endOff).flatMap { off ->
                             byDate[today.minusDays(off.toLong())].orEmpty()
                         }
@@ -274,17 +286,17 @@ class StatisticViewModel @Inject constructor(
             val c = barData[k]!!
             c.learning + c.relearning + c.young + c.mature
         }
-        val totalReviews   = dailyTotals.sum()
-        val daysStudied    = dailyTotals.count { it > 0 }
-        val periodDays     = sortedKeys.size
-        val avgStudiedDay  = if (daysStudied > 0) totalReviews.toDouble() / daysStudied else 0.0
-        val avgOverPeriod  = if (periodDays > 0) totalReviews.toDouble() / periodDays else 0.0
+        val totalReviews = dailyTotals.sum()
+        val daysStudied = dailyTotals.count { it > 0 }
+        val periodDays = sortedKeys.size
+        val avgStudiedDay = if (daysStudied > 0) totalReviews.toDouble() / daysStudied else 0.0
+        val avgOverPeriod = if (periodDays > 0) totalReviews.toDouble() / periodDays else 0.0
 
         return ReviewChartData(
-            barData           = barData,
-            lineData          = lineData,
-            dayStudied        = daysStudied,
-            total             = totalReviews,
+            barData = barData,
+            lineData = lineData,
+            dayStudied = daysStudied,
+            total = totalReviews,
             averageDayStudied = avgStudiedDay,
             averageOverPeriod = avgOverPeriod
         )
@@ -293,13 +305,17 @@ class StatisticViewModel @Inject constructor(
 
     // Helper để đếm 4 state theo rule Anki
     private fun countStates(logs: List<ReviewLogEntity>): ReviewChartCardData {
-        var l = 0; var r = 0; var y = 0; var m = 0
+        var l = 0;
+        var r = 0;
+        var y = 0;
+        var m = 0
         for (rlog in logs) {
             when (rlog.state) {
-                State.Learning   -> l++
+                State.Learning -> l++
                 State.Relearning -> r++
-                State.Review     ->
+                State.Review ->
                     if (rlog.scheduledDays < 21) y++ else m++
+
                 else -> {} // New bỏ qua
             }
         }
