@@ -19,6 +19,7 @@ import com.nmheir.kanicard.ui.screen.statistics.chart.CalendarChart
 import com.nmheir.kanicard.ui.screen.statistics.chart.CardCountChart
 import com.nmheir.kanicard.ui.screen.statistics.chart.FutureDueChart
 import com.nmheir.kanicard.ui.screen.statistics.chart.ReviewChart
+import com.nmheir.kanicard.ui.screen.statistics.chart.ReviewIntervalChart
 import com.nmheir.kanicard.ui.viewmodels.StatisticViewModel
 
 @Composable
@@ -36,6 +37,9 @@ fun StatisticScreen(
     val reviewChartState by viewModel.reviewChartState.collectAsStateWithLifecycle()
 
     val cardCountChartData by viewModel.cardCountChartData.collectAsStateWithLifecycle()
+
+    val reviewIntervalChartData by viewModel.reviewIntervalChartData.collectAsStateWithLifecycle()
+    val reviewIntervalChartState by viewModel.reviewIntervalChartState.collectAsStateWithLifecycle()
 
     val lazyListState = rememberLazyListState()
 
@@ -79,11 +83,21 @@ fun StatisticScreen(
             )
         }*/
 
-        item(
+/*        item(
             key = "card_count_chart"
         ) {
             CardCountChart(
                 data = cardCountChartData
+            )
+        }*/
+
+        item(
+            key = "review_interval"
+        ) {
+            ReviewIntervalChart(
+                data = reviewIntervalChartData,
+                state = reviewIntervalChartState,
+                action = viewModel::onAction
             )
         }
     }

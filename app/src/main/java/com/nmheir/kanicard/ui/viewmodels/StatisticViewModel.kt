@@ -34,6 +34,8 @@ import kotlin.math.roundToInt
 import com.nmheir.kanicard.data.enums.State
 import com.nmheir.kanicard.ui.screen.statistics.model.CardCountChartData
 import com.nmheir.kanicard.ui.screen.statistics.model.ReviewChartCardData
+import com.nmheir.kanicard.ui.screen.statistics.model.ReviewIntervalChartData
+import com.nmheir.kanicard.ui.screen.statistics.model.ReviewIntervalChartState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOn
@@ -130,6 +132,24 @@ class StatisticViewModel @Inject constructor(
         .distinctUntilChanged()
         .flowOn(Dispatchers.IO)
         .stateIn(viewModelScope, SharingStarted.Lazily, CardCountChartData())
+
+
+    val reviewIntervalChartState = MutableStateFlow<ReviewIntervalChartState>(
+        ReviewIntervalChartState.ONE_MONTH
+    )
+    val reviewIntervalChartData = combine(
+        allCards,
+        reviewIntervalChartState
+    ) { cards, state ->
+        cards to state
+    }.filter { (cards, state) ->
+        cards.isNotEmpty()
+    }.map { (cards, state) ->
+        calculateReviewIntervalChartData(cards, state)
+    }
+        .distinctUntilChanged()
+        .flowOn(Dispatchers.IO)
+        .stateIn(viewModelScope, SharingStarted.Lazily, ReviewIntervalChartData())
 
     private fun calculateFutureDueData(state: FutureDueChartState): FutureDueChartData {
         // 1. Xác định khoảng days dựa vào state
@@ -330,15 +350,79 @@ class StatisticViewModel @Inject constructor(
         val matureCount = reviewCards.size - youngCount
 
         return CardCountChartData(
-            total     = total,
-            new       = newCount,
-            learning  = learningCount,
-            relearning= relearningCount,
-            young     = youngCount,
-            mature    = matureCount
+            total = total,
+            new = newCount,
+            learning = learningCount,
+            relearning = relearningCount,
+            young = youngCount,
+            mature = matureCount
         )
     }
 
+    private fun calculateReviewIntervalChartData(
+        fsrsCards: List<FsrsCardEntity>,
+        state: ReviewIntervalChartState
+    ): ReviewIntervalChartData {
+        val now = OffsetDateTime.now()
+
+        // 1. Lọc dữ liệu theo state
+        val filtered = when (state) {
+            ReviewIntervalChartState.ONE_MONTH -> {
+                val cutoff = now.minusMonths(1)
+                fsrsCards.filter { it.lastReview?.isAfter(cutoff) == true }
+            }
+
+            ReviewIntervalChartState.HALF_PERCENT -> {
+                val sorted = fsrsCards.map { it.scheduledDays }.sorted()
+                if (sorted.isEmpty()) emptyList() else {
+                    val cutoffIdx = (sorted.size * 0.5).toInt().coerceAtLeast(1) - 1
+                    val cutoffValue = sorted[cutoffIdx]
+                    fsrsCards.filter { it.scheduledDays <= cutoffValue }
+                }
+            }
+
+            ReviewIntervalChartState.NINETY_FIVE_PERCENT -> {
+                val sorted = fsrsCards.map { it.scheduledDays }.sorted()
+                if (sorted.isEmpty()) emptyList() else {
+                    val cutoffIdx = (sorted.size * 0.95).toInt().coerceAtLeast(1) - 1
+                    val cutoffValue = sorted[cutoffIdx]
+                    fsrsCards.filter { it.scheduledDays <= cutoffValue }
+                }
+            }
+
+            ReviewIntervalChartState.ALL -> fsrsCards
+        }
+
+        if (fsrsCards.isEmpty()) return ReviewIntervalChartData()
+
+        // 2. Bar chart từ subset
+        val filteredIntervals = filtered.map { it.scheduledDays.toInt() }
+        val barData = filteredIntervals.groupingBy { it }.eachCount()
+
+        // 3. Line chart từ subset, % tích lũy dựa trên toàn bộ dữ liệu
+        val allIntervals = fsrsCards.map { it.scheduledDays.toInt() }
+        val fullHistogram = allIntervals.groupingBy { it }.eachCount().toSortedMap()
+
+        val total = allIntervals.size
+        var cum = 0
+        val cumulativePercent: Map<Int, Double> = fullHistogram.mapValues { (ivl, count) ->
+            cum += count
+            cum.toDouble() / total * 100
+        }
+
+        // Line chỉ giữ các interval có trong subset
+        val filteredSet = filteredIntervals.toSet()
+        val lineData = cumulativePercent.filterKeys { it in filteredSet }
+
+        // 4. avgIvl tính từ toàn bộ dữ liệu (not filtered)
+        val avgIvl = allIntervals.average()
+
+        return ReviewIntervalChartData(
+            barData = barData,
+            lineData = lineData,
+            avgIvl = avgIvl
+        )
+    }
 
     // Helper để đếm 4 state theo rule Anki
     private fun countStates(logs: List<ReviewLogEntity>): ReviewChartCardData {
@@ -373,6 +457,10 @@ class StatisticViewModel @Inject constructor(
             is StatisticUiAction.ChangeReviewCHartState -> {
                 reviewChartState.value = action.state
             }
+
+            is StatisticUiAction.ChangeReviewIntervalChartState -> {
+                reviewIntervalChartState.value = action.state
+            }
         }
     }
 }
@@ -381,4 +469,6 @@ sealed interface StatisticUiAction {
     data class ChangeFutureDueChartState(val state: FutureDueChartState) : StatisticUiAction
     data class ChangeCalendarChartState(val year: Int) : StatisticUiAction
     data class ChangeReviewCHartState(val state: ReviewChartState) : StatisticUiAction
+    data class ChangeReviewIntervalChartState(val state: ReviewIntervalChartState) :
+        StatisticUiAction
 }

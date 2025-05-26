@@ -231,4 +231,9 @@
         <item quantity="one">1 review</item>
         <item quantity="other">%d reviews</item>
     </plurals>
+
+    <plurals name="n_average_interval">
+        <item quantity="zero">Average interval: 0 day</item>
+        <item quantity="other">Average interval: %s days</item>
+    </plurals>
 </resources>
