@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nmheir.kanicard.data.entities.fsrs.FsrsCardEntity
 import com.nmheir.kanicard.data.entities.fsrs.ReviewLogEntity
+import com.nmheir.kanicard.data.enums.Rating
 import com.nmheir.kanicard.domain.repository.ICardRepo
 import com.nmheir.kanicard.domain.repository.IReviewLogRepo
 import com.nmheir.kanicard.ui.screen.statistics.model.CalendarChartData
@@ -32,6 +33,9 @@ import javax.inject.Inject
 import kotlin.math.min
 import kotlin.math.roundToInt
 import com.nmheir.kanicard.data.enums.State
+import com.nmheir.kanicard.ui.screen.statistics.model.AnswerButtonChartCardType
+import com.nmheir.kanicard.ui.screen.statistics.model.AnswerButtonChartData
+import com.nmheir.kanicard.ui.screen.statistics.model.AnswerButtonChartState
 import com.nmheir.kanicard.ui.screen.statistics.model.CardCountChartData
 import com.nmheir.kanicard.ui.screen.statistics.model.DifficultyChartData
 import com.nmheir.kanicard.ui.screen.statistics.model.ReviewChartCardData
@@ -158,6 +162,20 @@ class StatisticViewModel @Inject constructor(
         }.map { cards ->
             calculateDifficultyChartData(cards)
         }.stateIn(viewModelScope, SharingStarted.Lazily, DifficultyChartData())
+
+    val answerButtonChartState =
+        MutableStateFlow<AnswerButtonChartState>(AnswerButtonChartState.ONE_MONTH)
+    val answerButtonChartData = combine(
+        allReviewLogs, answerButtonChartState
+    ) { reviewLogs, state ->
+        reviewLogs to state
+    }.filter { (reviewLog, state) ->
+        reviewLog.isNotEmpty()
+    }.map {
+        calculateAnswerButtonChartData(it.first, it.second)
+    }.distinctUntilChanged()
+        .flowOn(Dispatchers.IO)
+        .stateIn(viewModelScope, SharingStarted.Lazily, AnswerButtonChartData())
 
     private fun calculateFutureDueData(state: FutureDueChartState): FutureDueChartData {
         // 1. Xác định khoảng days dựa vào state
@@ -470,7 +488,48 @@ class StatisticViewModel @Inject constructor(
         )
     }
 
+    private fun calculateAnswerButtonChartData(
+        reviewLogs: List<ReviewLogEntity>,
+        chartState: AnswerButtonChartState
+    ): AnswerButtonChartData {
+        // 1) Xác định mốc thời gian cắt
+        val now = OffsetDateTime.now()
+        val cutoff: OffsetDateTime = when (chartState) {
+            AnswerButtonChartState.THREE_MONTHS -> now.minusMonths(3)
+            AnswerButtonChartState.ONE_YEAR -> now.minusYears(1)
+            AnswerButtonChartState.ONE_MONTH -> now.minusMonths(1)
+        }
 
+        // 2) Lọc logs theo khoảng thời gian
+        val filteredLogs = reviewLogs.filter { it.review.isAfter(cutoff) }
+
+        // 3) Khởi tạo map ban đầu: mỗi cardType có một map Rating->count = 0
+        val emptyInnerMap: Map<Rating, Int> = Rating.entries.associateWith { 0 }
+        val barData = AnswerButtonChartCardType.entries
+            .associateWith { emptyInnerMap.toMutableMap() }
+            .toMutableMap()
+
+        // 4) Ánh xạ State -> CardType
+        fun mapStateToCardType(state: State, scheduledDays: Long): AnswerButtonChartCardType =
+            when (state) {
+                State.New, State.Learning, State.Relearning -> AnswerButtonChartCardType.Learning
+                State.Review -> {
+                    if (scheduledDays < 21) AnswerButtonChartCardType.Young
+                    else AnswerButtonChartCardType.Mature
+                }
+            }
+
+
+        // 5) Đếm số lần bấm cho mỗi (cardType, rating)
+        filteredLogs.forEach { log ->
+            val cardType = mapStateToCardType(log.state, log.scheduledDays)
+            val inner = barData.getValue(cardType)
+            inner[log.rating] = (inner[log.rating] ?: 0) + 1
+        }
+
+        // 6) Đóng gói kết quả
+        return AnswerButtonChartData(barData = barData)
+    }
 
 
     // Helper để đếm 4 state theo rule Anki
@@ -510,6 +569,10 @@ class StatisticViewModel @Inject constructor(
             is StatisticUiAction.ChangeReviewIntervalChartState -> {
                 reviewIntervalChartState.value = action.state
             }
+
+            is StatisticUiAction.ChangeAnswerButtonChartState -> {
+                answerButtonChartState.value = action.state
+            }
         }
     }
 }
@@ -520,4 +583,6 @@ sealed interface StatisticUiAction {
     data class ChangeReviewCHartState(val state: ReviewChartState) : StatisticUiAction
     data class ChangeReviewIntervalChartState(val state: ReviewIntervalChartState) :
         StatisticUiAction
+
+    data class ChangeAnswerButtonChartState(val state: AnswerButtonChartState) : StatisticUiAction
 }

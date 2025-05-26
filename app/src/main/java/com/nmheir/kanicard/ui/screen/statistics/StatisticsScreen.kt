@@ -15,6 +15,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.nmheir.kanicard.ui.activities.LocalAwareWindowInset
+import com.nmheir.kanicard.ui.screen.statistics.chart.AnswerButtonChart
 import com.nmheir.kanicard.ui.screen.statistics.chart.CalendarChart
 import com.nmheir.kanicard.ui.screen.statistics.chart.CardCountChart
 import com.nmheir.kanicard.ui.screen.statistics.chart.DifficultyChart
@@ -43,6 +44,9 @@ fun StatisticScreen(
     val reviewIntervalChartState by viewModel.reviewIntervalChartState.collectAsStateWithLifecycle()
 
     val difficultyChartData by viewModel.difficultyChartData.collectAsStateWithLifecycle()
+
+    val answerButtonChartState by viewModel.answerButtonChartState.collectAsStateWithLifecycle()
+    val answerButtonChartData by viewModel.answerButtonChartData.collectAsStateWithLifecycle()
 
     val lazyListState = rememberLazyListState()
 
@@ -104,11 +108,21 @@ fun StatisticScreen(
                     )
                 }*/
 
+        /*        item(
+                    key = "difficulty"
+                ) {
+                    DifficultyChart(
+                        data = difficultyChartData
+                    )
+                }*/
+
         item(
-            key = "difficulty"
+            key = "answer_button"
         ) {
-            DifficultyChart(
-                data = difficultyChartData
+            AnswerButtonChart(
+                data = answerButtonChartData,
+                state = answerButtonChartState,
+                action = viewModel::onAction
             )
         }
     }
