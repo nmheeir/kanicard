@@ -9,6 +9,7 @@ import timber.log.Timber
 import java.math.MathContext
 import java.math.RoundingMode
 import java.time.OffsetDateTime
+import java.util.Timer
 import kotlin.math.exp
 import kotlin.math.floor
 import kotlin.math.max
@@ -184,17 +185,54 @@ class FSRS(
                 )
     }
 
-    private fun nextForgetStability(d: Double, s: Double, r: Double): Double =
-        (this.parameters.w[11] *
+    private fun nextForgetStability(d: Double, s: Double, r: Double): Double {
+
+        val w11 = this.parameters.w[11]
+        val w12 = this.parameters.w[12]
+        val w13 = this.parameters.w[13]
+        val w14 = this.parameters.w[14]
+
+        val part1 = d.pow(-w12)
+        val part2 = (s + 1).pow(w13) - 1
+        val part3 = exp((1 - r) * w14)
+
+        Timber.d("d: $d, s: $s, r: $r")
+        Timber.d("w11: $w11, w12: $w12, w13: $w13, w14: $w14")
+        Timber.d("part1: $part1, part2: $part2, part3: $part3")
+
+        val result = w11 * part1 * part2 * part3
+        Timber.d("result: $result")
+
+        return (this.parameters.w[11] *
                 d.pow(-this.parameters.w[12]) *
                 ((s + 1).pow(this.parameters.w[13]) - 1) *
                 exp((1 - r) * this.parameters.w[14]))
             .toBigDecimal(MathContext(2, RoundingMode.HALF_UP))
             .toDouble()
+    }
 
     private fun forgettingCurve(elapsedDays: Long, stability: Double): Double {
-        return (1 + FACTOR * elapsedDays / stability).pow(DECAY)
+        val factor = FACTOR
+        val x = 1 + factor * elapsedDays / stability
+
+        Timber.d("---- forgettingCurve ----")
+        Timber.d("elapsedDays: $elapsedDays")
+        Timber.d("stability: $stability")
+        Timber.d("FACTOR: $factor")
+        Timber.d("x (base of pow): $x")
+        Timber.d("DECAY: $DECAY")
+
+        if (x <= 0.0) {
+            Timber.e("x <= 0, result will be NaN!")
+            return Double.NaN
+        }
+
+        val result = x.pow(DECAY)
+        Timber.d("forgettingCurve result: $result")
+
+        return result
     }
+
 
     companion object {
         const val DECAY: Double = -0.5
