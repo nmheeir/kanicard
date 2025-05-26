@@ -199,16 +199,6 @@ interface DatabaseDao {
     fun getCardTemplateByNoteTypeId(noteTypeId: Long): Flow<List<TemplateEntity>?>
 
 
-    @Query(
-        """
-    SELECT * FROM fsrs_card 
-    WHERE dId = :deckId 
-      AND date(due) <= date('now', 'localtime')
-    ORDER BY due ASC 
-    """
-    )
-    fun getDueCardsToday(deckId: Long): Flow<List<FsrsCardEntity>?>
-
     //This is for study case
     @Query("SELECT * FROM notes WHERE id IN (:nIds)")
     fun getNoteAndTemplates(nIds: List<Long>): Flow<List<NoteAndTemplate>>
@@ -363,6 +353,25 @@ interface DatabaseDao {
 
     @Query("SELECT * FROM fsrs_card WHERE dId = :dId")
     fun getAllCards(dId: Long): Flow<List<FsrsCardEntity>>
+
+    @Query(
+        """
+    SELECT * FROM fsrs_card 
+    WHERE dId = :deckId 
+      AND date(due) <= date('now', 'localtime')
+    ORDER BY due ASC 
+    """
+    )
+    fun getDueCardsToday(deckId: Long): Flow<List<FsrsCardEntity>?>
+
+    @Query(
+        """
+        SELECT * FROM fsrs_card 
+          WHERE date(due) <= date('now', 'localtime')
+        ORDER BY due ASC 
+        """
+    )
+    fun getDueCardsToday(): Flow<List<FsrsCardEntity>?>
 
     @Query(
         """

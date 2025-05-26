@@ -59,13 +59,30 @@ class StatisticViewModel @Inject constructor(
     private val dId = savedStateHandle.get<Long>("dId") ?: -1L
 
     private val allCards = cardRepo.getAllCards(dId)
-        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val allReviewLogs = reviewLogRepo.allReviewLogs()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    private val futureDueChartDataMap =
-        MutableStateFlow<Map<FutureDueChartState, FutureDueChartData>>(emptyMap())
+    val dueCardsToday = allCards
+        .map { cards ->
+            cards.filter {
+                it.due.toLocalDate() <= OffsetDateTime.now().toLocalDate()
+            }.size
+        }
+        .distinctUntilChanged()
+        .flowOn(Dispatchers.IO)
+        .stateIn(viewModelScope, SharingStarted.Lazily, 0)
+
+    val recentlyStudiedCards = allReviewLogs
+        .map {
+            it.filter {
+                it.review.toLocalDate() == OffsetDateTime.now().toLocalDate()
+            }.groupBy { it.nId }.size
+        }
+        .distinctUntilChanged()
+        .flowOn(Dispatchers.IO)
+        .stateIn(viewModelScope, SharingStarted.Lazily, 0)
 
     val futureDueChartState = MutableStateFlow<FutureDueChartState>(FutureDueChartState.ONE_MONTH)
 
@@ -120,9 +137,7 @@ class StatisticViewModel @Inject constructor(
             it.second.isNotEmpty()
         }
         .mapLatest { (state, reviewLogs) ->
-            withContext(Dispatchers.IO) {
-                calculateReviewData(state, reviewLogs)
-            }
+            calculateReviewData(state, reviewLogs)
         }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ReviewChartData())
