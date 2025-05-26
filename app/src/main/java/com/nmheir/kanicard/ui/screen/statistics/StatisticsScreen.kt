@@ -16,6 +16,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.nmheir.kanicard.ui.activities.LocalAwareWindowInset
 import com.nmheir.kanicard.ui.screen.statistics.chart.CalendarChart
+import com.nmheir.kanicard.ui.screen.statistics.chart.CardCountChart
 import com.nmheir.kanicard.ui.screen.statistics.chart.FutureDueChart
 import com.nmheir.kanicard.ui.screen.statistics.chart.ReviewChart
 import com.nmheir.kanicard.ui.viewmodels.StatisticViewModel
@@ -34,6 +35,8 @@ fun StatisticScreen(
     val reviewChartData by viewModel.reviewChartData.collectAsStateWithLifecycle()
     val reviewChartState by viewModel.reviewChartState.collectAsStateWithLifecycle()
 
+    val cardCountChartData by viewModel.cardCountChartData.collectAsStateWithLifecycle()
+
     val lazyListState = rememberLazyListState()
 
     LazyColumn(
@@ -45,7 +48,7 @@ fun StatisticScreen(
             .fillMaxSize()
     ) {
 
-        item(
+/*        item(
             key = "future_due_chart"
         ) {
             FutureDueChart(
@@ -73,6 +76,14 @@ fun StatisticScreen(
                 data = reviewChartData,
                 state = reviewChartState,
                 action = viewModel::onAction
+            )
+        }*/
+
+        item(
+            key = "card_count_chart"
+        ) {
+            CardCountChart(
+                data = cardCountChartData
             )
         }
     }

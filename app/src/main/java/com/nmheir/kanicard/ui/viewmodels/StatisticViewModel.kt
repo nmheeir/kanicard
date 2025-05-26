@@ -5,6 +5,7 @@ package com.nmheir.kanicard.ui.viewmodels
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nmheir.kanicard.data.entities.fsrs.FsrsCardEntity
 import com.nmheir.kanicard.data.entities.fsrs.ReviewLogEntity
 import com.nmheir.kanicard.domain.repository.ICardRepo
 import com.nmheir.kanicard.domain.repository.IReviewLogRepo
@@ -31,6 +32,7 @@ import javax.inject.Inject
 import kotlin.math.min
 import kotlin.math.roundToInt
 import com.nmheir.kanicard.data.enums.State
+import com.nmheir.kanicard.ui.screen.statistics.model.CardCountChartData
 import com.nmheir.kanicard.ui.screen.statistics.model.ReviewChartCardData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -117,6 +119,17 @@ class StatisticViewModel @Inject constructor(
         }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ReviewChartData())
+
+    val cardCountChartData = allCards
+        .filter {
+            it.isNotEmpty()
+        }
+        .map {
+            calculateCardCountData(it)
+        }
+        .distinctUntilChanged()
+        .flowOn(Dispatchers.IO)
+        .stateIn(viewModelScope, SharingStarted.Lazily, CardCountChartData())
 
     private fun calculateFutureDueData(state: FutureDueChartState): FutureDueChartData {
         // 1. Xác định khoảng days dựa vào state
@@ -299,6 +312,30 @@ class StatisticViewModel @Inject constructor(
             total = totalReviews,
             averageDayStudied = avgStudiedDay,
             averageOverPeriod = avgOverPeriod
+        )
+    }
+
+    private fun calculateCardCountData(
+        fsrsCards: List<FsrsCardEntity>
+    ): CardCountChartData {
+        val total = fsrsCards.size
+
+        val newCount = fsrsCards.count { it.state == State.New }
+        val learningCount = fsrsCards.count { it.state == State.Learning }
+        val relearningCount = fsrsCards.count { it.state == State.Relearning }
+
+        // Chỉ những card đã Review mới tính Young/Mature
+        val reviewCards = fsrsCards.filter { it.state == State.Review }
+        val youngCount = reviewCards.count { it.scheduledDays < 21 }
+        val matureCount = reviewCards.size - youngCount
+
+        return CardCountChartData(
+            total     = total,
+            new       = newCount,
+            learning  = learningCount,
+            relearning= relearningCount,
+            young     = youngCount,
+            mature    = matureCount
         )
     }
 
