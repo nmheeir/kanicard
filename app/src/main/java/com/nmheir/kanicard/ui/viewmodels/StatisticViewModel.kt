@@ -33,6 +33,7 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 import com.nmheir.kanicard.data.enums.State
 import com.nmheir.kanicard.ui.screen.statistics.model.CardCountChartData
+import com.nmheir.kanicard.ui.screen.statistics.model.DifficultyChartData
 import com.nmheir.kanicard.ui.screen.statistics.model.ReviewChartCardData
 import com.nmheir.kanicard.ui.screen.statistics.model.ReviewIntervalChartData
 import com.nmheir.kanicard.ui.screen.statistics.model.ReviewIntervalChartState
@@ -150,6 +151,13 @@ class StatisticViewModel @Inject constructor(
         .distinctUntilChanged()
         .flowOn(Dispatchers.IO)
         .stateIn(viewModelScope, SharingStarted.Lazily, ReviewIntervalChartData())
+
+    val difficultyChartData = allCards
+        .filter {
+            it.isNotEmpty()
+        }.map { cards ->
+            calculateDifficultyChartData(cards)
+        }.stateIn(viewModelScope, SharingStarted.Lazily, DifficultyChartData())
 
     private fun calculateFutureDueData(state: FutureDueChartState): FutureDueChartData {
         // 1. Xác định khoảng days dựa vào state
@@ -423,6 +431,47 @@ class StatisticViewModel @Inject constructor(
             avgIvl = avgIvl
         )
     }
+
+    private fun calculateDifficultyChartData(
+        fsrsCards: List<FsrsCardEntity>
+    ): DifficultyChartData {
+        if (fsrsCards.isEmpty()) return DifficultyChartData()
+
+        val binStep = 5
+        val binMax = 100
+        val binCount = binMax / binStep  // 20 bins: 5, 10, ..., 100
+
+        val counts = IntArray(binCount) { 0 }
+        var totalDifficulty = 0.0
+
+        fsrsCards.forEach { card ->
+            val percent = (card.difficulty.coerceIn(0.0, 10.0)) * 10.0  // scale to 0–100
+            val binIndex = if (percent < binStep) {
+                0 // bin 0: < 5%
+            } else {
+                ((percent / binStep).toInt()).coerceAtMost(binCount - 1)
+            }
+            counts[binIndex]++
+            totalDifficulty += card.difficulty
+        }
+
+        val barData = buildMap<Int, Number> {
+            for (i in 0 until binCount) {
+                val label = (i) * binStep  // 5, 10, 15, ..., 100
+                put(label, counts[i])
+            }
+        }
+
+        val avgDiff = totalDifficulty / fsrsCards.size
+
+        return DifficultyChartData(
+            barData = barData,
+            avgDiff = avgDiff
+        )
+    }
+
+
+
 
     // Helper để đếm 4 state theo rule Anki
     private fun countStates(logs: List<ReviewLogEntity>): ReviewChartCardData {

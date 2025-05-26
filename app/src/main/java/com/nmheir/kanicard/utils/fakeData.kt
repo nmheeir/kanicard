@@ -8,6 +8,7 @@ import com.nmheir.kanicard.data.dto.card.CardBrowseDto
 import com.nmheir.kanicard.data.dto.deck.DeckWidgetData
 import com.nmheir.kanicard.data.dto.note.NoteData
 import com.nmheir.kanicard.data.entities.card.TemplateEntity
+import com.nmheir.kanicard.data.entities.fsrs.FsrsCardEntity
 import com.nmheir.kanicard.data.entities.note.FieldEntity
 import com.nmheir.kanicard.data.enums.State
 import com.nmheir.kanicard.ui.screen.statistics.model.CalendarChartData
@@ -742,3 +743,20 @@ private fun generateMockReviewChartData(
 
 // Ví dụ sử dụng:
 val mock7 = generateMockReviewChartData(ReviewChartState.LAST_7_DAYS)
+
+val fakeFsrsCardEntities = List(100) { index ->
+    FsrsCardEntity(
+        nId = index.toLong(),
+        dId = 1L,
+        due = OffsetDateTime.now().plusDays(Random.nextLong(1, 30)),
+        stability = Random.nextDouble(0.1, 20.0),
+        difficulty = Random.nextDouble(1.0, 20.0), // độ khó trong khoảng 1–20
+        elapsedDays = Random.nextLong(1, 100),
+        scheduledDays = Random.nextLong(1, 100),
+        reps = Random.nextLong(1, 20),
+        lapses = Random.nextLong(0, 5),
+        state = State.Review, // hoặc Random từ enum State nếu cần
+        lastReview = OffsetDateTime.now().minusDays(Random.nextLong(1, 30))
+    )
+
+}
