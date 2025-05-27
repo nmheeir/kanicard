@@ -192,6 +192,13 @@
     <string name="sub_title_restore">Restore all data and application settings from a backup</string>
     <string name="sub_title_csv_import_export">Import or export database data in CSV format</string>
 
+    <!--Stuff-->
+    <string name="today">Today</string>
+    <string name="average">Average</string>
+    <string name="due_tomorrow">Due tomorrow</string>
+    <string name="daily_load">Daily load</string>
+    <string name="total">Total</string>
+
     <!--Plurals-->
     <plurals name="n_selected">
         <item quantity="other">%d selected</item>
@@ -224,5 +231,22 @@
 
     <plurals name="daily_limit_warning">
         <item quantity="other">If adding %1$d new cards each day, your review limit should be at least %2$d.</item>
+    </plurals>
+
+    <plurals name="n_reviews">
+        <item quantity="zero">0 review</item>
+        <item quantity="one">1 review</item>
+        <item quantity="other">%s reviews</item>
+    </plurals>
+
+    <plurals name="n_reviews_day">
+        <item quantity="zero">0 review/day</item>
+        <item quantity="one">1 review/day</item>
+        <item quantity="other">%s reviews/day</item>
+    </plurals>
+
+    <plurals name="n_average_interval">
+        <item quantity="zero">Average interval: 0 day</item>
+        <item quantity="other">Average interval: %s days</item>
     </plurals>
 </resources>

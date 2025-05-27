@@ -147,4 +147,5 @@ dependencies {
 
     //Chart
     implementation(libs.vico.compose)
+    implementation(libs.charts.mahu)
 }

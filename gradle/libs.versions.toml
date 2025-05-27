@@ -44,6 +44,7 @@ appcompat = "1.7.0"
 commonmark = "0.24.0"
 
 vico = "2.1.2"
+chartsMahu = "0.3.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -117,6 +118,7 @@ commonmark-ext-heading-anchor = { group = "org.commonmark", name = "commonmark-e
 compose-webview = { module = "io.github.kevinnzou:compose-webview", version.ref = "composeWebview" }
 
 vico-compose = { group = "com.patrykandpatrick.vico", name = "compose", version.ref = "vico" }
+charts-mahu = { module = "ma.hu:compose-charts", version.ref = "chartsMahu" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

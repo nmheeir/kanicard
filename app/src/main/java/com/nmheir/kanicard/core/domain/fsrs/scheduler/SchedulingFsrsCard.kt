@@ -6,6 +6,7 @@ import com.nmheir.kanicard.core.domain.fsrs.model.RecordLog
 import com.nmheir.kanicard.core.domain.fsrs.model.RecordLogItem
 import com.nmheir.kanicard.core.domain.fsrs.model.ReviewLog
 import com.nmheir.kanicard.data.enums.State
+import timber.log.Timber
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 
@@ -20,8 +21,13 @@ class SchedulingFsrsCard(
     private var lastElapsedDays: Long = card.elapsedDays
 
     init {
+        Timber.d("Now: $now")
+        Timber.d("Last review: $lastReview")
+        Timber.d("Card last review: ${card.lastReview}")
         card.elapsedDays =
-            if (card.state == State.New) 0 else now.until(card.lastReview, ChronoUnit.DAYS)
+            if (card.state == State.New) 0
+            else ChronoUnit.DAYS.between(card.lastReview, now).toLong()
+        Timber.d("Card elapsed days: ${card.elapsedDays}")
         card.lastReview = now
         card.reps += 1
         this.again = card.copy()
@@ -64,6 +70,9 @@ class SchedulingFsrsCard(
         goodInterval: Long,
         easyInterval: Long,
     ): SchedulingFsrsCard {
+        Timber.d("Schedule Interval Hard: $hardInterval")
+        Timber.d("Schedule Interval Good: $goodInterval")
+        Timber.d("Schedule Interval Easy: $easyInterval")
         this.again.scheduledDays = 0
         this.hard.scheduledDays = hardInterval
         this.good.scheduledDays = goodInterval

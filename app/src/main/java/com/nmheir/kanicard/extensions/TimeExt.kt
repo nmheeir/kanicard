@@ -6,9 +6,11 @@ import androidx.compose.ui.res.stringResource
 import com.nmheir.kanicard.R
 import timber.log.Timber
 import java.time.Duration
+import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.util.Calendar
 import java.util.Locale
 
 @Composable
@@ -82,7 +84,6 @@ fun OffsetDateTime.timeUntilDue(): String {
     }
 
 
-
     // 4) Nếu < 30 ngày → hiển thị ngày thập phân
     val totalDays = duration.toDays()
     if (totalDays < 30) {
@@ -108,7 +109,20 @@ fun OffsetDateTime.timeUntilDue(): String {
 }
 
 private val format1 = DateTimeFormatter.ofPattern("MMM dd, yyyy h:mm a", Locale.ENGLISH)
+private val localDateFormat = DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy", Locale.ENGLISH)
 
 fun OffsetDateTime.format3(): String {
     return this.format(format1)
 }
+
+fun LocalDate.formatLongDate(): String =
+    this.format(localDateFormat)
+
+fun LocalDate.isSameDay(other: LocalDate): Boolean {
+    return this.year == other.year &&
+            this.monthValue == other.monthValue &&
+            this.dayOfMonth == other.dayOfMonth
+}
+
+fun LocalDate.isToday(): Boolean =
+    this == LocalDate.now()
