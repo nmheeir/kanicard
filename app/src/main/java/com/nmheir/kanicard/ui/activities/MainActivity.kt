@@ -80,6 +80,7 @@ import com.nmheir.kanicard.constants.ThemeModeKey
 import com.nmheir.kanicard.core.domain.ui.model.AppTheme
 import com.nmheir.kanicard.core.domain.ui.model.ThemeMode
 import com.nmheir.kanicard.data.local.KaniDatabase
+import com.nmheir.kanicard.ui.component.DrawerContent
 import com.nmheir.kanicard.ui.component.InputFieldHeight
 import com.nmheir.kanicard.ui.component.SearchBar
 import com.nmheir.kanicard.ui.navigation.navigationBuilder
@@ -258,16 +259,14 @@ class MainActivity : ComponentActivity() {
                         drawerState = drawerState,
                         gesturesEnabled = drawerState.isOpen,
                         drawerContent = {
-                            ModalDrawerSheet {
-                                Text("Drawer title", modifier = Modifier.padding(16.dp))
-                                HorizontalDivider()
-                                NavigationDrawerItem(
-                                    label = { Text(text = "Setting") },
-                                    selected = false,
-                                    onClick = { navController.navigate(Screens.SettingsScreen.Setting.route) }
-                                )
-                                // ...other drawer items
-                            }
+                            DrawerContent(
+                                onNavigate = {
+                                    scope.launch {
+                                        drawerState.close()
+                                        navController.navigate(it.route)
+                                    }
+                                }
+                            )
                         }
                     ) {
                         CompositionLocalProvider(
