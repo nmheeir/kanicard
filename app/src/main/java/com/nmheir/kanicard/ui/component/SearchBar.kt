@@ -2,9 +2,11 @@
 
 package com.nmheir.kanicard.ui.component
 
+import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
@@ -20,6 +22,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -56,6 +59,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.takeOrElse
@@ -79,9 +83,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.util.lerp
 import com.nmheir.kanicard.constants.AppBarHeight
+import com.nmheir.kanicard.extensions.dpToPx
 import kotlin.math.max
 import kotlin.math.roundToInt
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchBar(
@@ -106,7 +112,7 @@ fun SearchBar(
 ) {
     //Change offset of search bar
     val heightOffsetLimit = with(LocalDensity.current) {
-        -(AppBarHeight.toPx() + WindowInsets.systemBars.getTop(this))
+        -(AppBarHeight.toPx() + WindowInsets.systemBars.getTop(this).toFloat())
     }
     SideEffect {
         if (scrollBehavior.state.heightOffsetLimit != heightOffsetLimit) {
@@ -145,7 +151,7 @@ fun SearchBar(
         windowInsets.asPaddingValues().calculateStartPadding(LocalLayoutDirection.current)
     val endInset = windowInsets.asPaddingValues().calculateEndPadding(LocalLayoutDirection.current)
 
-    val topPadding = SearchBarVerticalPadding + topInset
+    val topPadding = windowInsets.asPaddingValues().calculateTopPadding()
     val animatedSurfaceTopPadding = lerp(topPadding, 0.dp, animationProgress)
     val animatedInputFieldPadding by remember {
         derivedStateOf {
@@ -199,7 +205,7 @@ fun SearchBar(
             tonalElevation = tonalElevation,
             modifier = Modifier
                 .padding(
-//                    top = animatedSurfaceTopPadding,
+                    top = animatedSurfaceTopPadding,
                     start = startPadding,
                     end = endPadding
                 )

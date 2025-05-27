@@ -16,6 +16,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
@@ -86,111 +87,114 @@ fun StatisticScreen(
     val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
 
-    LazyColumn(
-        state = lazyListState,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        contentPadding = LocalAwareWindowInset.current.asPaddingValues(),
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-
-        item(
-            key = "Overview"
+    Scaffold { pv ->
+        LazyColumn(
+            state = lazyListState,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            contentPadding = pv,
+            modifier = Modifier
+                .fillMaxSize()
         ) {
-            OverviewSection(
-                dueToday = dueCardsToday,
-                studiedToday = studiedToDay
-            )
-        }
+
+            item(
+                key = "Overview"
+            ) {
+                OverviewSection(
+                    dueToday = dueCardsToday,
+                    studiedToday = studiedToDay
+                )
+            }
 
 
-        item(
-            key = "tab"
-        ) {
-            Gap(24.dp)
-            StatisticTabSection(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                pagerState = pagerState,
-                onTabSelected = { page ->
-                    scope.launch {
-                        pagerState.animateScrollToPage(page)
+            item(
+                key = "tab"
+            ) {
+                Gap(24.dp)
+                StatisticTabSection(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    pagerState = pagerState,
+                    onTabSelected = { page ->
+                        scope.launch {
+                            pagerState.animateScrollToPage(page)
+                        }
                     }
-                }
-            )
-        }
+                )
+            }
 
-        item(
-            key = "horizontal_page"
-        ) {
-            HorizontalPager(
-                verticalAlignment = Alignment.Top,
-                pageSpacing = 12.dp,
-                contentPadding = PaddingValues(horizontal = 12.dp),
-                state = pagerState,
-                userScrollEnabled = false
-            ) { page ->
-                when (page) {
+            item(
+                key = "horizontal_page"
+            ) {
+                HorizontalPager(
+                    verticalAlignment = Alignment.Top,
+                    pageSpacing = 12.dp,
+                    contentPadding = PaddingValues(horizontal = 12.dp),
+                    state = pagerState,
+                    userScrollEnabled = false
+                ) { page ->
+                    when (page) {
 //                    StatisticTab.ALL.ordinal -> {
 //
 //                    }
 
-                    StatisticTab.FUTURE_DUE.ordinal -> {
-                        FutureDueChart(
-                            state = futureDueChartState,
-                            data = futureDueChartData,
-                            action = viewModel::onAction
-                        )
-                    }
+                        StatisticTab.FUTURE_DUE.ordinal -> {
+                            FutureDueChart(
+                                state = futureDueChartState,
+                                data = futureDueChartData,
+                                action = viewModel::onAction
+                            )
+                        }
 
-                    StatisticTab.CALENDAR.ordinal -> {
-                        CalendarChart(
-                            data = calendarChartData,
-                            year = calendarChartState,
-                            action = viewModel::onAction
-                        )
-                    }
+                        StatisticTab.CALENDAR.ordinal -> {
+                            CalendarChart(
+                                data = calendarChartData,
+                                year = calendarChartState,
+                                action = viewModel::onAction
+                            )
+                        }
 
-                    StatisticTab.REVIEWS.ordinal -> {
-                        ReviewChart(
-                            data = reviewChartData,
-                            state = reviewChartState,
-                            action = viewModel::onAction
-                        )
-                    }
+                        StatisticTab.REVIEWS.ordinal -> {
+                            ReviewChart(
+                                data = reviewChartData,
+                                state = reviewChartState,
+                                action = viewModel::onAction
+                            )
+                        }
 
-                    StatisticTab.CARD_COUNT.ordinal -> {
-                        CardCountChart(
-                            data = cardCountChartData
-                        )
-                    }
+                        StatisticTab.CARD_COUNT.ordinal -> {
+                            CardCountChart(
+                                data = cardCountChartData
+                            )
+                        }
 
-                    StatisticTab.REVIEW_INTERVAL.ordinal -> {
-                        ReviewIntervalChart(
-                            data = reviewIntervalChartData,
-                            state = reviewIntervalChartState,
-                            action = viewModel::onAction
-                        )
-                    }
+                        StatisticTab.REVIEW_INTERVAL.ordinal -> {
+                            ReviewIntervalChart(
+                                data = reviewIntervalChartData,
+                                state = reviewIntervalChartState,
+                                action = viewModel::onAction
+                            )
+                        }
 
-                    StatisticTab.CARD_DIFFICULTY.ordinal -> {
-                        DifficultyChart(
-                            data = difficultyChartData
-                        )
-                    }
+                        StatisticTab.CARD_DIFFICULTY.ordinal -> {
+                            DifficultyChart(
+                                data = difficultyChartData
+                            )
+                        }
 
-                    StatisticTab.ANSWER_BUTTON.ordinal -> {
-                        AnswerButtonChart(
-                            data = answerButtonChartData,
-                            state = answerButtonChartState,
-                            action = viewModel::onAction
-                        )
+                        StatisticTab.ANSWER_BUTTON.ordinal -> {
+                            AnswerButtonChart(
+                                data = answerButtonChartData,
+                                state = answerButtonChartState,
+                                action = viewModel::onAction
+                            )
+                        }
                     }
                 }
             }
         }
     }
+
 }
 
 @Composable
