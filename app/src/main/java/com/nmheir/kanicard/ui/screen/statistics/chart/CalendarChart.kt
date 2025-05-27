@@ -37,6 +37,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -70,7 +71,6 @@ fun CalendarChart(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = modifier
-            .hozPadding()
     ) {
         YearSelect(
             year = year,
@@ -92,6 +92,7 @@ fun CalendarChart(
                 key = { it.first }
             ) { (month, monthItems) ->
                 Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Tiêu đề tháng (ví dụ "Jan", "Feb", v.v.)
@@ -107,6 +108,29 @@ fun CalendarChart(
                     )
                 }
             }
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.align(Alignment.End)
+        ) {
+            Text(
+                text = "Less",
+                style = MaterialTheme.typography.labelSmall
+            )
+            CalendarChartDayItem(
+                color = MaterialTheme.colorScheme.errorContainer,
+            )
+            (1..4).map {
+                CalendarChartDayItem(
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = ((it + 1) * 0.2f)),
+                )
+            }
+            Text(
+                text = "More",
+                style = MaterialTheme.typography.labelSmall
+            )
         }
     }
 }
@@ -226,10 +250,27 @@ private fun CalendarChartDayItem(
         data.reviewCount >= 200 -> MaterialTheme.colorScheme.primary
         data.reviewCount >= 100 -> MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
         data.reviewCount >= 50 -> MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-        data.reviewCount >= 1 -> MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+        data.reviewCount >= 1 -> MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
         else -> MaterialTheme.colorScheme.errorContainer
     }
 
+    CalendarChartDayItem(
+        color = color,
+        showBorder = data.day.isToday(),
+        enabled = enabled,
+        onClick = onClick,
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun CalendarChartDayItem(
+    modifier: Modifier = Modifier,
+    color: Color,
+    showBorder: Boolean = false,
+    enabled: Boolean = false,
+    onClick: () -> Unit = {}
+) {
     Box(
         modifier = modifier
             .size(20.dp)
@@ -237,7 +278,7 @@ private fun CalendarChartDayItem(
             .background(color)
             .clickable(enabled = enabled, onClick = onClick)
             .then(
-                other = if (data.day.isToday()) {
+                other = if (showBorder) {
                     Modifier.border(
                         1.dp,
                         MaterialTheme.colorScheme.outline,

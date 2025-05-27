@@ -1,6 +1,7 @@
 package com.nmheir.kanicard.ui.screen.statistics.chart
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +27,7 @@ import com.nmheir.kanicard.ui.screen.statistics.model.FutureDueChartState
 import com.nmheir.kanicard.ui.screen.statistics.model.ReviewChartCardData
 import com.nmheir.kanicard.ui.screen.statistics.model.ReviewChartData
 import com.nmheir.kanicard.ui.screen.statistics.model.ReviewChartState
+import com.nmheir.kanicard.ui.screen.statistics.model.core.columnColors
 import com.nmheir.kanicard.ui.screen.statistics.rememberMarker
 import com.nmheir.kanicard.ui.theme.KaniTheme
 import com.nmheir.kanicard.ui.viewmodels.StatisticUiAction
@@ -38,6 +40,7 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.stacked
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.common.component.shapeComponent
@@ -46,6 +49,8 @@ import com.patrykandpatrick.vico.compose.common.rememberHorizontalLegend
 import com.patrykandpatrick.vico.compose.common.rememberVerticalLegend
 import com.patrykandpatrick.vico.compose.common.shader.horizontalGradient
 import com.patrykandpatrick.vico.compose.common.vicoTheme
+import com.patrykandpatrick.vico.core.cartesian.AutoScrollCondition
+import com.patrykandpatrick.vico.core.cartesian.Scroll
 import com.patrykandpatrick.vico.core.cartesian.axis.Axis
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
@@ -105,6 +110,9 @@ fun ReviewChart(
             lineSeries {
                 series(data.lineData.keys, data.lineData.values)
             }
+            extras {
+                it[LegendLabelKey] = seriesMap.keys
+            }
         }
     }
 
@@ -117,7 +125,7 @@ fun ReviewChart(
     ) {
         Text(
             text = "The number of questions you have answered.",
-            style = MaterialTheme.typography.labelSmall
+            style = MaterialTheme.typography.labelLarge
         )
 
         MultiChoiceSegmentedButtonRow {
@@ -156,13 +164,6 @@ private fun ReviewChart(
 
     val lineColor = Color(0xffa485e0).copy(alpha = 0.4f)
 
-    val columnColors = listOf(
-        Color(0xff6438a7),
-        Color(0xff3490de),
-        Color(0xff73e8dc),
-        Color.Cyan
-    )
-
     val legendItemLabelComponent = rememberTextComponent(vicoTheme.textColor)
 
     CartesianChartHost(
@@ -172,7 +173,7 @@ private fun ReviewChart(
                     columnColors.map {
                         rememberLineComponent(
                             fill = fill(it),
-                            thickness = 8.dp
+                            thickness = 16.dp
                         )
                     }
                 ),
@@ -205,26 +206,48 @@ private fun ReviewChart(
                 rangeProvider = CartesianLayerRangeProvider.auto(),
                 verticalAxisPosition = Axis.Position.Vertical.End
             ),
-            marker = rememberMarker(),
-            startAxis = VerticalAxis.rememberStart(),
-            endAxis = VerticalAxis.rememberEnd(),
-            bottomAxis = HorizontalAxis.rememberBottom(),
-//            legend = rememberVerticalLegend(
-//                items = { extraStore ->
-//                    extraStore[LegendLabelKey].forEachIndexed { index, label ->
-//                        add(
-//                            LegendItem(
-//                                shapeComponent(fill(columnColors[index]), CorneredShape.Pill),
-//                                legendItemLabelComponent,
-//                                label,
-//                            )
-//                        )
-//                    }
-//                },
-//                padding = Insets(startDp = 12f)
-//            )
+            marker = rememberMarker(showIndicator = false),
+            startAxis = VerticalAxis.rememberStart(
+                guideline = null
+            ),
+            endAxis = VerticalAxis.rememberEnd(
+                guideline = null
+            ),
+            bottomAxis = HorizontalAxis.rememberBottom(
+                guideline = null
+            ),
+            legend = rememberHorizontalLegend(
+                items = { extraStore ->
+                    extraStore[LegendLabelKey].forEachIndexed { index, label ->
+                        add(
+                            LegendItem(
+                                shapeComponent(fill(columnColors[index]), CorneredShape.Pill),
+                                legendItemLabelComponent,
+                                label,
+                            )
+                        )
+                    }
+                },
+                padding = Insets(horizontalDp = 12f, verticalDp = 12f)
+            )
         ),
-        modelProducer = modelProducer
+        scrollState = rememberVicoScrollState(
+            initialScroll = Scroll.Absolute.End,
+            autoScrollCondition = AutoScrollCondition.OnModelGrowth
+        ),
+        modelProducer = modelProducer,
+        placeholder = {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = modifier.matchParentSize()
+            ) {
+                Text(
+                    text = "No Data",
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                )
+            }
+        }
     )
 }
 
@@ -305,29 +328,29 @@ private fun Test() {
             .toList()                            // List<ReviewChartCardData>
             .let { list ->
                 mapOf(
-                    "learning" to list.map { it.learning },
-                    "relearning" to list.map { it.relearning },
-                    "young" to list.map { it.young },
-                    "mature" to list.map { it.mature }
+                    "Learning" to list.map { it.learning },
+                    "Relearning" to list.map { it.relearning },
+                    "Young" to list.map { it.young },
+                    "Mature" to list.map { it.mature }
                 )
             }
 
-        runBlocking {
-            modelProducer.runTransaction {
-                columnSeries {
-                    seriesMap.values.forEach {
-                        series(barData.keys, it)
-                    }
-                }
-                lineSeries {
-                    series(lineData.keys, lineData.values)
-                }
-
-                extras { extraStore ->
-                    extraStore[LegendLabelKey] = seriesMap.keys
-                }
-            }
-        }
+//        runBlocking {
+//            modelProducer.runTransaction {
+//                columnSeries {
+//                    seriesMap.values.forEach {
+//                        series(barData.keys, it)
+//                    }
+//                }
+//                lineSeries {
+//                    series(lineData.keys, lineData.values)
+//                }
+//
+//                extras { extraStore ->
+//                    extraStore[LegendLabelKey] = seriesMap.keys
+//                }
+//            }
+//        }
 
         ReviewChart(
             modelProducer = modelProducer

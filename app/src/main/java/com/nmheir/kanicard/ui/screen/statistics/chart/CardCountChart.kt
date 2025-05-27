@@ -76,14 +76,13 @@ fun CardCountChart(
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
-            .hozPadding()
-            .height(240.dp)
+            .height(400.dp)
     ) {
         PieChart(
             data =
                 PieChartData(
                     entries = pieChartEntries,
-                    legendPosition = LegendPosition.End
+                    legendPosition = LegendPosition.Bottom
                 ),
             chartSize = 160.dp,
             sliceWidth = 0.dp,
@@ -169,11 +168,10 @@ private fun CardCountLegendItem(
                 )
         ) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(3f)
+                modifier = Modifier.weight(1f)
             ) {
-
                 Box(
                     modifier = Modifier
                         .size(8.dp)
@@ -195,13 +193,16 @@ private fun CardCountLegendItem(
 
                 Text(
                     text = total.toString(),
-                    textAlign = TextAlign.Center,
+                    textAlign = TextAlign.End,
                     style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f)
                 )
 
                 Text(
                     text = String.format("%.1f%%", percent),
-                    style = MaterialTheme.typography.bodyMedium
+                    textAlign = TextAlign.End,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f)
                 )
             }
 
@@ -209,7 +210,7 @@ private fun CardCountLegendItem(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun Test() {
     KaniTheme {
@@ -223,13 +224,14 @@ private fun Test() {
         )
 
         val fakeData1 = CardCountChartData(
-//            total = 110,
-            new = 50,
-            learning = 40,
-            relearning = 10,
-            young = 0,
-            mature = 10
+            new = 17382,
+            learning = 24671,
+            relearning = 8913,
+            young = 19436,
+            mature = 29698
         )
+
+
 
         CardCountChart(
             data = fakeData1

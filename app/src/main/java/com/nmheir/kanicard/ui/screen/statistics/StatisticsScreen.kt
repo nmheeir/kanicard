@@ -39,6 +39,9 @@ import com.nmheir.kanicard.R
 import com.nmheir.kanicard.core.presentation.utils.hozPadding
 import com.nmheir.kanicard.ui.activities.LocalAwareWindowInset
 import com.nmheir.kanicard.ui.component.Gap
+import com.nmheir.kanicard.ui.component.widget.PreferenceEntry
+import com.nmheir.kanicard.ui.component.widget.PreferenceGroupHeader
+import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
 import com.nmheir.kanicard.ui.screen.statistics.chart.AnswerButtonChart
 import com.nmheir.kanicard.ui.screen.statistics.chart.CalendarChart
 import com.nmheir.kanicard.ui.screen.statistics.chart.CardCountChart
@@ -76,7 +79,6 @@ fun StatisticScreen(
     val answerButtonChartState by viewModel.answerButtonChartState.collectAsStateWithLifecycle()
     val answerButtonChartData by viewModel.answerButtonChartData.collectAsStateWithLifecycle()
 
-    val selectedTab by remember { mutableStateOf(StatisticTab.FUTURE_DUE) }
     val pagerState = rememberPagerState(0) {
         StatisticTab.entries.size
     }
@@ -106,7 +108,10 @@ fun StatisticScreen(
         item(
             key = "tab"
         ) {
+            Gap(24.dp)
             StatisticTabSection(
+                modifier = Modifier
+                    .fillMaxWidth(),
                 pagerState = pagerState,
                 onTabSelected = { page ->
                     scope.launch {
@@ -120,6 +125,8 @@ fun StatisticScreen(
             key = "horizontal_page"
         ) {
             HorizontalPager(
+                verticalAlignment = Alignment.Top,
+                pageSpacing = 12.dp,
                 contentPadding = PaddingValues(horizontal = 12.dp),
                 state = pagerState,
                 userScrollEnabled = false
@@ -192,6 +199,9 @@ private fun OverviewSection(
     dueToday: Int,
     studiedToday: Int
 ) {
+    TextPreferenceWidget(
+        title = "Overview"
+    )
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -254,6 +264,7 @@ private fun StatisticTabSection(
     onTabSelected: (Int) -> Unit
 ) {
     ScrollableTabRow(
+        edgePadding = 0.dp,
         selectedTabIndex = pagerState.currentPage,
         modifier = modifier
     ) {
@@ -266,7 +277,7 @@ private fun StatisticTabSection(
                 text = {
                     Text(
                         text = tab.title,
-                        style = MaterialTheme.typography.labelSmall
+                        style = MaterialTheme.typography.labelMedium
                     )
                 }
             )

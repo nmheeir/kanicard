@@ -114,10 +114,11 @@ class StatisticViewModel @Inject constructor(
         .filter { (cards, _) -> cards.isNotEmpty() }
         // 3. Khi có cards mới hoặc state thay đổi, tính toán
         .map { (cards, state) ->
-            calculateFutureDueData(state)
+            calculateFutureDueData(cards, state)
         }
         // 4. Loại trùng lặp nếu cần
         .distinctUntilChanged()
+        .flowOn(Dispatchers.IO)
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5_000),
@@ -192,14 +193,12 @@ class StatisticViewModel @Inject constructor(
         .flowOn(Dispatchers.IO)
         .stateIn(viewModelScope, SharingStarted.Lazily, AnswerButtonChartData())
 
-    private fun calculateFutureDueData(state: FutureDueChartState): FutureDueChartData {
+    private fun calculateFutureDueData(
+        cards: List<FsrsCardEntity>,
+        state: FutureDueChartState
+    ): FutureDueChartData {
         // 1. Xác định khoảng days dựa vào state
-        val maxDays = when (state) {
-            FutureDueChartState.ONE_MONTH -> 30L
-            FutureDueChartState.THREE_MONTHS -> 90L
-            FutureDueChartState.ONE_YEAR -> 365L
-            FutureDueChartState.ALL -> Long.MAX_VALUE
-        }
+        val maxDays = state.duration
 
         // 2. Lấy thời điểm hiện tại (OffsetDateTime)
         val today = OffsetDateTime.now().toLocalDate()
@@ -208,7 +207,7 @@ class StatisticViewModel @Inject constructor(
         //    barData: số card mỗi ngày
         //    lineData: số tích lũy (cumulative) đến ngày đó
         val counts = mutableMapOf<Int, Int>()
-        allCards.value.forEach { card ->
+        cards.forEach { card ->
             val dueDate = card.due.toLocalDate()
             val daysUntil = ChronoUnit.DAYS.between(today, dueDate).toInt()
             if (daysUntil in 0..maxDays) {
@@ -240,6 +239,7 @@ class StatisticViewModel @Inject constructor(
         val abc = FutureDueChartData(
             barData = barData,
             lineData = lineData,
+            total = total,
             average = average,
             dueTomorrow = dueTomorrow,
             dailyLoad = average.roundToInt()
@@ -247,13 +247,7 @@ class StatisticViewModel @Inject constructor(
 
         Timber.d(abc.toString())
 
-        return FutureDueChartData(
-            barData = barData,
-            lineData = lineData,
-            average = average,
-            dueTomorrow = dueTomorrow,
-            dailyLoad = average.roundToInt()
-        )
+        return abc
     }
 
     private fun calculateChartData(

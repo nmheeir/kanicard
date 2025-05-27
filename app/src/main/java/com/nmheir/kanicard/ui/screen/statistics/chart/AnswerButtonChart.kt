@@ -3,6 +3,7 @@ package com.nmheir.kanicard.ui.screen.statistics.chart
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -15,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
@@ -23,6 +25,7 @@ import com.nmheir.kanicard.data.enums.Rating
 import com.nmheir.kanicard.ui.screen.statistics.model.AnswerButtonChartCardType
 import com.nmheir.kanicard.ui.screen.statistics.model.AnswerButtonChartData
 import com.nmheir.kanicard.ui.screen.statistics.model.AnswerButtonChartState
+import com.nmheir.kanicard.ui.screen.statistics.model.core.columnColors
 import com.nmheir.kanicard.ui.screen.statistics.rememberMarker
 import com.nmheir.kanicard.ui.theme.KaniTheme
 import com.nmheir.kanicard.ui.viewmodels.StatisticUiAction
@@ -45,6 +48,7 @@ import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
+import com.patrykandpatrick.vico.core.common.Insets
 import com.patrykandpatrick.vico.core.common.LegendItem
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
@@ -86,8 +90,14 @@ fun AnswerButtonChart(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier
             .fillMaxWidth()
-            .hozPadding()
     ) {
+
+        Text(
+            text = "The number of times you have pressed each button.",
+            style = MaterialTheme.typography.labelLarge,
+            textAlign = TextAlign.Center
+        )
+
         SingleChoiceSegmentedButtonRow {
             AnswerButtonChartState.entries.fastForEachIndexed { idx, chartState ->
                 SegmentedButton(
@@ -125,13 +135,6 @@ private val BottomAxisValueFormatter = CartesianValueFormatter { context, x, _ -
 private fun AnswerButtonChart(
     modelProducer: CartesianChartModelProducer
 ) {
-    val columnColors = listOf(
-        Color(0xff6438a7),
-        Color(0xff3490de),
-        Color(0xff73e8dc),
-        Color.Cyan
-    )
-
     val legendItemLabelComponent = rememberTextComponent(vicoTheme.textColor)
 
     CartesianChartHost(
@@ -168,7 +171,8 @@ private fun AnswerButtonChart(
                             ),
                         )
                     }
-                }
+                },
+                padding = Insets(12f)
             )
         ),
         zoomState = rememberVicoZoomState(zoomEnabled = false),
