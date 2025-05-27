@@ -10,11 +10,13 @@ import com.nmheir.kanicard.data.entities.option.defaultDeckOption
 import com.nmheir.kanicard.domain.repository.IDeckOptionRepo
 import com.nmheir.kanicard.domain.repository.IDeckRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
@@ -37,7 +39,9 @@ class DeckOptionViewModel @Inject constructor(
         optionUsages, selectedDeckOptionId
     ) { list, id ->
         list.find { it.option.id == id }?.option ?: defaultDeckOption
-    }.distinctUntilChanged()
+    }
+        .distinctUntilChanged()
+        .flowOn(Dispatchers.IO)
         .stateIn(viewModelScope, SharingStarted.Lazily, defaultDeckOption)
     val isLoading = MutableStateFlow<Boolean>(false)
 
