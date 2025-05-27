@@ -30,6 +30,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -70,6 +71,7 @@ import com.nmheir.kanicard.ui.component.widget.SwitchPreferenceWidget
 import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
 import com.nmheir.kanicard.ui.viewmodels.DeckOptionUiAction
 import com.nmheir.kanicard.ui.viewmodels.DeckOptionViewModel
+import timber.log.Timber
 
 @Composable
 fun DeckOptionScreen(
@@ -85,18 +87,18 @@ fun DeckOptionScreen(
     val saveOptionSuccess by viewModel.saveOptionSuccess.collectAsStateWithLifecycle()
     val showCheckConfirmSaveAction by viewModel.showCheckConfirmSaveAction.collectAsStateWithLifecycle()
 
-    val selectedDto = remember(optionUsages, optionData.id) {
+    val selectedDto = remember(optionUsages, optionData) {
         optionUsages.find { it.option.id == optionData.id }
     }
 
 
     // State for editable values
-    var newPerDay by rememberSaveable(optionData.id) { mutableStateOf(optionData.newPerDay.toString()) }
-    var revPerDay by rememberSaveable(optionData.id) { mutableStateOf(optionData.revPerDay.toString()) }
-    var autoPlayAudio by rememberSaveable(optionData.id) { mutableStateOf(optionData.autoAudio) }
-    var autoShowAnswer by rememberSaveable(optionData.id) { mutableLongStateOf(optionData.autoShowAnswer) }
+    var newPerDay by rememberSaveable(optionData) { mutableStateOf(optionData.newPerDay.toString()) }
+    var revPerDay by rememberSaveable(optionData) { mutableStateOf(optionData.revPerDay.toString()) }
+    var autoPlayAudio by rememberSaveable(optionData) { mutableStateOf(optionData.autoAudio) }
+    var autoShowAnswer by rememberSaveable(optionData) { mutableLongStateOf(optionData.autoShowAnswer) }
 
-    val parameterState = remember(optionData.id) {
+    val parameterState = remember(optionData) {
         TextFieldState(initialText = optionData.fsrsParams.joinToString(", "))
     }
 
@@ -109,12 +111,19 @@ fun DeckOptionScreen(
 
     var confirmChange by remember { mutableStateOf(false) }
 
+    val newPerDayChanged = newPerDay.toLong() != optionData.newPerDay
+    val revPerDayChanged = revPerDay.toLong() != optionData.revPerDay
+    val autoPlayAudioChanged = autoPlayAudio != optionData.autoAudio
+    val autoShowAnswerChanged = autoShowAnswer != optionData.autoShowAnswer
+    val currentFsrsParams = parameterState.text.split(", ").map { it.toDouble() }
+    val fsrsParamsChanged = currentFsrsParams != optionData.fsrsParams
+
     val checkData = {
-        newPerDay.toLong() != optionData.newPerDay
-                || revPerDay.toLong() != optionData.revPerDay
-                || autoPlayAudio != optionData.autoAudio
-                || autoShowAnswer != optionData.autoShowAnswer
-                || parameterState.text.split(", ").map { it.toDouble() } != optionData.fsrsParams
+        newPerDayChanged
+                || revPerDayChanged
+                || autoPlayAudioChanged
+                || autoShowAnswerChanged
+                || fsrsParamsChanged
     }
 
     BackHandler(enabled = checkData()) {
@@ -139,7 +148,10 @@ fun DeckOptionScreen(
     if (saveOptionSuccess) {
         AlertDialog(
             onDismiss = { viewModel.onAction(DeckOptionUiAction.ConfirmSaveSuccess) },
-            onConfirm = navController::navigateUp,
+            onConfirm = {
+                viewModel.onAction(DeckOptionUiAction.ConfirmSaveSuccess)
+                navController::navigateUp
+            },
             confirmText = "Leave",
             dismissText = "Keep editing",
             icon = {
@@ -235,13 +247,14 @@ fun DeckOptionScreen(
                     action = viewModel::onAction,
                     optionData = selectedDto,
                     onSave = {
-                        viewModel.onAction(DeckOptionUiAction.CheckConfirmSaveAction(
-                            newPerDay = newPerDay.toLong(),
-                            revPerDay = revPerDay.toLong(),
-                            autoPlayAudio = autoPlayAudio,
-                            autoShowAnswer = autoShowAnswer,
-                            fsrsParams = parameterState.text.split(", ").map { it.toDouble() }
-                        ))
+                        viewModel.onAction(
+                            DeckOptionUiAction.CheckConfirmSaveAction(
+                                newPerDay = newPerDay.toLong(),
+                                revPerDay = revPerDay.toLong(),
+                                autoPlayAudio = autoPlayAudio,
+                                autoShowAnswer = autoShowAnswer,
+                                fsrsParams = parameterState.text.split(", ").map { it.toDouble() }
+                            ))
                         /*viewModel.onAction(
                             DeckOptionUiAction.Save(
                                 newPerDay = newPerDay.toLong(),
@@ -389,7 +402,7 @@ private fun DropDownDeckOption(
                 action(DeckOptionUiAction.ChangeSelectedOption(it.option.id))
             },
             itemLabel = {
-                it.option.name + " (${it.usage})"
+                it.option.name
             },
             itemSubLabel = {
                 if (it == null) {
@@ -554,7 +567,7 @@ private fun ConfirmSaveActionDialog(
                     onDismiss()
                 }
             ) {
-                Text(text = "Apply all preset")
+                Text(text = "Apply all decks")
             }
         }
     ) {

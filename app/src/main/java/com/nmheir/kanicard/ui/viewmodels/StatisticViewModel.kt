@@ -95,9 +95,9 @@ class StatisticViewModel @Inject constructor(
     ) { year, reviewLogs ->
         reviewLogs to year
     }
-        .filter { (reviewLogs, _) ->
-            reviewLogs.isNotEmpty()
-        }
+//        .filter { (reviewLogs, _) ->
+//            reviewLogs.isNotEmpty()
+//        }
         .map { (reviewLogs, year) ->
             calculateChartData(year, reviewLogs)
         }
@@ -277,6 +277,8 @@ class StatisticViewModel @Inject constructor(
                 )
             }
         }
+
+        Timber.d(monthToItems.toString())
 
         return CalendarChartData(data = monthToItems)
     }

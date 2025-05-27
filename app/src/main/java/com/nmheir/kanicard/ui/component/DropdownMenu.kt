@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -46,6 +47,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import com.nmheir.kanicard.R
+import com.nmheir.kanicard.core.domain.ui.model.AppTheme
 import com.nmheir.kanicard.ui.screen.deck.fakeDeckOptionUsages
 import com.nmheir.kanicard.ui.theme.KaniTheme
 
@@ -63,8 +65,9 @@ fun <T> ImprovedDropdownMenu(
 
     val highlightColor = MaterialTheme.colorScheme.primary
     val selectedItemBackgroundColor = MaterialTheme.colorScheme.primaryContainer
+    val selectedItemColor = MaterialTheme.colorScheme.onSecondary
     val defaultTextColor = MaterialTheme.colorScheme.onBackground
-    val unselectedIndicatorColor = MaterialTheme.colorScheme.outlineVariant
+    val unselectedIndicatorColor = MaterialTheme.colorScheme.outline
     val defaultBackgroundColor = MaterialTheme.colorScheme.background
 
     Column(
@@ -95,21 +98,14 @@ fun <T> ImprovedDropdownMenu(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = selectedItem?.let { itemLabel(it) } ?: "Select one preset",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = if (selectedItem == null) Color.Gray else Color.DarkGray
-                        )
-                        Text(
-                            text = itemSubLabel(selectedItem),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = defaultTextColor
-                        )
-                    }
+                    val label = (selectedItem?.let { itemLabel(it) }
+                        ?: "Select one preset") + " " + itemSubLabel(selectedItem)
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = if (selectedItem == null) Color.Gray else Color.DarkGray,
+                        modifier = Modifier.weight(1f)
+                    )
                     Icon(
                         painter = painterResource(
                             if (expanded) R.drawable.ic_arrow_up else R.drawable.ic_arrow_down,
@@ -129,12 +125,11 @@ fun <T> ImprovedDropdownMenu(
                     .width(with(LocalDensity.current) { menuWidth.toDp() })
                     .background(defaultBackgroundColor)
                     .clip(RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp))
-                    .border(
-                        width = 1.dp,
-                        color = unselectedIndicatorColor.copy(alpha = 0.5f),
+                    .shadow(
+                        elevation = 1.dp,
+//                        color = unselectedIndicatorColor.copy(alpha = 0.5f),
                         shape = RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
-                    )
-                ,
+                    ),
                 properties = PopupProperties(
                     focusable = true,
                     dismissOnBackPress = true,
@@ -148,7 +143,7 @@ fun <T> ImprovedDropdownMenu(
                         text = {
                             Text(
                                 text = itemLabel(item),
-                                color = if (isSelected) highlightColor else Color.DarkGray,
+                                color = if (isSelected) selectedItemColor else unselectedIndicatorColor,
                                 fontWeight = FontWeight.Medium
                             )
                         },
@@ -157,12 +152,16 @@ fun <T> ImprovedDropdownMenu(
                                 modifier = Modifier
                                     .size(28.dp)
                                     .clip(CircleShape)
-                                    .background(if (isSelected) selectedItemBackgroundColor else unselectedIndicatorColor),
+                                    .background(
+                                        if (isSelected) selectedItemBackgroundColor else unselectedIndicatorColor.copy(
+                                            alpha = 0.5f
+                                        )
+                                    ),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = (index + 1).toString(),
-                                    color = if (isSelected) highlightColor else Color.DarkGray,
+                                    color = if (isSelected) selectedItemColor else unselectedIndicatorColor,
                                     fontWeight = FontWeight.Medium
                                 )
                             }
@@ -201,7 +200,9 @@ fun <T> ImprovedDropdownMenu(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun abc() {
-    KaniTheme {
+    KaniTheme(
+        appTheme = AppTheme.LAVENDER
+    ) {
         ImprovedDropdownMenu(
             modifier = Modifier.padding(top = 64.dp),
             items = fakeDeckOptionUsages,

@@ -251,8 +251,6 @@ private fun CollectionWithDeck(
                             .hozPadding(),
                         deck = deckWidgetData,
                         onLearn = { onLearn(deckWidgetData.deckId) },
-                        onEdit = { showEditDialog = true },
-                        onView = { onView(deckWidgetData.deckId) },
                         onOption = { showOptionDialog = true }
                     )
                     if (showOptionDialog) {
@@ -278,6 +276,11 @@ private fun CollectionWithDeck(
                                     DeckOptions.Add -> {
                                         showOptionDialog = false
                                         onAdd(deckWidgetData.deckId)
+                                    }
+
+                                    DeckOptions.View -> {
+                                        showOptionDialog = false
+                                        onView(deckWidgetData.deckId)
                                     }
                                 }
                             }
@@ -536,5 +539,5 @@ private val homeAddOptions = listOf(
 )
 
 private enum class DeckOptions {
-    Edit, Add, Config, Delete
+    View, Edit, Add, Config, Delete
 }

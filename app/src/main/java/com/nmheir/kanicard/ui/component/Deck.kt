@@ -50,9 +50,7 @@ fun DeckItem(
     modifier: Modifier = Modifier,
     deck: DeckWidgetData,
     onLearn: () -> Unit,
-    onOption: () -> Unit,
-    onEdit: () -> Unit,
-    onView: () -> Unit
+    onOption: () -> Unit
 ) {
     var showDetail by rememberSaveable { mutableStateOf(false) }
     Card(
@@ -100,14 +98,6 @@ fun DeckItem(
                         )
                     }
                 }
-                IconButton(
-                    onClick = { showDetail = !showDetail }
-                ) {
-                    Icon(
-                        painterResource(if (!showDetail) R.drawable.ic_arrow_down else R.drawable.ic_arrow_up),
-                        null
-                    )
-                }
             }
             Row(
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
@@ -133,58 +123,11 @@ fun DeckItem(
                 )
             }
 
-            if (showDetail) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
-                    horizontalAlignment = Alignment.Start,
-                ) {
-                    HorizontalDivider()
-                    StatisticRow(
-                        label = stringResource(R.string.label_due_today),
-                        count = deck.dueToday
-                    )
-                    HorizontalDivider()
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            modifier = Modifier.weight(3f)
-                        ) {
-                            DeckFunction(
-                                label = stringResource(R.string.action_view),
-                                iconRes = R.drawable.ic_visibility,
-                                onClick = onView,
-                                modifier = Modifier.weight(1f)
-                            )
-                            DeckFunction(
-                                label = stringResource(R.string.action_edit),
-                                iconRes = R.drawable.ic_edit,
-                                onClick = onEdit,
-                                modifier = Modifier.weight(1f)
-                            )
-                            DeckFunction(
-                                label = stringResource(R.string.action_options),
-                                iconRes = R.drawable.ic_tune,
-                                onClick = onOption,
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                        TextButton(
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            ),
-                            shape = MaterialTheme.shapes.small,
-                            onClick = onLearn,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(text = stringResource(R.string.action_learn))
-                        }
-                    }
-                }
-            }
+            HorizontalDivider()
+            StatisticRow(
+                label = stringResource(R.string.label_due_today),
+                count = deck.dueToday
+            )
         }
     }
 }
@@ -279,9 +222,7 @@ private fun Test() {
         DeckItem(
             deck = fakeDeckWidgetData[0],
             onLearn = {},
-            onOption = {},
-            onEdit = {},
-            onView = {}
+            onOption = {}
         )
     }
 }
