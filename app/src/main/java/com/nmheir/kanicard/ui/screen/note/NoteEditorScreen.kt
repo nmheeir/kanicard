@@ -64,6 +64,7 @@ import com.nmheir.kanicard.ui.component.dialog.DefaultDialog
 import com.nmheir.kanicard.ui.component.dialog.ListOptionDialog
 import com.nmheir.kanicard.ui.component.dialog.ProgressDialog
 import com.nmheir.kanicard.ui.viewmodels.FieldValue
+import com.nmheir.kanicard.ui.viewmodels.MediaType
 import com.nmheir.kanicard.ui.viewmodels.NewTypeDialogUiState
 import com.nmheir.kanicard.ui.viewmodels.NoteEditorUiAction
 import com.nmheir.kanicard.ui.viewmodels.NoteEditorViewModel
@@ -356,20 +357,22 @@ private fun FieldEditElement(
             onAudioClipSelection = {
                 //convert file name
                 val fileName = convertFileName(context, it)
-                action(NoteEditorUiAction.UpdateFileState(field.id, fileName, it))
+                val audioMarkdown = "<audio src=\"${convertFileName(context, it)}\" controls></audio>"
+                action(NoteEditorUiAction.UpdateFileState(field.id, fileName, it, MediaType.AUDIO))
             },
             onGallerySelection = {
                 val fileName = convertFileName(context, it)
                 val imageMarkdown = "![](${fileName})"
-                action(NoteEditorUiAction.UpdateFileState(field.id, imageMarkdown, it))
+                action(NoteEditorUiAction.UpdateFileState(field.id, imageMarkdown, it, MediaType.IMAGE))
             },
             onVideoClipSelection = {
                 val fileName = "<video src=\"${convertFileName(context, it)}\" controls></video>"
-                action(NoteEditorUiAction.UpdateFileState(field.id, fileName, it))
+                action(NoteEditorUiAction.UpdateFileState(field.id, fileName, it, MediaType.VIDEO))
             },
             onRecordAudioSelection = {
                 val fileName = convertFileName(context, it)
-                action(NoteEditorUiAction.UpdateFileState(field.id, fileName, it))
+                val audioMarkdown = "<audio src=\"${convertFileName(context, it)}\" controls></audio>"
+                action(NoteEditorUiAction.UpdateFileState(field.id, audioMarkdown, it, MediaType.AUDIO))
             }
         )
     }

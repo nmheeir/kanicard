@@ -91,11 +91,15 @@ fun getFileExtension(context: Context, uri: Uri): String {
     }
 }
 
-fun convertFileName(context: Context, uri: Uri) : String {
+fun convertFileName(context: Context, uri: Uri): String {
     val timestamp = System.currentTimeMillis()
     val name = getFileName(context, uri)
-    val fileName = "${name?.substringBeforeLast(".")}_${timestamp}.${
-        name?.substringAfterLast(".")
-    }"
-    return fileName
+
+    val baseName = name?.substringBeforeLast(".") ?: "file"
+    val extension = name?.substringAfterLast(".", "") ?: "dat"
+
+    // Làm sạch tên baseName để tránh ký tự đặc biệt
+    val sanitizedBaseName = baseName.replace(Regex("[^a-zA-Z0-9._-]"), "_")
+
+    return "${sanitizedBaseName}_$timestamp.$extension"
 }

@@ -5,10 +5,14 @@ package com.nmheir.kanicard.ui.viewmodels
 import android.content.Context
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.animation.core.rememberTransition
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nmheir.kanicard.constants.StoragePathKey
+import com.nmheir.kanicard.core.presentation.components.Constants
 import com.nmheir.kanicard.data.dto.deck.SelectableDeck
 import com.nmheir.kanicard.data.dto.note.SelectableNoteType
 import com.nmheir.kanicard.data.entities.card.TemplateEntity
@@ -21,6 +25,9 @@ import com.nmheir.kanicard.data.repository.FieldRepo
 import com.nmheir.kanicard.domain.repository.ICardRepo
 import com.nmheir.kanicard.domain.repository.IDeckRepo
 import com.nmheir.kanicard.domain.repository.INoteRepo
+import com.nmheir.kanicard.extensions.getOrCreateDirectory
+import com.nmheir.kanicard.utils.dataStore
+import com.nmheir.kanicard.utils.get
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -73,7 +80,7 @@ class NoteEditorViewModel @Inject constructor(
 
     val selectedNoteType = MutableStateFlow<SelectableNoteType?>(null)
     val newTypeDialogUiState = MutableStateFlow<NewTypeDialogUiState>(NewTypeDialogUiState())
-    val mediaFileState = MutableStateFlow<Map<Long, Uri?>>(emptyMap())
+    private val mediaFileState = MutableStateFlow<Map<Long, MediaFile?>>(emptyMap())
 
     val fields = selectedNoteType
         .filterNotNull()
@@ -189,7 +196,7 @@ class NoteEditorViewModel @Inject constructor(
             }
 
             is NoteEditorUiAction.UpdateFileState -> {
-                updateFileState(action.fieldId, action.fileName, action.fileDir)
+                updateFileState(action.fieldId, action.fileName, action.fileDir, action.mediaType)
             }
 
             NoteEditorUiAction.SaveNote -> {
@@ -198,7 +205,7 @@ class NoteEditorViewModel @Inject constructor(
         }
     }
 
-    private fun updateFileState(fieldId: Long, fileName: String, fileDir: Uri?) {
+    private fun updateFileState(fieldId: Long, fileName: String, fileDir: Uri?, type: MediaType) {
         viewModelScope.launch {
             fieldValuesState.update { currentList ->
                 currentList.map {
@@ -211,12 +218,16 @@ class NoteEditorViewModel @Inject constructor(
             }
 
             mediaFileState.update { currentState ->
-                currentState + (fieldId to fileDir)
+                currentState.toMutableMap().apply {
+                    this[fieldId] = fileDir?.let { MediaFile(it, fileName, type) }
+                }
             }
+
             Timber.d(fieldValuesState.value.toString())
             Timber.d(mediaFileState.value.toString())
         }
     }
+
 
     private fun saveNote() {
         isSaving.value = true
@@ -245,6 +256,12 @@ class NoteEditorViewModel @Inject constructor(
                 cardRepo.insert(
                     FsrsCardEntity.createNew(deckId, noteId)
                 )
+                val mediaFile = mediaFileState.value[template.id]
+                if (mediaFile != null && mediaFile.fileName.isNotEmpty()) {
+                    val sanitizeFileName = sanitizeFileName(mediaFile.fileName, mediaFile.type)
+                    saveFile(mediaFile.type, mediaFile.uri, sanitizeFileName)
+                }
+
                 savingProgress.value = ((index + 1).toFloat() / templates.size).coerceAtMost(1f)
             }
 
@@ -253,7 +270,106 @@ class NoteEditorViewModel @Inject constructor(
             isSaving.value = false
         }
     }
+
+    private suspend fun saveFile(mediaType: MediaType, file: Uri?, fileName: String) {
+        if (file == null) {
+            Timber.d("File is empty")
+            return
+        }
+        val contentResolver = context.contentResolver
+        val rootUri = context.dataStore.get(StoragePathKey, "").toUri()
+
+        val rootDir = getOrCreateDirectory(context, rootUri, Constants.File.KANI_CARD)
+
+        when (mediaType) {
+            MediaType.IMAGE -> {
+                val imageDir = rootDir?.let { dir ->
+                    getOrCreateDirectory(dir, Constants.File.KANI_CARD_IMAGE)
+                }
+
+                imageDir?.let { dir ->
+                    try {
+                        contentResolver.openInputStream(file)?.use { input ->
+                            val mimeType = contentResolver.getType(file) ?: "image/*"
+                            val newFile = dir.createFile(mimeType, fileName)
+                            newFile?.let { file ->
+                                contentResolver.openOutputStream(file.uri)?.use { output ->
+                                    input.copyTo(output)
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Timber.d(e.toString())
+                    }
+                }
+            }
+
+            MediaType.AUDIO -> {
+                val audioDir = rootDir?.let { dir ->
+                    getOrCreateDirectory(dir, Constants.File.KANI_CARD_AUDIO)
+                }
+
+                audioDir?.let { dir ->
+                    try {
+                        val mimeType = contentResolver.getType(file) ?: "audio/*"
+                        contentResolver.openInputStream(file)?.use { input ->
+                            val createdFile = dir.createFile(mimeType, fileName)
+                            if (createdFile == null) {
+                                Timber.w("Could not create audio file: $fileName in dir: ${dir.name}")
+                                return@use
+                            }
+
+                            contentResolver.openOutputStream(createdFile.uri)?.use { output ->
+                                input.copyTo(output)
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Timber.d(e.toString())
+                    }
+                }
+            }
+
+            MediaType.VIDEO -> {
+                val videoDir = rootDir?.let { dir ->
+                    getOrCreateDirectory(dir, Constants.File.KANI_CARD_VIDEO)
+                }
+                videoDir?.let { dir ->
+                    val newFile = dir.createFile("video/*", fileName)
+                    newFile?.let {
+                        contentResolver.openInputStream(file)?.use { input ->
+                            contentResolver.openOutputStream(it.uri)?.use { output ->
+                                input.copyTo(output)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
+
+private fun sanitizeFileName(name: String, mediaType: MediaType): String {
+    val rawName = when (mediaType) {
+        MediaType.IMAGE -> {
+            // Markdown image: ![](filename)
+            Regex("""!\[]\((.*?)\)""").find(name)?.groupValues?.get(1)
+        }
+
+        MediaType.VIDEO -> {
+            // HTML video: <video src="filename" controls></video>
+            Regex("""<video\s+src="(.*?)"\s+controls>.*?</video>""").find(name)?.groupValues?.get(1)
+        }
+
+        MediaType.AUDIO -> {
+            // HTML audio: <audio src="filename" controls></audio>
+            Regex("""<audio\s+src="(.*?)"\s+controls>.*?</audio>""").find(name)?.groupValues?.get(1)
+        }
+    } ?: name
+
+    // Clean the extracted filename: allow alphanumerics, dot, dash, underscore
+    return rawName.replace(Regex("[^a-zA-Z0-9._-]"), "_")
+}
+
 
 sealed interface NoteEditorUiAction {
     data class UpdateSelectedDeck(val deck: SelectableDeck?) : NoteEditorUiAction
@@ -262,8 +378,12 @@ sealed interface NoteEditorUiAction {
         NoteEditorUiAction
 
     data class SaveNoteToState(val typeName: String, val fields: List<String>) : NoteEditorUiAction
-    data class UpdateFileState(val fieldId: Long, val fileName: String, val fileDir: Uri?) :
-        NoteEditorUiAction
+    data class UpdateFileState(
+        val fieldId: Long,
+        val fileName: String,
+        val fileDir: Uri?,
+        val mediaType: MediaType
+    ) : NoteEditorUiAction
 
     data object SaveNote : NoteEditorUiAction
 }
@@ -272,19 +392,6 @@ data class NewTypeDialogUiState(
     val fields: List<String> = listOf<String>(""),
     val typeName: String = ""
 )
-
-sealed interface FileDataEvent {
-
-    data class ImportImages(
-        val context: Context,
-        val uriList: List<Uri>
-    ) : FileDataEvent
-
-    data class ImportVideo(
-        val context: Context,
-        val uri: Uri
-    ) : FileDataEvent
-}
 
 private val sampleTemplate = TemplateEntity(
     id = 0L,
@@ -298,4 +405,14 @@ data class FieldValue(
     val id: Long,
     val fieldName: String,
     val value: TextFieldState = TextFieldState("")
+)
+
+enum class MediaType {
+    IMAGE, AUDIO, VIDEO
+}
+
+data class MediaFile(
+    val uri: Uri,
+    val fileName: String,
+    val type: MediaType
 )
