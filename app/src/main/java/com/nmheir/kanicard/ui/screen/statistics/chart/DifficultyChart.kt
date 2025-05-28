@@ -2,6 +2,7 @@ package com.nmheir.kanicard.ui.screen.statistics.chart
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -71,7 +72,8 @@ fun DifficultyChart(
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.padding(12.dp)
     ) {
         Text(
             text = "The higher the difficulty, the slower stability will increase.",

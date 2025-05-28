@@ -77,6 +77,7 @@ fun CardCountChart(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .height(400.dp)
+            .padding(12.dp)
     ) {
         PieChart(
             data =

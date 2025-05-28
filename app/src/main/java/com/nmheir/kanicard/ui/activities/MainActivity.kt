@@ -154,121 +154,123 @@ class MainActivity : ComponentActivity() {
                 val backStackEntry by navController.currentBackStackEntryAsState()
                 val scope = rememberCoroutineScope()
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surface)
+
+                val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+
+                ModalNavigationDrawer(
+                    drawerState = drawerState,
+                    gesturesEnabled = drawerState.isOpen,
+                    drawerContent = {
+                        DrawerContent(
+                            onNavigate = {
+                                scope.launch {
+                                    drawerState.close()
+                                    navController.navigate(it.route)
+                                }
+                            }
+                        )
+                    },
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    val navigationItems = remember { Screens.MainScreen.Screens }
-                    val topLevelScreens = listOf(
-                        Screens.MainScreen.Home.route,
-                        Screens.MainScreen.Statistics.route,
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surface)
+                    ) {
+                        val navigationItems = remember { Screens.MainScreen.Screens }
+                        val topLevelScreens = listOf(
+                            Screens.MainScreen.Home.route,
+                            Screens.MainScreen.Statistics.route,
+                        )
 
-                    val focusManager = LocalFocusManager.current
+                        val focusManager = LocalFocusManager.current
 
-                    val windowInsets = WindowInsets.systemBars
-                    val density = LocalDensity.current
-                    val bottomInset = with(density) { windowInsets.getBottom(density).toDp() }
-                    val topInset = with(density) { windowInsets.getTop(density).toDp() }
+                        val windowInsets = WindowInsets.systemBars
+                        val density = LocalDensity.current
+                        val bottomInset = with(density) { windowInsets.getBottom(density).toDp() }
+                        val topInset = with(density) { windowInsets.getTop(density).toDp() }
 
-                    var active by rememberSaveable {
-                        mutableStateOf(false)
-                    }
-                    val (query, onQueryChange) = rememberSaveable(stateSaver = TextFieldValue.Saver) {
-                        mutableStateOf(TextFieldValue())
-                    }
-                    val onActiveChange: (Boolean) -> Unit = { newActive ->
-                        active = newActive
-                        if (!newActive) {
-                            focusManager.clearFocus()
-                            if (backStackEntry?.destination?.route == Screens.MainScreen.Home.route) {
-                                onQueryChange(TextFieldValue())
+                        var active by rememberSaveable {
+                            mutableStateOf(false)
+                        }
+                        val (query, onQueryChange) = rememberSaveable(stateSaver = TextFieldValue.Saver) {
+                            mutableStateOf(TextFieldValue())
+                        }
+                        val onActiveChange: (Boolean) -> Unit = { newActive ->
+                            active = newActive
+                            if (!newActive) {
+                                focusManager.clearFocus()
+                                if (backStackEntry?.destination?.route == Screens.MainScreen.Home.route) {
+                                    onQueryChange(TextFieldValue())
+                                }
                             }
                         }
-                    }
 
 
-                    var searchSource by rememberEnumPreference(
-                        SearchSourceKey,
-                        SearchSource.ONLINE
-                    )
-                    val searchBarFocusRequester = remember { FocusRequester() }
-                    val onSearch: (String) -> Unit = {
-                        if (it.isNotEmpty()) {
-                            onActiveChange(false)
-                            navController.navigate("${Screens.Base.Search}/$it")
-                            /*if (dataStore[PauseSearchHistoryKey] != true) {
-                                database.query {
-                                    insert(SearchHistoryEntity(query = it))
-                                }
-                            }*/
-                        }
-                    }
-
-                    val shouldShowNavigationBar = remember(backStackEntry, active) {
-                        backStackEntry?.destination?.route == null
-                                || navigationItems.fastAny { it.route == backStackEntry?.destination?.route }
-                                && !active
-                    }
-                    val navigationBarHeight by animateDpAsState(
-                        targetValue = if (shouldShowNavigationBar) NavigationBarHeight else 0.dp,
-                        label = "",
-                        animationSpec = NavigationBarAnimationSpec
-                    )
-
-                    val shouldShowSearchBar = remember(backStackEntry, active) {
-                        (active
-                                || backStackEntry?.destination?.route == Screens.MainScreen.Home.route
-                                || backStackEntry?.destination?.route?.startsWith("/search") == true)
-                    }
-
-                    /*Scroll Behaviour*/
-                    val topAppBarScrollBehavior = appBarScrollBehavior(
-                        canScroll = {
-                            !(backStackEntry?.destination?.route == Screens.MainScreen.Home.route
-                                    || backStackEntry?.destination?.route == Screens.MainScreen.Statistics.route)
-                        }
-                    )
-                    val searchBarScrollBehavior = appBarScrollBehavior(
-                        canScroll = {
-                            backStackEntry?.destination?.route?.startsWith("${Screens.Base.Search}/") == false
-                        }
-                    )
-
-                    val localAwareWindowInset =
-                        remember(bottomInset, shouldShowNavigationBar, shouldShowSearchBar) {
-                            var bottom = bottomInset
-                            var top = 0.dp
-                            if (shouldShowNavigationBar) bottom += NavigationBarHeight
-                            if (shouldShowSearchBar) top += (InputFieldHeight + 4.dp)
-                            windowInsets
-                                .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
-                                .add(WindowInsets(bottom = bottom, top = top))
-                        }
-
-                    LaunchedEffect(active) {
-                        if (active) {
-                            searchBarScrollBehavior.state.resetHeightOffset()
-                        }
-                    }
-
-                    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-
-                    ModalNavigationDrawer(
-                        drawerState = drawerState,
-                        gesturesEnabled = drawerState.isOpen,
-                        drawerContent = {
-                            DrawerContent(
-                                onNavigate = {
-                                    scope.launch {
-                                        drawerState.close()
-                                        navController.navigate(it.route)
+                        var searchSource by rememberEnumPreference(
+                            SearchSourceKey,
+                            SearchSource.ONLINE
+                        )
+                        val searchBarFocusRequester = remember { FocusRequester() }
+                        val onSearch: (String) -> Unit = {
+                            if (it.isNotEmpty()) {
+                                onActiveChange(false)
+                                navController.navigate("${Screens.Base.Search}/$it")
+                                /*if (dataStore[PauseSearchHistoryKey] != true) {
+                                    database.query {
+                                        insert(SearchHistoryEntity(query = it))
                                     }
-                                }
-                            )
+                                }*/
+                            }
                         }
-                    ) {
+
+                        val shouldShowNavigationBar = remember(backStackEntry, active) {
+                            backStackEntry?.destination?.route == null
+                                    || navigationItems.fastAny { it.route == backStackEntry?.destination?.route }
+                                    && !active
+                        }
+                        val navigationBarHeight by animateDpAsState(
+                            targetValue = if (shouldShowNavigationBar) NavigationBarHeight else 0.dp,
+                            label = "",
+                            animationSpec = NavigationBarAnimationSpec
+                        )
+
+                        val shouldShowSearchBar = remember(backStackEntry, active) {
+                            (active
+                                    || backStackEntry?.destination?.route == Screens.MainScreen.Home.route
+                                    || backStackEntry?.destination?.route?.startsWith("/search") == true)
+                        }
+
+                        /*Scroll Behaviour*/
+                        val topAppBarScrollBehavior = appBarScrollBehavior(
+                            canScroll = {
+                                !(backStackEntry?.destination?.route == Screens.MainScreen.Home.route
+                                        || backStackEntry?.destination?.route == Screens.MainScreen.Statistics.route)
+                            }
+                        )
+                        val searchBarScrollBehavior = appBarScrollBehavior(
+                            canScroll = {
+                                backStackEntry?.destination?.route?.startsWith("${Screens.Base.Search}/") == false
+                            }
+                        )
+
+                        val localAwareWindowInset =
+                            remember(bottomInset, shouldShowNavigationBar, shouldShowSearchBar) {
+                                var bottom = bottomInset
+                                var top = 0.dp
+                                if (shouldShowNavigationBar) bottom += NavigationBarHeight
+                                if (shouldShowSearchBar) top += (InputFieldHeight + 4.dp)
+                                windowInsets
+                                    .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
+                                    .add(WindowInsets(bottom = bottom, top = top))
+                            }
+
+                        LaunchedEffect(active) {
+                            if (active) {
+                                searchBarScrollBehavior.state.resetHeightOffset()
+                            }
+                        }
+
                         CompositionLocalProvider(
                             LocalDatabase provides database,
                             LocalAwareWindowInset provides localAwareWindowInset

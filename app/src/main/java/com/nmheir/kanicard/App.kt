@@ -2,9 +2,13 @@ package com.nmheir.kanicard
 
 import android.app.Activity
 import android.app.Application
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import android.webkit.WebView
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
@@ -29,7 +33,7 @@ class App : Application(), SingletonImageLoader.Factory {
             Timber.plant(Timber.DebugTree())
         }
 
-        Timber.d("con cac")
+        WebViewPreloader.warmUp(applicationContext)
 
         registerActivityLifecycleCallbacks(AppLifecycleTracker())
     }
@@ -74,4 +78,25 @@ class AppLifecycleTracker : Application.ActivityLifecycleCallbacks {
     override fun onActivityPaused(activity: Activity) {}
     override fun onActivityStopped(activity: Activity) {}
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
+}
+
+object WebViewPreloader {
+    private var isInitialized = false
+
+    fun warmUp(context: Context) {
+        if (isInitialized) return
+        isInitialized = true
+
+        Handler(Looper.getMainLooper()).post {
+            try {
+                WebView(context).apply {
+                    settings.javaScriptEnabled = false
+                    loadDataWithBaseURL(null, "<html></html>", "text/html", "UTF-8", null)
+                    destroy() // Không cần giữ lại WebView
+                }
+            } catch (e: Exception) {
+                Timber.tag("WebViewPreloader").w("Warm-up failed: ${e.message}")
+            }
+        }
+    }
 }

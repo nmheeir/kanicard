@@ -5,6 +5,7 @@ package com.nmheir.kanicard.ui.screen.statistics.chart
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -73,10 +75,11 @@ fun CalendarChart(
         )
 
         LazyRow(
-            contentPadding = PaddingValues(8.dp),
+            state = lazyRowState,
+            contentPadding = PaddingValues(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             reverseLayout = false,
-            flingBehavior = rememberSnapFlingBehavior(lazyRowState)
+            flingBehavior = rememberSnapFlingBehavior(lazyRowState, SnapPosition.Start)
         ) {
             // Chuyển Map<Int, List<...>> thành List<Pair<month, items>>
             val monthsList = data.data.toList()
@@ -108,7 +111,9 @@ fun CalendarChart(
         Row(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.align(Alignment.End)
+            modifier = Modifier
+                .align(Alignment.End)
+                .padding(end = 12.dp)
         ) {
             Text(
                 text = "Less",

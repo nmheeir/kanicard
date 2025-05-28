@@ -47,6 +47,7 @@ fun <T> IconButtonDropdownMenu(
                             )
                         },
                         onClick = {
+                            showDropdown = false
                             onValueSelected(value)
                         }
                     )

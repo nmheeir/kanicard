@@ -101,7 +101,8 @@ fun PreviewNoteScreen(
                 InteractiveFlashcard(
                     flipController = flipController,
                     qHtml = datas[page].qHtml,
-                    aHtml = datas[page].aHtml
+                    aHtml = datas[page].aHtml,
+                    enableFlip = true
                 )
             }
         }
@@ -131,6 +132,9 @@ private fun PreviewNoteBottomBar(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier
+            .fillMaxWidth()
+            .hozPadding()
+            .padding(bottom = 12.dp)
     ) {
         Slider(
             value = sliderValue,
@@ -149,8 +153,7 @@ private fun PreviewNoteBottomBar(
                 inactiveTickColor = Color.Transparent,
                 inactiveTrackColor = MaterialTheme.colorScheme.surfaceContainer
             ),
-            valueRange = 1f..pageCount.toFloat(),
-            modifier = Modifier.hozPadding()
+            valueRange = 1f..pageCount.toFloat()
         )
 
         Row(
