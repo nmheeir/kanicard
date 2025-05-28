@@ -52,7 +52,7 @@ import com.nmheir.kanicard.ui.viewmodels.LearningAction
 import com.nmheir.kanicard.ui.viewmodels.LearningData
 import com.nmheir.kanicard.ui.viewmodels.LearningViewModel
 import timber.log.Timber
-import java.time.OffsetDateTime
+import java.time.LocalDateTime
 
 
 @Composable
@@ -147,7 +147,7 @@ private fun StateCountSection(
 @Composable
 private fun LearningSection(
     datas: List<LearningData>,
-    ratingDue: Map<Rating, OffsetDateTime>,
+    ratingDue: Map<Rating, LocalDateTime>,
     action: (LearningAction) -> Unit
 ) {
     var showRating by remember { mutableStateOf(false) }
@@ -256,7 +256,7 @@ private fun LearnFlashcard(
 
 @Composable
 private fun LearningBottomBar(
-    ratingDue: Map<Rating, OffsetDateTime>,
+    ratingDue: Map<Rating, LocalDateTime>,
     onClick: (Rating) -> Unit,
 ) {
     Row(

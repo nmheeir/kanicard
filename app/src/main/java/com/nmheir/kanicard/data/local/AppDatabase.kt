@@ -56,7 +56,7 @@ class KaniDatabase(
         DeckOptionEntity::class,
         CollectionEntity::class
     ],
-    version = 4,
+    version = 1,
     exportSchema = true,
     autoMigrations = [
     ]

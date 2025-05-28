@@ -9,7 +9,6 @@ import com.nmheir.kanicard.core.domain.fsrs.algorithm.FSRS
 import com.nmheir.kanicard.core.domain.fsrs.algorithm.FsrsParameters
 import com.nmheir.kanicard.core.domain.fsrs.model.FsrsCard
 import com.nmheir.kanicard.data.dto.note.NoteData
-import com.nmheir.kanicard.data.entities.option.defaultDeckOption
 import com.nmheir.kanicard.data.enums.Rating
 import com.nmheir.kanicard.data.enums.State
 import com.nmheir.kanicard.domain.repository.ICardRepo
@@ -22,7 +21,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -30,10 +28,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.time.OffsetDateTime
+import java.time.LocalDateTime
 import javax.inject.Inject
-
-// TODO: Tạm thời như này
 
 @HiltViewModel
 class LearningViewModel @Inject constructor(
@@ -86,7 +82,7 @@ class LearningViewModel @Inject constructor(
     private val currentRecordLog = dueCards.map { cards ->
         if (cards.isEmpty()) null
         else {
-            fsrs.repeat(cards.first().toFsrsCard(), OffsetDateTime.now())
+            fsrs.repeat(cards.first().toFsrsCard(), LocalDateTime.now())
         }
     }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
@@ -97,7 +93,7 @@ class LearningViewModel @Inject constructor(
         }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
 
-    val ratingDueInfo: StateFlow<Map<Rating, OffsetDateTime>> =
+    val ratingDueInfo: StateFlow<Map<Rating, LocalDateTime>> =
         currentRatingCard
             .map { m -> m.mapValues { it.value.due } }
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())

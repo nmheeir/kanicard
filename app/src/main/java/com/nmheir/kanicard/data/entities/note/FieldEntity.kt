@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import java.time.OffsetDateTime
+import java.time.LocalDateTime
 
 @Entity(
     tableName = "fields",
@@ -23,6 +23,6 @@ data class FieldEntity(
     val ntId: Long,
     val name: String,
     val ord: Int,
-    val createdTime: OffsetDateTime,
-    val modifiedTime: OffsetDateTime
+    val createdTime: LocalDateTime,
+    val modifiedTime: LocalDateTime
 )

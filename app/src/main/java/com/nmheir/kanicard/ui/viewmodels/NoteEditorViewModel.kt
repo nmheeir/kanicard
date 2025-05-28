@@ -38,7 +38,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.time.OffsetDateTime
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -158,8 +158,8 @@ class NoteEditorViewModel @Inject constructor(
                         NoteTypeEntity(
                             name = action.typeName,
                             description = "",
-                            createdTime = OffsetDateTime.now(),
-                            modifiedTime = OffsetDateTime.now()
+                            createdTime = LocalDateTime.now(),
+                            modifiedTime = LocalDateTime.now()
                         )
                     )
                     val fields = action.fieldNames.mapIndexed { index, name ->
@@ -167,8 +167,8 @@ class NoteEditorViewModel @Inject constructor(
                             ntId = newTypeId,
                             name = name,
                             ord = index,
-                            createdTime = OffsetDateTime.now(),
-                            modifiedTime = OffsetDateTime.now()
+                            createdTime = LocalDateTime.now(),
+                            modifiedTime = LocalDateTime.now()
                         )
                     }
 
@@ -238,8 +238,8 @@ class NoteEditorViewModel @Inject constructor(
                     dId = deckId,
                     templateId = template.id,
                     fieldJson = fieldJson,
-                    createdTime = OffsetDateTime.now(),
-                    modifiedTime = OffsetDateTime.now()
+                    createdTime = LocalDateTime.now(),
+                    modifiedTime = LocalDateTime.now()
                 )
                 val noteId = noteRepo.insert(note)
                 cardRepo.insert(

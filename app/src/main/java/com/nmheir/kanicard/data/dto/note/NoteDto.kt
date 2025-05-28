@@ -1,11 +1,11 @@
 package com.nmheir.kanicard.data.dto.note
 
-import java.time.OffsetDateTime
+import java.time.LocalDateTime
 
 data class NoteDto(
     val id: Long,
     val tId: Long,
     val field: Map<String, String>,
-    val createdTime: OffsetDateTime,
-    val modifiedTime: OffsetDateTime
+    val createdTime: LocalDateTime,
+    val modifiedTime: LocalDateTime
 )

@@ -1,6 +1,7 @@
 package com.nmheir.kanicard.data.dto.deck
 
 import com.nmheir.kanicard.data.entities.deck.DeckEntity
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 
 data class DeckDto(
@@ -8,8 +9,8 @@ data class DeckDto(
     val colId: Long = 0,
     val name: String,
     val description: String,
-    val createdTime: OffsetDateTime,
-    val modifiedTime: OffsetDateTime? = null,
+    val createdTime: LocalDateTime,
+    val modifiedTime: LocalDateTime? = null,
     val flags: Int? = null
 ) {
     fun toDeckEntity(): DeckEntity {

@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.time.OffsetDateTime
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -87,6 +87,6 @@ private val sampleDeckData = DeckData(
     name = "",
     description = "",
     noteCount = 0,
-    createdTime = OffsetDateTime.now(),
+    createdTime = LocalDateTime.now(),
     modifiedTime = null
 )

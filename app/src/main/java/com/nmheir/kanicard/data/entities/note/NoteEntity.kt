@@ -12,7 +12,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import java.time.OffsetDateTime
+import java.time.LocalDateTime
 
 @Entity(
     tableName = "notes",
@@ -39,8 +39,8 @@ data class NoteEntity(
     val dId: Long,
     val templateId: Long,
     val fieldJson: String,
-    val createdTime: OffsetDateTime,
-    val modifiedTime: OffsetDateTime
+    val createdTime: LocalDateTime,
+    val modifiedTime: LocalDateTime
 )
 
 /**

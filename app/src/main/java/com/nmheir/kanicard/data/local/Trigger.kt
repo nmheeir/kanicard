@@ -31,6 +31,35 @@ class RoomCallBack @Inject constructor(
               END;
             """.trimIndent()
         )
+
+        //Update modified time on decks
+        db.execSQL(
+            """
+                CREATE TRIGGER IF NOT EXISTS trg_update_modified_time_on_deck
+                AFTER UPDATE ON decks
+                FOR EACH ROW
+                BEGIN
+                    UPDATE decks
+                    SET modifiedTime = CURRENT_TIMESTAMP
+                    WHERE id = OLD.id;
+                END;
+            """.trimIndent()
+        )
+
+        //Update modified time on notes
+        db.execSQL(
+            """
+                CREATE TRIGGER IF NOT EXISTS trg_update_modified_time_on_note
+                AFTER UPDATE ON notes
+                FOR EACH ROW
+                BEGIN
+                    UPDATE notes
+                    SET modifiedTime = CURRENT_TIMESTAMP
+                    WHERE id = OLD.id;
+                END;
+            """.trimIndent()
+        )
+
     }
 
 }

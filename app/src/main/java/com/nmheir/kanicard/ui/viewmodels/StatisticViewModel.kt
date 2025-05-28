@@ -8,46 +8,44 @@ import androidx.lifecycle.viewModelScope
 import com.nmheir.kanicard.data.entities.fsrs.FsrsCardEntity
 import com.nmheir.kanicard.data.entities.fsrs.ReviewLogEntity
 import com.nmheir.kanicard.data.enums.Rating
+import com.nmheir.kanicard.data.enums.State
 import com.nmheir.kanicard.domain.repository.ICardRepo
 import com.nmheir.kanicard.domain.repository.IReviewLogRepo
+import com.nmheir.kanicard.ui.screen.statistics.model.AnswerButtonChartCardType
+import com.nmheir.kanicard.ui.screen.statistics.model.AnswerButtonChartData
+import com.nmheir.kanicard.ui.screen.statistics.model.AnswerButtonChartState
 import com.nmheir.kanicard.ui.screen.statistics.model.CalendarChartData
 import com.nmheir.kanicard.ui.screen.statistics.model.CalendarChartItemData
+import com.nmheir.kanicard.ui.screen.statistics.model.CardCountChartData
+import com.nmheir.kanicard.ui.screen.statistics.model.DifficultyChartData
 import com.nmheir.kanicard.ui.screen.statistics.model.FutureDueChartData
 import com.nmheir.kanicard.ui.screen.statistics.model.FutureDueChartState
+import com.nmheir.kanicard.ui.screen.statistics.model.ReviewChartCardData
 import com.nmheir.kanicard.ui.screen.statistics.model.ReviewChartData
 import com.nmheir.kanicard.ui.screen.statistics.model.ReviewChartState
+import com.nmheir.kanicard.ui.screen.statistics.model.ReviewIntervalChartData
+import com.nmheir.kanicard.ui.screen.statistics.model.ReviewIntervalChartState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
+import timber.log.Timber
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.OffsetDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
+import kotlin.math.ceil
 import kotlin.math.min
 import kotlin.math.roundToInt
-import com.nmheir.kanicard.data.enums.State
-import com.nmheir.kanicard.ui.screen.statistics.model.AnswerButtonChartCardType
-import com.nmheir.kanicard.ui.screen.statistics.model.AnswerButtonChartData
-import com.nmheir.kanicard.ui.screen.statistics.model.AnswerButtonChartState
-import com.nmheir.kanicard.ui.screen.statistics.model.CardCountChartData
-import com.nmheir.kanicard.ui.screen.statistics.model.DifficultyChartData
-import com.nmheir.kanicard.ui.screen.statistics.model.ReviewChartCardData
-import com.nmheir.kanicard.ui.screen.statistics.model.ReviewIntervalChartData
-import com.nmheir.kanicard.ui.screen.statistics.model.ReviewIntervalChartState
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.withContext
-import timber.log.Timber
-import kotlin.math.ceil
 
 @HiltViewModel
 class StatisticViewModel @Inject constructor(
@@ -67,7 +65,7 @@ class StatisticViewModel @Inject constructor(
     val dueCardsToday = allCards
         .map { cards ->
             cards.filter {
-                it.due.toLocalDate() <= OffsetDateTime.now().toLocalDate()
+                it.due.toLocalDate() <= LocalDateTime.now().toLocalDate()
             }.size
         }
         .distinctUntilChanged()
@@ -77,7 +75,7 @@ class StatisticViewModel @Inject constructor(
     val recentlyStudiedCards = allReviewLogs
         .map {
             it.filter {
-                it.review.toLocalDate() == OffsetDateTime.now().toLocalDate()
+                it.review.toLocalDate() == LocalDateTime.now().toLocalDate()
             }.groupBy { it.nId }.size
         }
         .distinctUntilChanged()
@@ -200,8 +198,8 @@ class StatisticViewModel @Inject constructor(
         // 1. Xác định khoảng days dựa vào state
         val maxDays = state.duration
 
-        // 2. Lấy thời điểm hiện tại (OffsetDateTime)
-        val today = OffsetDateTime.now().toLocalDate()
+        // 2. Lấy thời điểm hiện tại (LocalDateTime)
+        val today = LocalDateTime.now().toLocalDate()
 
         // 3. Tính số cards sẽ due trong tương lai, gom theo khoảng ngày
         //    barData: số card mỗi ngày
@@ -400,7 +398,7 @@ class StatisticViewModel @Inject constructor(
         fsrsCards: List<FsrsCardEntity>,
         state: ReviewIntervalChartState
     ): ReviewIntervalChartData {
-        val now = OffsetDateTime.now()
+        val now = LocalDateTime.now()
 
         // 1. Lọc dữ liệu theo state
         val filtered = when (state) {
@@ -504,8 +502,8 @@ class StatisticViewModel @Inject constructor(
         chartState: AnswerButtonChartState
     ): AnswerButtonChartData {
         // 1) Xác định mốc thời gian cắt
-        val now = OffsetDateTime.now()
-        val cutoff: OffsetDateTime = when (chartState) {
+        val now = LocalDateTime.now()
+        val cutoff: LocalDateTime = when (chartState) {
             AnswerButtonChartState.THREE_MONTHS -> now.minusMonths(3)
             AnswerButtonChartState.ONE_YEAR -> now.minusYears(1)
             AnswerButtonChartState.ONE_MONTH -> now.minusMonths(1)

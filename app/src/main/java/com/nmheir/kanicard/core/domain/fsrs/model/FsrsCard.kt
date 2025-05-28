@@ -1,10 +1,10 @@
 package com.nmheir.kanicard.core.domain.fsrs.model
 
 import com.nmheir.kanicard.data.enums.State
-import java.time.OffsetDateTime
+import java.time.LocalDateTime
 
 data class FsrsCard(
-    var due: OffsetDateTime,
+    var due: LocalDateTime,
     var stability: Double,
     var difficulty: Double,
     var elapsedDays: Long,
@@ -12,10 +12,10 @@ data class FsrsCard(
     var reps: Long,
     var lapses: Long,
     var state: State,
-    var lastReview: OffsetDateTime?
+    var lastReview: LocalDateTime?
 ) {
     companion object {
-        fun createEmpty(now: OffsetDateTime): FsrsCard =
+        fun createEmpty(now: LocalDateTime): FsrsCard =
             FsrsCard(
                 due = now,
                 stability = 0.0,

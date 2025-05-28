@@ -3,17 +3,17 @@ package com.nmheir.kanicard.data.converters
 import androidx.room.TypeConverter
 import com.nmheir.kanicard.data.enums.Rating
 import com.nmheir.kanicard.data.enums.State
-import java.time.OffsetDateTime
+import java.time.LocalDateTime
 
 class Converters {
     @TypeConverter
-    fun offsetDateTimeToString(value: OffsetDateTime): String {
+    fun offsetDateTimeToString(value: LocalDateTime): String {
         return value.toString()
     }
 
     @TypeConverter
-    fun stringToOffsetDateTime(value: String): OffsetDateTime {
-        return OffsetDateTime.parse(value)
+    fun stringToOffsetDateTime(value: String): LocalDateTime {
+        return LocalDateTime.parse(value)
     }
 
     @TypeConverter

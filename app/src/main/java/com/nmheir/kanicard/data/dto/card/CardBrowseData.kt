@@ -1,7 +1,7 @@
 package com.nmheir.kanicard.data.dto.card
 
 import com.nmheir.kanicard.data.enums.State
-import java.time.OffsetDateTime
+import java.time.LocalDateTime
 
 data class CardBrowseData(
     val nid: Long,               //Note id
@@ -14,7 +14,7 @@ data class CardBrowseData(
     val lapse: Long,            //Lapse count
     val state: State,           //Card State
     val reviews: Int,           //Review count
-    val due: OffsetDateTime,    //Due date
-    val createdTime: OffsetDateTime,    //Created date
-    val modifiedTime: OffsetDateTime    //Modified date
+    val due: LocalDateTime,    //Due date
+    val createdTime: LocalDateTime,    //Created date
+    val modifiedTime: LocalDateTime    //Modified date
 )
