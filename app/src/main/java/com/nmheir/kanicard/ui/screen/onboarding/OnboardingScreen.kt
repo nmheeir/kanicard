@@ -63,8 +63,8 @@ fun OnboardingScreen(
     val steps = remember {
         listOf(
             ThemeStep(),
-            PermissionStep(),
-            GuideStep()
+            StorageStep(),
+            PermissionStep()
         )
     }
     val isLastStep = currentStep == steps.lastIndex
