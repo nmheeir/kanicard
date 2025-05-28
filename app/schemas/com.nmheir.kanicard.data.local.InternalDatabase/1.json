@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "e0e252a716a44054edf854f8105b63ec",
+    "identityHash": "e833482befcff56e1a03c7eee86ef47d",
     "entities": [
       {
         "tableName": "search_history",
@@ -266,7 +266,7 @@
       },
       {
         "tableName": "decks",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `collectionId` INTEGER NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `createdTime` TEXT NOT NULL, `modifiedTime` TEXT, `flags` INTEGER, FOREIGN KEY(`collectionId`) REFERENCES `collections`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `oId` INTEGER NOT NULL DEFAULT 1, `colId` INTEGER NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `createdTime` TEXT NOT NULL, `modifiedTime` TEXT, `flags` INTEGER, FOREIGN KEY(`colId`) REFERENCES `collections`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`oId`) REFERENCES `deck_options`(`id`) ON UPDATE NO ACTION ON DELETE SET DEFAULT )",
         "fields": [
           {
             "fieldPath": "id",
@@ -275,8 +275,15 @@
             "notNull": true
           },
           {
-            "fieldPath": "collectionId",
-            "columnName": "collectionId",
+            "fieldPath": "oId",
+            "columnName": "oId",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          },
+          {
+            "fieldPath": "colId",
+            "columnName": "colId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -334,7 +341,18 @@
             "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
-              "collectionId"
+              "colId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "deck_options",
+            "onDelete": "SET DEFAULT",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "oId"
             ],
             "referencedColumns": [
               "id"
@@ -427,7 +445,7 @@
       },
       {
         "tableName": "note_types",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `createdTime` TEXT NOT NULL, `modifiedTime` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `createdTime` TEXT NOT NULL, `modifiedTime` TEXT)",
         "fields": [
           {
             "fieldPath": "id",
@@ -457,7 +475,7 @@
             "fieldPath": "modifiedTime",
             "columnName": "modifiedTime",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -608,8 +626,8 @@
         ]
       },
       {
-        "tableName": "deck_configs",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `deckId` INTEGER NOT NULL, `newCardsPerDay` INTEGER NOT NULL, `maxReviewsCardPerDay` INTEGER NOT NULL, `initialEase` REAL NOT NULL, `graduatingIvl` INTEGER NOT NULL, `easyIvl` INTEGER NOT NULL, `lapseIvl` INTEGER NOT NULL, `stepsNew` TEXT NOT NULL, `stepsLearning` TEXT NOT NULL, `stepsReview` TEXT NOT NULL, `stepsRelearning` INTEGER NOT NULL, `learningEase` REAL NOT NULL, `easyBonus` REAL NOT NULL, `ivlModifier` REAL NOT NULL, FOREIGN KEY(`deckId`) REFERENCES `decks`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "tableName": "deck_options",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `createdAt` TEXT NOT NULL, `updatedAt` TEXT, `newPerDay` INTEGER NOT NULL, `revPerDay` INTEGER NOT NULL, `fsrsParams` TEXT NOT NULL, `autoShowAnswer` INTEGER NOT NULL, `autoAudio` INTEGER NOT NULL, `autoAnswer` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -618,87 +636,57 @@
             "notNull": true
           },
           {
-            "fieldPath": "deckId",
-            "columnName": "deckId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "newCardsPerDay",
-            "columnName": "newCardsPerDay",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "maxReviewsCardPerDay",
-            "columnName": "maxReviewsCardPerDay",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "initialEase",
-            "columnName": "initialEase",
-            "affinity": "REAL",
-            "notNull": true
-          },
-          {
-            "fieldPath": "graduatingIvl",
-            "columnName": "graduatingIvl",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "easyIvl",
-            "columnName": "easyIvl",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "lapseIvl",
-            "columnName": "lapseIvl",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "stepsNew",
-            "columnName": "stepsNew",
+            "fieldPath": "name",
+            "columnName": "name",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "stepsLearning",
-            "columnName": "stepsLearning",
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "stepsReview",
-            "columnName": "stepsReview",
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
-            "fieldPath": "stepsRelearning",
-            "columnName": "stepsRelearning",
+            "fieldPath": "newPerDay",
+            "columnName": "newPerDay",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "learningEase",
-            "columnName": "learningEase",
-            "affinity": "REAL",
+            "fieldPath": "revPerDay",
+            "columnName": "revPerDay",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "easyBonus",
-            "columnName": "easyBonus",
-            "affinity": "REAL",
+            "fieldPath": "fsrsParams",
+            "columnName": "fsrsParams",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "ivlModifier",
-            "columnName": "ivlModifier",
-            "affinity": "REAL",
+            "fieldPath": "autoShowAnswer",
+            "columnName": "autoShowAnswer",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "autoAudio",
+            "columnName": "autoAudio",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "autoAnswer",
+            "columnName": "autoAnswer",
+            "affinity": "INTEGER",
             "notNull": true
           }
         ],
@@ -708,30 +696,8 @@
             "id"
           ]
         },
-        "indices": [
-          {
-            "name": "index_deck_configs_deckId",
-            "unique": true,
-            "columnNames": [
-              "deckId"
-            ],
-            "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_deck_configs_deckId` ON `${TABLE_NAME}` (`deckId`)"
-          }
-        ],
-        "foreignKeys": [
-          {
-            "table": "decks",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "deckId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
-          }
-        ]
+        "indices": [],
+        "foreignKeys": []
       },
       {
         "tableName": "collections",
@@ -773,7 +739,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e0e252a716a44054edf854f8105b63ec')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e833482befcff56e1a03c7eee86ef47d')"
     ]
   }
 }

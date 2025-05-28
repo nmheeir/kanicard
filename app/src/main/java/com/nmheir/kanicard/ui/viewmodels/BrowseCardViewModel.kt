@@ -172,7 +172,7 @@ fun List<CardBrowseData>.toQstValuePairs(
                 BrowseOption.Template -> card.templateName
                 BrowseOption.Lapses -> card.lapse.toString()
                 BrowseOption.Reviews -> card.reviews.toString()
-                BrowseOption.Due -> card.due.toString()
+                BrowseOption.Due -> card.due.format3()
                 BrowseOption.State -> card.state.name
                 BrowseOption.Modified -> card.modifiedTime.format3()
                 BrowseOption.Created -> card.createdTime.format3()

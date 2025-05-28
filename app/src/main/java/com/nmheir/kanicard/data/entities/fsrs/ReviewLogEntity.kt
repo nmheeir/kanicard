@@ -7,7 +7,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.nmheir.kanicard.data.enums.Rating
 import com.nmheir.kanicard.data.enums.State
-import java.time.OffsetDateTime
+import java.time.LocalDateTime
 
 @Entity(
     tableName = "review_logs",
@@ -24,11 +24,11 @@ data class ReviewLogEntity(
     val nId: Long,
     val rating: Rating,
     val state: State,
-    val due: OffsetDateTime,
+    val due: LocalDateTime,
     val stability: Double,
     val difficulty: Double,
     val elapsedDays: Long,
     val lastElapsedDays: Long,
     val scheduledDays: Long,
-    val review: OffsetDateTime
+    val review: LocalDateTime
 )

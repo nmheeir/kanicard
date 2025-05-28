@@ -8,7 +8,7 @@ import com.nmheir.kanicard.core.domain.fsrs.model.FsrsCard
 import com.nmheir.kanicard.data.entities.deck.DeckEntity
 import com.nmheir.kanicard.data.entities.note.NoteEntity
 import com.nmheir.kanicard.data.enums.State
-import java.time.OffsetDateTime
+import java.time.LocalDateTime
 
 @Entity(
     tableName = "fsrs_card",
@@ -34,7 +34,7 @@ import java.time.OffsetDateTime
 data class FsrsCardEntity(
     @PrimaryKey val nId: Long,
     val dId: Long,
-    val due: OffsetDateTime,
+    val due: LocalDateTime,
     val stability: Double,
     val difficulty: Double,
     val elapsedDays: Long,
@@ -42,14 +42,14 @@ data class FsrsCardEntity(
     val reps: Long,
     val lapses: Long,
     val state: State,
-    val lastReview: OffsetDateTime?
+    val lastReview: LocalDateTime?
 ) {
     companion object {
         fun createNew(dId: Long, nId: Long): FsrsCardEntity {
             return FsrsCardEntity(
                 dId = dId,
                 nId = nId,
-                due = OffsetDateTime.now(),
+                due = LocalDateTime.now(),
                 stability = 0.0,
                 difficulty = 0.0,
                 elapsedDays = 0,

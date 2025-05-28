@@ -1,15 +1,14 @@
 package com.nmheir.kanicard.core.domain.fsrs.algorithm
 
 import com.nmheir.kanicard.core.domain.fsrs.model.FsrsCard
-import com.nmheir.kanicard.data.enums.Rating
 import com.nmheir.kanicard.core.domain.fsrs.model.RecordLog
-import com.nmheir.kanicard.data.enums.State
 import com.nmheir.kanicard.core.domain.fsrs.scheduler.SchedulingFsrsCard
+import com.nmheir.kanicard.data.enums.Rating
+import com.nmheir.kanicard.data.enums.State
 import timber.log.Timber
 import java.math.MathContext
 import java.math.RoundingMode
-import java.time.OffsetDateTime
-import java.util.Timer
+import java.time.LocalDateTime
 import kotlin.math.exp
 import kotlin.math.floor
 import kotlin.math.max
@@ -23,7 +22,7 @@ class FSRS(
 
     private val internalModifier: Double = (parameters.requestRetention.pow(1 / DECAY) - 1) / FACTOR
 
-    fun repeat(card: FsrsCard, now: OffsetDateTime): RecordLog {
+    fun repeat(card: FsrsCard, now: LocalDateTime): RecordLog {
 
         val s = SchedulingFsrsCard(card, now).updateState(card.state)
         var easyInterval: Long

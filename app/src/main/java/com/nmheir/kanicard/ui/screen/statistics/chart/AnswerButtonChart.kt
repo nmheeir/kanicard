@@ -3,6 +3,7 @@ package com.nmheir.kanicard.ui.screen.statistics.chart
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -15,12 +16,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
-import com.nmheir.kanicard.core.presentation.utils.hozPadding
 import com.nmheir.kanicard.data.enums.Rating
 import com.nmheir.kanicard.ui.screen.statistics.model.AnswerButtonChartCardType
 import com.nmheir.kanicard.ui.screen.statistics.model.AnswerButtonChartData
@@ -90,6 +89,7 @@ fun AnswerButtonChart(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier
             .fillMaxWidth()
+            .padding(12.dp)
     ) {
 
         Text(

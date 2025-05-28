@@ -1,23 +1,23 @@
 package com.nmheir.kanicard.core.domain.fsrs.scheduler
 
 import com.nmheir.kanicard.core.domain.fsrs.model.FsrsCard
-import com.nmheir.kanicard.data.enums.Rating
 import com.nmheir.kanicard.core.domain.fsrs.model.RecordLog
 import com.nmheir.kanicard.core.domain.fsrs.model.RecordLogItem
 import com.nmheir.kanicard.core.domain.fsrs.model.ReviewLog
+import com.nmheir.kanicard.data.enums.Rating
 import com.nmheir.kanicard.data.enums.State
 import timber.log.Timber
-import java.time.OffsetDateTime
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 class SchedulingFsrsCard(
-    card: FsrsCard, now: OffsetDateTime
+    card: FsrsCard, now: LocalDateTime
 ) {
     var again: FsrsCard
     var hard: FsrsCard
     var good: FsrsCard
     var easy: FsrsCard
-    private var lastReview: OffsetDateTime = card.lastReview ?: card.due
+    private var lastReview: LocalDateTime = card.lastReview ?: card.due
     private var lastElapsedDays: Long = card.elapsedDays
 
     init {
@@ -65,7 +65,7 @@ class SchedulingFsrsCard(
     }
 
     fun schedule(
-        now: OffsetDateTime,
+        now: LocalDateTime,
         hardInterval: Long,
         goodInterval: Long,
         easyInterval: Long,
@@ -85,7 +85,7 @@ class SchedulingFsrsCard(
         return this
     }
 
-    fun recordLog(card: FsrsCard, now: OffsetDateTime): RecordLog =
+    fun recordLog(card: FsrsCard, now: LocalDateTime): RecordLog =
         RecordLog(
             mapOf(
                 Rating.Again to RecordLogItem(

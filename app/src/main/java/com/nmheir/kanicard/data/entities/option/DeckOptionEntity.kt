@@ -5,6 +5,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.nmheir.kanicard.data.entities.deck.DeckEntity
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 
 @Entity(
@@ -13,8 +14,8 @@ import java.time.OffsetDateTime
 data class DeckOptionEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0L,
     val name: String,
-    val createdAt: OffsetDateTime,
-    val updatedAt: OffsetDateTime?,
+    val createdAt: LocalDateTime,
+    val updatedAt: LocalDateTime? = null,
     val newPerDay: Long,
     val revPerDay: Long,
     val fsrsParams: List<Double>,
@@ -25,7 +26,7 @@ data class DeckOptionEntity(
     fun clone(): DeckOptionEntity {
         return DeckOptionEntity(
             name = "Clone of $name",
-            createdAt = OffsetDateTime.now(),
+            createdAt = LocalDateTime.now(),
             updatedAt = null,
             newPerDay = newPerDay,
             revPerDay = revPerDay,
@@ -40,8 +41,7 @@ data class DeckOptionEntity(
         fun new(name: String): DeckOptionEntity {
             return DeckOptionEntity(
                 name = name,
-                createdAt = OffsetDateTime.now(),
-                updatedAt = null,
+                createdAt = LocalDateTime.now(),
                 newPerDay = defaultDeckOption.newPerDay,
                 revPerDay = defaultDeckOption.revPerDay,
                 fsrsParams = defaultDeckOption.fsrsParams,
@@ -56,7 +56,7 @@ data class DeckOptionEntity(
 val defaultDeckOption = DeckOptionEntity(
     id = 1L,
     name = "Default",
-    createdAt = OffsetDateTime.now(),
+    createdAt = LocalDateTime.now(),
     updatedAt = null,
     newPerDay = 20,
     revPerDay = 200,

@@ -1,6 +1,6 @@
 package com.nmheir.kanicard.data.dto.deck
 
-import java.time.OffsetDateTime
+import java.time.LocalDateTime
 
 data class DeckWidgetData(
     val deckId: Long,
@@ -10,5 +10,5 @@ data class DeckWidgetData(
     val learnCount: Int,
     val newCount: Int,
     val dueToday: Int,
-    val lastReview: OffsetDateTime? = null
+    val lastReview: LocalDateTime? = null
 )

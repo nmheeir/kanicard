@@ -220,7 +220,7 @@ private fun CollectionWithDeck(
     action: (HomeUiAction) -> Unit,
     onConfig: (Long, Long) -> Unit
 ) {
-    var showMore by rememberSaveable { mutableStateOf(false) }
+    var showMore by rememberSaveable { mutableStateOf(true) }
     Column(
         modifier = Modifier.animateContentSize()
     ) {

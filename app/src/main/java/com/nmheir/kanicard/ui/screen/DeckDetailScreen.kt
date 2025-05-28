@@ -3,6 +3,7 @@
 package com.nmheir.kanicard.ui.screen
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -271,6 +272,7 @@ private fun SampleNoteSection(
         val horizontalLazyGridItemWidth = this.maxWidth * horizontalLazyGridItemWidthFactor
 
         LazyRow(
+            flingBehavior = rememberSnapFlingBehavior(state),
             state = state,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(horizontal = MaterialTheme.padding.mediumSmall)

@@ -1,6 +1,6 @@
 package com.nmheir.kanicard.data.dto.deck
 
-import java.time.OffsetDateTime
+import java.time.LocalDateTime
 
 data class DeckData(
     val id: Long,
@@ -8,6 +8,6 @@ data class DeckData(
     val name: String,
     val description: String,
     val noteCount: Int,
-    val createdTime: OffsetDateTime,
-    val modifiedTime: OffsetDateTime?,
+    val createdTime: LocalDateTime,
+    val modifiedTime: LocalDateTime?,
 )

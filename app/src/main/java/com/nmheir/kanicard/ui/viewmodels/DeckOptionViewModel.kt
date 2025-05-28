@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.OffsetDateTime
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -170,7 +170,7 @@ class DeckOptionViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             val clone = DeckOptionEntity(
-                createdAt = OffsetDateTime.now(),
+                createdAt = LocalDateTime.now(),
                 updatedAt = null,
                 name = "Clone of " + optionData.value.name,
                 newPerDay = newPerDay,

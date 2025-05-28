@@ -21,6 +21,7 @@ import com.nmheir.kanicard.ui.screen.statistics.model.ReviewChartState
 import com.nmheir.kanicard.ui.viewmodels.LearningData
 import com.nmheir.kanicard.ui.viewmodels.TemplatePreview
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.YearMonth
 import java.time.ZoneOffset
@@ -120,7 +121,7 @@ val fakeDeckWidgetData = List(10) { index ->
         dueToday = Random.nextInt(0, 20),
         optionId = index.toLong(),
         lastReview = if (Random.nextBoolean()) {
-            OffsetDateTime.now(ZoneOffset.UTC).minusDays(Random.nextLong(0, 30))
+            LocalDateTime.now(ZoneOffset.UTC).minusDays(Random.nextLong(0, 30))
         } else {
             null
         }
@@ -141,8 +142,8 @@ val fakeFields = List(5) {
         name = "Field $it",
         ntId = 3,
         ord = it,
-        createdTime = OffsetDateTime.now(),
-        modifiedTime = OffsetDateTime.now()
+        createdTime = LocalDateTime.now(),
+        modifiedTime = LocalDateTime.now()
     )
 }
 
@@ -247,9 +248,9 @@ val fakeCardBrowseDatas = listOf(
         lapse = 0L,
         state = State.New,
         reviews = 0,
-        due = OffsetDateTime.parse("2025-05-16T09:00:00+07:00"),
-        createdTime = OffsetDateTime.parse("2025-05-06T08:00:00+07:00"),
-        modifiedTime = OffsetDateTime.parse("2025-05-06T08:00:00+07:00")
+        due = LocalDateTime.parse("2025-05-16T09:00:00+07:00"),
+        createdTime = LocalDateTime.parse("2025-05-06T08:00:00+07:00"),
+        modifiedTime = LocalDateTime.parse("2025-05-06T08:00:00+07:00")
     ),
     // 2. With hint
     CardBrowseData(
@@ -263,9 +264,9 @@ val fakeCardBrowseDatas = listOf(
         lapse = 1L,
         state = State.Learning,
         reviews = 2,
-        due = OffsetDateTime.parse("2025-05-17T10:00:00+07:00"),
-        createdTime = OffsetDateTime.parse("2025-05-07T09:30:00+07:00"),
-        modifiedTime = OffsetDateTime.parse("2025-05-08T11:15:00+07:00")
+        due = LocalDateTime.parse("2025-05-17T10:00:00+07:00"),
+        createdTime = LocalDateTime.parse("2025-05-07T09:30:00+07:00"),
+        modifiedTime = LocalDateTime.parse("2025-05-08T11:15:00+07:00")
     ),
     // 3. Meta category
     CardBrowseData(
@@ -279,9 +280,9 @@ val fakeCardBrowseDatas = listOf(
         lapse = 0L,
         state = State.Review,
         reviews = 5,
-        due = OffsetDateTime.parse("2025-05-18T11:30:00+07:00"),
-        createdTime = OffsetDateTime.parse("2025-05-05T07:45:00+07:00"),
-        modifiedTime = OffsetDateTime.parse("2025-05-10T12:00:00+07:00")
+        due = LocalDateTime.parse("2025-05-18T11:30:00+07:00"),
+        createdTime = LocalDateTime.parse("2025-05-05T07:45:00+07:00"),
+        modifiedTime = LocalDateTime.parse("2025-05-10T12:00:00+07:00")
     ),
     // 4. Multiple tags
     CardBrowseData(
@@ -295,9 +296,9 @@ val fakeCardBrowseDatas = listOf(
         lapse = 2L,
         state = State.Relearning,
         reviews = 8,
-        due = OffsetDateTime.parse("2025-05-19T13:00:00+07:00"),
-        createdTime = OffsetDateTime.parse("2025-05-04T10:20:00+07:00"),
-        modifiedTime = OffsetDateTime.parse("2025-05-11T14:10:00+07:00")
+        due = LocalDateTime.parse("2025-05-19T13:00:00+07:00"),
+        createdTime = LocalDateTime.parse("2025-05-04T10:20:00+07:00"),
+        modifiedTime = LocalDateTime.parse("2025-05-11T14:10:00+07:00")
     ),
     // 5. Notes included
     CardBrowseData(
@@ -311,9 +312,9 @@ val fakeCardBrowseDatas = listOf(
         lapse = 1L,
         state = State.Relearning,
         reviews = 10,
-        due = OffsetDateTime.parse("2025-05-20T15:45:00+07:00"),
-        createdTime = OffsetDateTime.parse("2025-05-03T11:00:00+07:00"),
-        modifiedTime = OffsetDateTime.parse("2025-05-12T16:30:00+07:00")
+        due = LocalDateTime.parse("2025-05-20T15:45:00+07:00"),
+        createdTime = LocalDateTime.parse("2025-05-03T11:00:00+07:00"),
+        modifiedTime = LocalDateTime.parse("2025-05-12T16:30:00+07:00")
     ),
     // 6. Complex meta and hint
     CardBrowseData(
@@ -327,9 +328,9 @@ val fakeCardBrowseDatas = listOf(
         lapse = 3L,
         state = State.Review,
         reviews = 12,
-        due = OffsetDateTime.parse("2025-05-21T17:20:00+07:00"),
-        createdTime = OffsetDateTime.parse("2025-05-02T12:00:00+07:00"),
-        modifiedTime = OffsetDateTime.parse("2025-05-13T18:00:00+07:00")
+        due = LocalDateTime.parse("2025-05-21T17:20:00+07:00"),
+        createdTime = LocalDateTime.parse("2025-05-02T12:00:00+07:00"),
+        modifiedTime = LocalDateTime.parse("2025-05-13T18:00:00+07:00")
     ),
     // 7. Missing hint
     CardBrowseData(
@@ -343,9 +344,9 @@ val fakeCardBrowseDatas = listOf(
         lapse = 0L,
         state = State.New,
         reviews = 1,
-        due = OffsetDateTime.parse("2025-05-22T09:00:00+07:00"),
-        createdTime = OffsetDateTime.parse("2025-05-01T13:30:00+07:00"),
-        modifiedTime = OffsetDateTime.parse("2025-05-14T10:15:00+07:00")
+        due = LocalDateTime.parse("2025-05-22T09:00:00+07:00"),
+        createdTime = LocalDateTime.parse("2025-05-01T13:30:00+07:00"),
+        modifiedTime = LocalDateTime.parse("2025-05-14T10:15:00+07:00")
     ),
     // 8. Multiple meta fields
     CardBrowseData(
@@ -359,9 +360,9 @@ val fakeCardBrowseDatas = listOf(
         lapse = 2L,
         state = State.Relearning,
         reviews = 15,
-        due = OffsetDateTime.parse("2025-05-23T14:10:00+07:00"),
-        createdTime = OffsetDateTime.parse("2025-05-01T14:00:00+07:00"),
-        modifiedTime = OffsetDateTime.parse("2025-05-15T15:00:00+07:00")
+        due = LocalDateTime.parse("2025-05-23T14:10:00+07:00"),
+        createdTime = LocalDateTime.parse("2025-05-01T14:00:00+07:00"),
+        modifiedTime = LocalDateTime.parse("2025-05-15T15:00:00+07:00")
     ),
     // 9. Long hint text
     CardBrowseData(
@@ -375,9 +376,9 @@ val fakeCardBrowseDatas = listOf(
         lapse = 1L,
         state = State.Learning,
         reviews = 7,
-        due = OffsetDateTime.parse("2025-05-24T16:30:00+07:00"),
-        createdTime = OffsetDateTime.parse("2025-05-01T15:45:00+07:00"),
-        modifiedTime = OffsetDateTime.parse("2025-05-14T17:20:00+07:00")
+        due = LocalDateTime.parse("2025-05-24T16:30:00+07:00"),
+        createdTime = LocalDateTime.parse("2025-05-01T15:45:00+07:00"),
+        modifiedTime = LocalDateTime.parse("2025-05-14T17:20:00+07:00")
     ),
     // 10. Full complexity
     CardBrowseData(
@@ -391,9 +392,9 @@ val fakeCardBrowseDatas = listOf(
         lapse = 3L,
         state = State.Relearning,
         reviews = 20,
-        due = OffsetDateTime.parse("2025-05-25T18:50:00+07:00"),
-        createdTime = OffsetDateTime.parse("2025-05-02T16:00:00+07:00"),
-        modifiedTime = OffsetDateTime.parse("2025-05-15T18:00:00+07:00")
+        due = LocalDateTime.parse("2025-05-25T18:50:00+07:00"),
+        createdTime = LocalDateTime.parse("2025-05-02T16:00:00+07:00"),
+        modifiedTime = LocalDateTime.parse("2025-05-15T18:00:00+07:00")
     )
 )
 
@@ -411,9 +412,9 @@ val fakeCardBrowseDtos = listOf(
         lapse = 0L,
         state = State.New,
         reviews = 0,
-        due = OffsetDateTime.parse("2025-05-16T09:00:00+07:00"),
-        createdTime = OffsetDateTime.parse("2025-05-06T08:00:00+07:00"),
-        modifiedTime = OffsetDateTime.parse("2025-05-06T08:00:00+07:00")
+        due = LocalDateTime.parse("2025-05-16T09:00:00+07:00"),
+        createdTime = LocalDateTime.parse("2025-05-06T08:00:00+07:00"),
+        modifiedTime = LocalDateTime.parse("2025-05-06T08:00:00+07:00")
     ),
     // 2
     CardBrowseDto(
@@ -428,9 +429,9 @@ val fakeCardBrowseDtos = listOf(
         lapse = 1L,
         state = State.Learning,
         reviews = 2,
-        due = OffsetDateTime.parse("2025-05-17T10:00:00+07:00"),
-        createdTime = OffsetDateTime.parse("2025-05-07T09:30:00+07:00"),
-        modifiedTime = OffsetDateTime.parse("2025-05-08T11:15:00+07:00")
+        due = LocalDateTime.parse("2025-05-17T10:00:00+07:00"),
+        createdTime = LocalDateTime.parse("2025-05-07T09:30:00+07:00"),
+        modifiedTime = LocalDateTime.parse("2025-05-08T11:15:00+07:00")
     ),
     // 3
     CardBrowseDto(
@@ -445,9 +446,9 @@ val fakeCardBrowseDtos = listOf(
         lapse = 0L,
         state = State.Review,
         reviews = 5,
-        due = OffsetDateTime.parse("2025-05-18T11:30:00+07:00"),
-        createdTime = OffsetDateTime.parse("2025-05-05T07:45:00+07:00"),
-        modifiedTime = OffsetDateTime.parse("2025-05-10T12:00:00+07:00")
+        due = LocalDateTime.parse("2025-05-18T11:30:00+07:00"),
+        createdTime = LocalDateTime.parse("2025-05-05T07:45:00+07:00"),
+        modifiedTime = LocalDateTime.parse("2025-05-10T12:00:00+07:00")
     ),
     // 4
     CardBrowseDto(
@@ -462,9 +463,9 @@ val fakeCardBrowseDtos = listOf(
         lapse = 2L,
         state = State.Relearning,
         reviews = 8,
-        due = OffsetDateTime.parse("2025-05-19T13:00:00+07:00"),
-        createdTime = OffsetDateTime.parse("2025-05-04T10:20:00+07:00"),
-        modifiedTime = OffsetDateTime.parse("2025-05-11T14:10:00+07:00")
+        due = LocalDateTime.parse("2025-05-19T13:00:00+07:00"),
+        createdTime = LocalDateTime.parse("2025-05-04T10:20:00+07:00"),
+        modifiedTime = LocalDateTime.parse("2025-05-11T14:10:00+07:00")
     ),
     // 5
     CardBrowseDto(
@@ -479,9 +480,9 @@ val fakeCardBrowseDtos = listOf(
         lapse = 1L,
         state = State.Relearning,
         reviews = 10,
-        due = OffsetDateTime.parse("2025-05-20T15:45:00+07:00"),
-        createdTime = OffsetDateTime.parse("2025-05-03T11:00:00+07:00"),
-        modifiedTime = OffsetDateTime.parse("2025-05-12T16:30:00+07:00")
+        due = LocalDateTime.parse("2025-05-20T15:45:00+07:00"),
+        createdTime = LocalDateTime.parse("2025-05-03T11:00:00+07:00"),
+        modifiedTime = LocalDateTime.parse("2025-05-12T16:30:00+07:00")
     ),
     // 6
     CardBrowseDto(
@@ -496,9 +497,9 @@ val fakeCardBrowseDtos = listOf(
         lapse = 3L,
         state = State.Review,
         reviews = 12,
-        due = OffsetDateTime.parse("2025-05-21T17:20:00+07:00"),
-        createdTime = OffsetDateTime.parse("2025-05-02T12:00:00+07:00"),
-        modifiedTime = OffsetDateTime.parse("2025-05-13T18:00:00+07:00")
+        due = LocalDateTime.parse("2025-05-21T17:20:00+07:00"),
+        createdTime = LocalDateTime.parse("2025-05-02T12:00:00+07:00"),
+        modifiedTime = LocalDateTime.parse("2025-05-13T18:00:00+07:00")
     ),
     // 7
     CardBrowseDto(
@@ -513,9 +514,9 @@ val fakeCardBrowseDtos = listOf(
         lapse = 0L,
         state = State.New,
         reviews = 1,
-        due = OffsetDateTime.parse("2025-05-22T09:00:00+07:00"),
-        createdTime = OffsetDateTime.parse("2025-05-01T13:30:00+07:00"),
-        modifiedTime = OffsetDateTime.parse("2025-05-14T10:15:00+07:00")
+        due = LocalDateTime.parse("2025-05-22T09:00:00+07:00"),
+        createdTime = LocalDateTime.parse("2025-05-01T13:30:00+07:00"),
+        modifiedTime = LocalDateTime.parse("2025-05-14T10:15:00+07:00")
     ),
     // 8
     CardBrowseDto(
@@ -530,9 +531,9 @@ val fakeCardBrowseDtos = listOf(
         lapse = 2L,
         state = State.Relearning,
         reviews = 15,
-        due = OffsetDateTime.parse("2025-05-23T14:10:00+07:00"),
-        createdTime = OffsetDateTime.parse("2025-05-01T14:00:00+07:00"),
-        modifiedTime = OffsetDateTime.parse("2025-05-15T15:00:00+07:00")
+        due = LocalDateTime.parse("2025-05-23T14:10:00+07:00"),
+        createdTime = LocalDateTime.parse("2025-05-01T14:00:00+07:00"),
+        modifiedTime = LocalDateTime.parse("2025-05-15T15:00:00+07:00")
     ),
     // 9
     CardBrowseDto(
@@ -547,9 +548,9 @@ val fakeCardBrowseDtos = listOf(
         lapse = 1L,
         state = State.Learning,
         reviews = 7,
-        due = OffsetDateTime.parse("2025-05-24T16:30:00+07:00"),
-        createdTime = OffsetDateTime.parse("2025-05-01T15:45:00+07:00"),
-        modifiedTime = OffsetDateTime.parse("2025-05-14T17:20:00+07:00")
+        due = LocalDateTime.parse("2025-05-24T16:30:00+07:00"),
+        createdTime = LocalDateTime.parse("2025-05-01T15:45:00+07:00"),
+        modifiedTime = LocalDateTime.parse("2025-05-14T17:20:00+07:00")
     ),
     // 10
     CardBrowseDto(
@@ -564,9 +565,9 @@ val fakeCardBrowseDtos = listOf(
         lapse = 3L,
         state = State.Relearning,
         reviews = 20,
-        due = OffsetDateTime.parse("2025-05-25T18:50:00+07:00"),
-        createdTime = OffsetDateTime.parse("2025-05-02T16:00:00+07:00"),
-        modifiedTime = OffsetDateTime.parse("2025-05-15T18:00:00+07:00")
+        due = LocalDateTime.parse("2025-05-25T18:50:00+07:00"),
+        createdTime = LocalDateTime.parse("2025-05-02T16:00:00+07:00"),
+        modifiedTime = LocalDateTime.parse("2025-05-15T18:00:00+07:00")
     )
 )
 
@@ -579,7 +580,7 @@ val fakeStateCount = mapOf(
 
 val fakeFsrsCards = List(10) {
     FsrsCard(
-        due = OffsetDateTime.now(ZoneOffset.UTC).plusDays(Random.nextLong(-3, 5)),
+        due = LocalDateTime.now(ZoneOffset.UTC).plusDays(Random.nextLong(-3, 5)),
         stability = Random.nextDouble(0.1, 10.0),
         difficulty = Random.nextDouble(1.0, 10.0),
         elapsedDays = Random.nextLong(0, 100),
@@ -588,7 +589,7 @@ val fakeFsrsCards = List(10) {
         lapses = Random.nextLong(0, 5),
         state = State.entries.random(),
         lastReview = if (Random.nextBoolean()) {
-            OffsetDateTime.now(ZoneOffset.UTC).minusDays(Random.nextLong(1, 60))
+            LocalDateTime.now(ZoneOffset.UTC).minusDays(Random.nextLong(1, 60))
         } else {
             null
         }
@@ -748,7 +749,7 @@ val fakeFsrsCardEntities = List(100) { index ->
     FsrsCardEntity(
         nId = index.toLong(),
         dId = 1L,
-        due = OffsetDateTime.now().plusDays(Random.nextLong(1, 30)),
+        due = LocalDateTime.now().plusDays(Random.nextLong(1, 30)),
         stability = Random.nextDouble(0.1, 20.0),
         difficulty = Random.nextDouble(1.0, 20.0), // độ khó trong khoảng 1–20
         elapsedDays = Random.nextLong(1, 100),
@@ -756,7 +757,7 @@ val fakeFsrsCardEntities = List(100) { index ->
         reps = Random.nextLong(1, 20),
         lapses = Random.nextLong(0, 5),
         state = State.Review, // hoặc Random từ enum State nếu cần
-        lastReview = OffsetDateTime.now().minusDays(Random.nextLong(1, 30))
+        lastReview = LocalDateTime.now().minusDays(Random.nextLong(1, 30))
     )
 
 }

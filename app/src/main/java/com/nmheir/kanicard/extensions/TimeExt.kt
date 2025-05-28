@@ -7,15 +7,14 @@ import com.nmheir.kanicard.R
 import timber.log.Timber
 import java.time.Duration
 import java.time.LocalDate
-import java.time.OffsetDateTime
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import java.util.Calendar
 import java.util.Locale
 
 @Composable
-fun OffsetDateTime.relativeTime(): String {
-    val now = OffsetDateTime.now()
+fun LocalDateTime.relativeTime(): String {
+    val now = LocalDateTime.now()
 
     if (this.isAfter(now)) return "In the future"
 
@@ -44,8 +43,8 @@ fun OffsetDateTime.relativeTime(): String {
     return pluralStringResource(R.plurals.relative_months_ago, showMonths.toInt(), showMonths)
 }
 
-fun OffsetDateTime.timeUntilDue(): String {
-    val now = OffsetDateTime.now()
+fun LocalDateTime.timeUntilDue(): String {
+    val now = LocalDateTime.now()
     if (this.isBefore(now)) return "< 1m"  // đã qua rồi, coi như < 1 phút
 
     val duration = Duration.between(now, this)
@@ -111,7 +110,7 @@ fun OffsetDateTime.timeUntilDue(): String {
 private val format1 = DateTimeFormatter.ofPattern("MMM dd, yyyy h:mm a", Locale.ENGLISH)
 private val localDateFormat = DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy", Locale.ENGLISH)
 
-fun OffsetDateTime.format3(): String {
+fun LocalDateTime.format3(): String {
     return this.format(format1)
 }
 

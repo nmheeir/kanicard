@@ -87,7 +87,11 @@ fun StatisticScreen(
     val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
 
-    Scaffold { pv ->
+    Scaffold(
+        modifier = Modifier.padding(
+            bottom = LocalAwareWindowInset.current.asPaddingValues().calculateBottomPadding()
+        )
+    ) { pv ->
         LazyColumn(
             state = lazyListState,
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -129,7 +133,6 @@ fun StatisticScreen(
                 HorizontalPager(
                     verticalAlignment = Alignment.Top,
                     pageSpacing = 12.dp,
-                    contentPadding = PaddingValues(horizontal = 12.dp),
                     state = pagerState,
                     userScrollEnabled = false
                 ) { page ->

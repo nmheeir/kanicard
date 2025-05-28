@@ -7,6 +7,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.nmheir.kanicard.data.dto.deck.DeckDto
 import com.nmheir.kanicard.data.entities.option.DeckOptionEntity
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 
 @Entity(
@@ -34,8 +35,8 @@ data class DeckEntity(
     val colId: Long,
     val name: String,
     val description: String,
-    val createdTime: OffsetDateTime = OffsetDateTime.now(),
-    val modifiedTime: OffsetDateTime? = null,
+    val createdTime: LocalDateTime = LocalDateTime.now(),
+    val modifiedTime: LocalDateTime? = null,
     val flags: Int? = null
 ) {
     fun toDeckDto(): DeckDto {

@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.time.OffsetDateTime
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -116,7 +116,7 @@ class HomeViewModel @Inject constructor(
                 name = name,
                 description = "",
                 colId = collectionId,
-                createdTime = OffsetDateTime.now(),
+                createdTime = LocalDateTime.now(),
             )
 
             deckRepo.insert(deckDto)
