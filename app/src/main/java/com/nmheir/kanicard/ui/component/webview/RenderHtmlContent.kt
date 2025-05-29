@@ -3,14 +3,12 @@
 package com.nmheir.kanicard.ui.component.webview
 
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
@@ -35,8 +33,6 @@ import com.nmheir.kanicard.extensions.rememberCustomTabsIntent
 import com.nmheir.kanicard.extensions.toHexColor
 import com.nmheir.kanicard.ui.theme.linkColor
 import com.nmheir.kanicard.utils.MediaCache
-import com.nmheir.kanicard.utils.dataStore
-import com.nmheir.kanicard.utils.get
 import com.nmheir.kanicard.utils.rememberPreference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -71,6 +67,7 @@ data class MarkdownStyles(
 fun RenderHtmlContent(
     modifier: Modifier = Modifier,
     html: String,
+    onWebViewClick: () -> Unit = {}
 ) {
 
     var template by remember { mutableStateOf("") }
@@ -102,11 +99,6 @@ fun RenderHtmlContent(
                 template = template
             )
         )
-    }
-
-    LaunchedEffect(data, html) {
-//        Timber.d("Data: %s", data)
-        Timber.d("html: %s", html)
     }
 
     val rootUri by rememberPreference(StoragePathKey, "")
@@ -157,9 +149,6 @@ fun RenderHtmlContent(
 
     AndroidView(
         modifier = modifier
-            .clickable {
-                Timber.d("Android view clicked !")
-            }
             .fillMaxHeight(),
         factory = {
             WebView(it).also { webView = it }.apply {
@@ -295,6 +284,15 @@ fun RenderHtmlContent(
                     },
                     "mediaPathHandler"
                 )
+                addJavascriptInterface(
+                    object {
+                        @JavascriptInterface
+                        fun onBodyClick() {
+                            onWebViewClick()
+                        }
+                    },
+                    "clickHandler"
+                )
 
                 settings.allowFileAccess = true
                 settings.allowContentAccess = true
@@ -308,7 +306,7 @@ fun RenderHtmlContent(
                 isHorizontalScrollBarEnabled = false
                 settings.setSupportZoom(true)
                 settings.builtInZoomControls = true
-                settings.displayZoomControls = false
+                settings.displayZoomControls = true
                 settings.useWideViewPort = true
                 settings.loadWithOverviewMode = true
             }

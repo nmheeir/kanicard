@@ -77,6 +77,19 @@
 <main>{{CONTENT}}</main>
 
 <script>
+    //Handle click action when click on webview
+    document.addEventListener('click', function (event) {
+        const tag = event.target.tagName.toLowerCase();
+        const ignoreTags = ['img', 'video', 'audio', 'button', 'a', 'input', 'label'];
+
+        if (ignoreTags.includes(tag)) return;
+
+        // Always call if click is in <body> or <main> or blank area not ignored
+        if (window.clickHandler && typeof window.clickHandler.onBodyClick === 'function') {
+            window.clickHandler.onBodyClick();
+        }
+    });
+
     // Initialize handler objects
     const handlers = {
         processMediaItems: () => {

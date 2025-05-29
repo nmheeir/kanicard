@@ -215,11 +215,10 @@ private fun LearnFlashcard(
     val flipController = rememberFlipController()
     val swipeState = rememberSwipeableCardState()
     val enableFlip by remember(showRating) {
-        derivedStateOf { showRating }
+        derivedStateOf { showRating == true }
     }
 
     LaunchedEffect(showRating) {
-        Timber.d("Show rating: %s %d", showRating.toString(), data.id)
         if (showRating == true) {
             flipController.flipToBack()
         } else {
