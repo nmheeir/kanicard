@@ -35,6 +35,7 @@ import org.commonmark.renderer.html.HtmlNodeRendererContext
 import org.commonmark.renderer.html.HtmlRenderer
 import org.commonmark.renderer.text.TextContentNodeRendererContext
 import org.commonmark.renderer.text.TextContentRenderer
+import timber.log.Timber
 
 /**
  * AST node for parameters in the format {{paramName}}
@@ -179,7 +180,7 @@ object MarkdownWithParametersParser {
      */
     fun parseToHtml(markdown: String, parameters: Map<String, String>): String {
         val extensions = listOf<Extension>(
-            ParameterInlineParserExtension(),
+//            ParameterInlineParserExtension(),
             TablesExtension.create(),
             AutolinkExtension.create(),
             FootnotesExtension.create(),
@@ -193,19 +194,22 @@ object MarkdownWithParametersParser {
             .extensions(extensions)
             .build()
 
-        val document = parser.parse(markdown)
+        val parsedMarkdown = replaceParameters(markdown, parameters)
+        val document = parser.parse(parsedMarkdown)
 
         val renderer = HtmlRenderer.builder()
-            .extensions(listOf(
-                ParameterHtmlRendererExtension(parameters),
-                TablesExtension.create(),
-                AutolinkExtension.create(),
-                FootnotesExtension.create(),
-                HeadingAnchorExtension.create(),
-                InsExtension.create(),
-                StrikethroughExtension.create(),
-                TaskListItemsExtension.create(),
-            ))
+            .extensions(
+                listOf(
+//                    ParameterHtmlRendererExtension(parameters),
+                    TablesExtension.create(),
+                    AutolinkExtension.create(),
+                    FootnotesExtension.create(),
+                    HeadingAnchorExtension.create(),
+                    InsExtension.create(),
+                    StrikethroughExtension.create(),
+                    TaskListItemsExtension.create(),
+                )
+            )
             .build()
 
         return renderer.render(document)
@@ -262,6 +266,14 @@ fun MarkdownWithParams(
     )
 }
 
+fun replaceParameters(markdown: String, parameters: Map<String, String>): String {
+    val regex = Regex("""\{\{(.*?)\}\}""")
+    return regex.replace(markdown) { matchResult ->
+        val key = matchResult.groupValues[1].trim()
+        parameters[key] ?: matchResult.value  // fallback nếu không có key
+    }
+}
+
 /**
  * Example usage preview*/
 @Preview(showBackground = true)
@@ -276,7 +288,7 @@ fun MarkdownWithParamsPreview() {
 
 // 2. Map chứa giá trị thay thế
     val simpleParams = mapOf(
-        "name"    to "Alice",
+        "name" to "Alice",
         "appName" to "MyCoolApp"
     )
 

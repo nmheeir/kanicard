@@ -25,6 +25,7 @@ import com.nmheir.kanicard.data.repository.FieldRepo
 import com.nmheir.kanicard.domain.repository.ICardRepo
 import com.nmheir.kanicard.domain.repository.IDeckRepo
 import com.nmheir.kanicard.domain.repository.INoteRepo
+import com.nmheir.kanicard.extensions.convertFileName
 import com.nmheir.kanicard.extensions.getOrCreateDirectory
 import com.nmheir.kanicard.utils.dataStore
 import com.nmheir.kanicard.utils.get
@@ -196,7 +197,7 @@ class NoteEditorViewModel @Inject constructor(
             }
 
             is NoteEditorUiAction.UpdateFileState -> {
-                updateFileState(action.fieldId, action.fileName, action.fileDir, action.mediaType)
+                updateFileState(action.fieldId, action.fileDir, action.mediaType)
             }
 
             NoteEditorUiAction.SaveNote -> {
@@ -205,8 +206,17 @@ class NoteEditorViewModel @Inject constructor(
         }
     }
 
-    private fun updateFileState(fieldId: Long, fileName: String, fileDir: Uri?, type: MediaType) {
+    private fun updateFileState(fieldId: Long, fileDir: Uri, type: MediaType) {
+
         viewModelScope.launch {
+
+            val convertName = convertFileName(context, fileDir)
+            val fileName = when (type) {
+                MediaType.IMAGE -> "![](${convertName})"
+                MediaType.AUDIO -> "<audio src=\"$convertName\" controls></audio>"
+                MediaType.VIDEO -> "<video src=\"$convertName\" controls></video>"
+            }
+
             fieldValuesState.update { currentList ->
                 currentList.map {
                     if (it.id == fieldId) {
@@ -219,7 +229,7 @@ class NoteEditorViewModel @Inject constructor(
 
             mediaFileState.update { currentState ->
                 currentState.toMutableMap().apply {
-                    this[fieldId] = fileDir?.let { MediaFile(it, fileName, type) }
+                    this[fieldId] = MediaFile(fileDir, fileName, type)
                 }
             }
 
@@ -236,9 +246,14 @@ class NoteEditorViewModel @Inject constructor(
             val fields = fieldValuesState.value
             val templates = templates.value
             val deckId = selectedDeck.value?.id ?: -1L
+
+            //insert media to folder
             fields.forEach {
-                if (medias[it.id] != null) {
-                    Timber.d(medias[it.id].toString())
+                val mediaFile = medias[it.id]
+                if (mediaFile != null && mediaFile.fileName.isNotEmpty()) {
+                    Timber.d("Media File: $mediaFile")
+                    val sanitizeFileName = sanitizeFileName(mediaFile.fileName, mediaFile.type)
+                    saveFile(mediaFile.type, mediaFile.uri, sanitizeFileName)
                 }
             }
 
@@ -256,12 +271,6 @@ class NoteEditorViewModel @Inject constructor(
                 cardRepo.insert(
                     FsrsCardEntity.createNew(deckId, noteId)
                 )
-                val mediaFile = mediaFileState.value[template.id]
-                if (mediaFile != null && mediaFile.fileName.isNotEmpty()) {
-                    val sanitizeFileName = sanitizeFileName(mediaFile.fileName, mediaFile.type)
-                    saveFile(mediaFile.type, mediaFile.uri, sanitizeFileName)
-                }
-
                 savingProgress.value = ((index + 1).toFloat() / templates.size).coerceAtMost(1f)
             }
 
@@ -271,7 +280,7 @@ class NoteEditorViewModel @Inject constructor(
         }
     }
 
-    private suspend fun saveFile(mediaType: MediaType, file: Uri?, fileName: String) {
+    private fun saveFile(mediaType: MediaType, file: Uri?, fileName: String) {
         if (file == null) {
             Timber.d("File is empty")
             return
@@ -370,7 +379,6 @@ private fun sanitizeFileName(name: String, mediaType: MediaType): String {
     return rawName.replace(Regex("[^a-zA-Z0-9._-]"), "_")
 }
 
-
 sealed interface NoteEditorUiAction {
     data class UpdateSelectedDeck(val deck: SelectableDeck?) : NoteEditorUiAction
     data class UpdateSelectedNoteType(val noteType: SelectableNoteType?) : NoteEditorUiAction
@@ -380,8 +388,7 @@ sealed interface NoteEditorUiAction {
     data class SaveNoteToState(val typeName: String, val fields: List<String>) : NoteEditorUiAction
     data class UpdateFileState(
         val fieldId: Long,
-        val fileName: String,
-        val fileDir: Uri?,
+        val fileDir: Uri,
         val mediaType: MediaType
     ) : NoteEditorUiAction
 

@@ -355,24 +355,16 @@ private fun FieldEditElement(
         AttachFileSheet(
             onDismiss = { showAttachFileSheet = false },
             onAudioClipSelection = {
-                //convert file name
-                val fileName = convertFileName(context, it)
-                val audioMarkdown = "<audio src=\"${convertFileName(context, it)}\" controls></audio>"
-                action(NoteEditorUiAction.UpdateFileState(field.id, fileName, it, MediaType.AUDIO))
+                action(NoteEditorUiAction.UpdateFileState(field.id, it, MediaType.AUDIO))
             },
             onGallerySelection = {
-                val fileName = convertFileName(context, it)
-                val imageMarkdown = "![](${fileName})"
-                action(NoteEditorUiAction.UpdateFileState(field.id, imageMarkdown, it, MediaType.IMAGE))
+                action(NoteEditorUiAction.UpdateFileState(field.id, it, MediaType.IMAGE))
             },
             onVideoClipSelection = {
-                val fileName = "<video src=\"${convertFileName(context, it)}\" controls></video>"
-                action(NoteEditorUiAction.UpdateFileState(field.id, fileName, it, MediaType.VIDEO))
+                action(NoteEditorUiAction.UpdateFileState(field.id, it, MediaType.VIDEO))
             },
             onRecordAudioSelection = {
-                val fileName = convertFileName(context, it)
-                val audioMarkdown = "<audio src=\"${convertFileName(context, it)}\" controls></audio>"
-                action(NoteEditorUiAction.UpdateFileState(field.id, audioMarkdown, it, MediaType.AUDIO))
+                action(NoteEditorUiAction.UpdateFileState(field.id, it, MediaType.AUDIO))
             }
         )
     }
