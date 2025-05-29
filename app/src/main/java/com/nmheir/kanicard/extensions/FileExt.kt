@@ -6,6 +6,8 @@ import androidx.documentfile.provider.DocumentFile
 import com.nmheir.kanicard.constants.StoragePathKey
 import com.nmheir.kanicard.utils.dataStore
 import com.nmheir.kanicard.utils.get
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
 import java.io.InputStream
@@ -25,10 +27,10 @@ fun hasFileWithName(dir: DocumentFile, fileName: String): Boolean {
 }
 
 // Checks whether a file with a specified name exists in the directory
-fun getFileName(context: Context, uri: Uri): String? {
-    val docFile = DocumentFile.fromSingleUri(context, uri)
-    return docFile?.name
-}
+suspend fun getFileName(context: Context, uri: Uri): String? =
+    withContext(Dispatchers.IO) {
+        DocumentFile.fromSingleUri(context, uri)?.name
+    }
 
 fun getOrCreateDirectory(
     context: Context, parentUri: Uri, dirName: String
@@ -91,11 +93,15 @@ fun getFileExtension(context: Context, uri: Uri): String {
     }
 }
 
-fun convertFileName(context: Context, uri: Uri) : String {
+suspend fun convertFileName(context: Context, uri: Uri): String {
     val timestamp = System.currentTimeMillis()
     val name = getFileName(context, uri)
-    val fileName = "${name?.substringBeforeLast(".")}_${timestamp}.${
-        name?.substringAfterLast(".")
-    }"
-    return fileName
+
+    val baseName = name?.substringBeforeLast(".") ?: "file"
+    val extension = name?.substringAfterLast(".", "") ?: "dat"
+
+    // Làm sạch tên baseName để tránh ký tự đặc biệt
+    val sanitizedBaseName = baseName.replace(Regex("[^a-zA-Z0-9._-]"), "_")
+
+    return "${sanitizedBaseName}_$timestamp.$extension"
 }

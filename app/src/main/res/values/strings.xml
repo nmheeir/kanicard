@@ -78,6 +78,11 @@
     <string name="onboarding_permission_action_grant">Grant</string>
     <string name="onboarding_permission_notifications">Notification permission</string>
     <string name="onboarding_permission_notifications_description">Get notified for library updates and more.</string>
+    <string name="onboarding_permission_storage">Storage permission</string>
+    <string name="onboarding_storage_action_select">Select a folder</string>
+    <string name="no_location_set">No storage location set</string>
+    <string name="file_picker_error">No file picker app found</string>
+    <string name="onboarding_storage_info">Select a folder where %1$s will store audio, image, backups, and more.\n\nA dedicated folder is recommended.\n\nSelected folder: %2$s</string>
 
     <!--Theme-->
     <string name="theme_monet">Dynamic</string>

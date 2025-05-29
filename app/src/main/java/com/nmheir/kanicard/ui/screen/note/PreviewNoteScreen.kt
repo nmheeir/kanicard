@@ -102,7 +102,6 @@ fun PreviewNoteScreen(
                     flipController = flipController,
                     qHtml = datas[page].qHtml,
                     aHtml = datas[page].aHtml,
-                    enableFlip = true
                 )
             }
         }

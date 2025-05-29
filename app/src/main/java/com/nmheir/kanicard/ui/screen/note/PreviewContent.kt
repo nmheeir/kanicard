@@ -65,6 +65,7 @@ fun PreviewContent(
             onFlippedListener = {
                 reverseLayout = it
             },
+            enableFlip = true,
             modifier = Modifier
                 .padding(pv)
                 .padding(12.dp)

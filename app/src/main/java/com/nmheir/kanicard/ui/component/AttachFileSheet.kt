@@ -13,12 +13,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import com.nmheir.kanicard.R
+import com.nmheir.kanicard.ui.component.dialog.AlertDialog
 import com.nmheir.kanicard.ui.component.widget.TextPreferenceWidget
 import timber.log.Timber
 
@@ -71,6 +77,16 @@ fun AttachFileSheet(
         }
     }
 
+    var notFoundRecordAudioDialog by remember { mutableStateOf(false) }
+    if (notFoundRecordAudioDialog) {
+        AlertDialog(
+            onDismiss = { notFoundRecordAudioDialog = false },
+            onConfirm = { notFoundRecordAudioDialog = false }
+        ) {
+            Text(text = "Record audio not found")
+        }
+    }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
@@ -104,6 +120,7 @@ fun AttachFileSheet(
                                 try {
                                     recordAudioLauncher.launch(intent)
                                 } catch (e: Exception) {
+                                    notFoundRecordAudioDialog = true
                                     e.printStackTrace()
                                 }
                             }

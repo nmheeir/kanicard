@@ -3,13 +3,12 @@
 package com.nmheir.kanicard.ui.component.webview
 
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.JavascriptInterface
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
@@ -27,10 +26,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.net.toUri
+import androidx.documentfile.provider.DocumentFile
+import com.nmheir.kanicard.constants.StoragePathKey
+import com.nmheir.kanicard.core.presentation.components.Constants
 import com.nmheir.kanicard.extensions.rememberCustomTabsIntent
 import com.nmheir.kanicard.extensions.toHexColor
 import com.nmheir.kanicard.ui.theme.linkColor
+import com.nmheir.kanicard.utils.MediaCache
+import com.nmheir.kanicard.utils.rememberPreference
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
@@ -62,7 +67,9 @@ data class MarkdownStyles(
 fun RenderHtmlContent(
     modifier: Modifier = Modifier,
     html: String,
+    onWebViewClick: () -> Unit = {}
 ) {
+
     var template by remember { mutableStateOf("") }
     val colorScheme = MaterialTheme.colorScheme
     val markdownStyles = remember(colorScheme) {
@@ -94,13 +101,54 @@ fun RenderHtmlContent(
         )
     }
 
+    val rootUri by rememberPreference(StoragePathKey, "")
+
+    var imagesDir by remember { mutableStateOf<DocumentFile?>(null) }
+    var audioDir by remember { mutableStateOf<DocumentFile?>(null) }
+    var videosDir by remember { mutableStateOf<DocumentFile?>(null) }
     var webView by remember { mutableStateOf<WebView?>(null) }
+
+    LaunchedEffect(rootUri) {
+        withContext(Dispatchers.IO) {
+            MediaCache.clearCaches()
+            imagesDir = try {
+                DocumentFile.fromTreeUri(context.applicationContext, rootUri.toUri())
+                    ?.findFile(Constants.File.KANI_CARD)
+                    ?.findFile(Constants.File.KANI_CARD_IMAGE)
+            } catch (_: Exception) {
+                null
+            }
+            audioDir = try {
+                DocumentFile.fromTreeUri(context.applicationContext, rootUri.toUri())
+                    ?.findFile(Constants.File.KANI_CARD)
+                    ?.findFile(Constants.File.KANI_CARD_AUDIO)
+            } catch (_: Exception) {
+                null
+            }
+            videosDir = try {
+                DocumentFile.fromTreeUri(context.applicationContext, rootUri.toUri())
+                    ?.findFile(Constants.File.KANI_CARD)
+                    ?.findFile(Constants.File.KANI_CARD_VIDEO)
+            } catch (_: Exception) {
+                null
+            }
+            // 目录加载完成后，重新触发媒体处理
+            withContext(Dispatchers.Main) {
+                webView?.evaluateJavascript(
+                    """
+                    (function() {
+                        if (handlers && typeof handlers.processMediaItems === 'function') {
+                            handlers.processMediaItems();
+                        }
+                    })();
+                """.trimIndent(), null
+                )
+            }
+        }
+    }
 
     AndroidView(
         modifier = modifier
-            .clickable {
-                Timber.d("Android view clicked !")
-            }
             .fillMaxHeight(),
         factory = {
             WebView(it).also { webView = it }.apply {
@@ -109,14 +157,6 @@ fun RenderHtmlContent(
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
                 webViewClient = object : WebViewClient() {
-                    override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                        super.onPageStarted(view, url, favicon)
-                    }
-
-                    override fun onPageFinished(view: WebView?, url: String?) {
-                        super.onPageFinished(view, url)
-                    }
-
                     override fun shouldOverrideUrlLoading(
                         view: WebView?,
                         request: WebResourceRequest
@@ -128,6 +168,132 @@ fun RenderHtmlContent(
                         return true
                     }
                 }
+                addJavascriptInterface(
+                    object {
+                        @JavascriptInterface
+                        fun onImageClick(urlStr: String) {
+                            Timber.d("WebView Image clicked: $urlStr")
+//                            clickedImageUrl = urlStr
+//                            showDialog = true
+                        }
+                    },
+                    "imageInterface"
+                )
+                addJavascriptInterface(
+                    object {
+                        @JavascriptInterface
+                        fun processMedia(mediaName: String, id: String, mediaType: String) {
+                            scope.launch(Dispatchers.IO) {
+                                when (mediaType) {
+                                    "image" -> {
+                                        // Check cache first for images
+                                        MediaCache.getImageUri(mediaName)?.let {
+                                            updateImageInWebView(id, it)
+                                            return@launch
+                                        }
+
+                                        val file =
+                                            imagesDir?.listFiles()?.find { it.name == mediaName }
+                                        val uri = file?.uri?.toString().orEmpty()
+                                        if (uri.isNotEmpty()) {
+                                            MediaCache.cacheImageUri(mediaName, uri)
+                                            updateImageInWebView(id, uri)
+                                        }
+                                    }
+
+                                    "video" -> {
+                                        val file =
+                                            videosDir?.listFiles()?.find { it.name == mediaName }
+                                        val uri = file?.uri ?: return@launch
+                                        val uriString = uri.toString()
+
+                                        // Get thumbnail from cache or generate new one
+                                        val thumbnail =
+                                            MediaCache.getVideoThumbnail(mediaName) ?: run {
+                                                val newThumbnail =
+                                                    MediaCache.generateVideoThumbnail(context, uri)
+                                                if (newThumbnail.isNotEmpty()) {
+                                                    MediaCache.cacheVideoThumbnail(
+                                                        mediaName,
+                                                        newThumbnail
+                                                    )
+                                                }
+                                                newThumbnail
+                                            }
+
+                                        updateVideoInWebView(id, uriString, thumbnail)
+                                    }
+
+                                    "audio" -> {
+                                        val file =
+                                            audioDir?.listFiles()?.find { it.name == mediaName }
+                                        val uri = file?.uri?.toString().orEmpty()
+                                        if (uri.isNotEmpty()) {
+                                            updateAudioInWebView(id, uri)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        private suspend fun updateImageInWebView(id: String, uri: String) {
+                            withContext(Dispatchers.Main) {
+                                webView?.evaluateJavascript(
+                                    """
+                    (function() {
+                        const img = document.querySelector('img[data-id="$id"]');
+                        if (img) img.src = '$uri';
+                    })();
+                    """.trimIndent(), null
+                                )
+                            }
+                        }
+
+                        private suspend fun updateVideoInWebView(
+                            id: String,
+                            uri: String,
+                            thumbnail: String
+                        ) {
+                            withContext(Dispatchers.Main) {
+                                webView?.evaluateJavascript(
+                                    """
+                    (function() {
+                        const video = document.querySelector('video[data-id="$id"]');
+                        if (video) {
+                            video.src = '$uri';
+                            video.poster = '$thumbnail';
+                        }
+                    })();
+                    """.trimIndent(), null
+                                )
+                            }
+                        }
+
+                        private suspend fun updateAudioInWebView(id: String, uri: String) {
+                            withContext(Dispatchers.Main) {
+                                webView?.evaluateJavascript(
+                                    """
+                    (function() {
+                        const audio = document.querySelector('audio[data-id="$id"]');
+                        if (audio) audio.src = '$uri';
+                    })();
+                    """.trimIndent(), null
+                                )
+                            }
+                        }
+                    },
+                    "mediaPathHandler"
+                )
+                addJavascriptInterface(
+                    object {
+                        @JavascriptInterface
+                        fun onBodyClick() {
+                            onWebViewClick()
+                        }
+                    },
+                    "clickHandler"
+                )
+
                 settings.allowFileAccess = true
                 settings.allowContentAccess = true
                 settings.allowFileAccessFromFileURLs = true
@@ -138,11 +304,11 @@ fun RenderHtmlContent(
                 settings.loadsImagesAutomatically = true
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false
-                settings.setSupportZoom(false)
-                settings.builtInZoomControls = false
-                settings.displayZoomControls = false
+                settings.setSupportZoom(true)
+                settings.builtInZoomControls = true
+                settings.displayZoomControls = true
                 settings.useWideViewPort = true
-                settings.loadWithOverviewMode = false
+                settings.loadWithOverviewMode = true
             }
         },
         update = {
@@ -154,6 +320,12 @@ fun RenderHtmlContent(
                 "UTF-8",
                 null
             )
+        },
+        onReset = {
+            it.clearHistory()
+            it.stopLoading()
+            it.destroy()
+            webView = null
         }
     )
 }
